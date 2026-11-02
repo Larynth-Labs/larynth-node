@@ -18,7 +18,7 @@
   "license": "MIT",
   "type": "module",
   "engines": {
-    "node": ">=22.18"
+    "node": ">=24"
   },
   "sideEffects": false,
   "main": "./dist/index.js",
@@ -55,9 +55,9 @@
   },
   "devDependencies": {
     "@hey-api/openapi-ts": "0.99.0",
-    "@types/node": "22.19.1",
+    "@types/node": "24.19.2",
     "esbuild": "0.28.2",
-    "typescript": "5.9.3",
+    "typescript": "6.0.3",
     "vitest": "5.0.5"
   },
   "bugs": {

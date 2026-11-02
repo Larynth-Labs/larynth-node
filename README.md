@@ -11,7 +11,7 @@ TypeScript SDK for the Larynth voice AI API, with webhook signature verification
 npm install @larynth/sdk
 ```
 
-Requires Node 22.18 or newer.
+Requires Node 24 or newer.
 
 > **0.x: beta, may change.** Minor versions can include breaking changes until 1.0.
 
