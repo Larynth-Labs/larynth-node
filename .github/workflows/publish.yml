@@ -48,4 +48,13 @@ jobs:
         with:
           name: npm-dist
           path: dist
-      - run: npm publish ./dist/*.tgz --provenance --access public
+      - name: Publish unless this version is already on npm
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          if npm view "@larynth/sdk@${TAG#v}" version >/dev/null 2>&1; then
+            echo "@larynth/sdk@${TAG#v} is already published"
+            exit 0
+          fi
+          npm publish ./dist/*.tgz --provenance --access public
