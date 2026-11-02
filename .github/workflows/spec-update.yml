@@ -1,0 +1,54 @@
+name: spec-update
+
+on:
+  push:
+    branches:
+      - "spec/**"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: spec-update-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 26.13.0
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm run generate
+      - name: commit regenerated code
+        run: |
+          set -euo pipefail
+          git add -A
+          if git diff --cached --quiet; then
+            echo "generated code already current"
+            exit 0
+          fi
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -m "chore(spec): regenerate SDK"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - name: open pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          existing="$(gh pr list --head "$BRANCH" --base main --state open --json number --jq 'length')"
+          if [ "$existing" != "0" ]; then
+            echo "pull request already open for $BRANCH"
+            exit 0
+          fi
+          gh pr create --base main --head "$BRANCH" \
+            --title "chore(spec): sync API spec (${BRANCH#spec/})" \
+            --body "Synced from the core API spec and regenerated the client. Review the generated diff before merging."

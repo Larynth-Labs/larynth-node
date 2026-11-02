@@ -1,0 +1,53 @@
+{
+  "source": "Standard Webhooks 1.0.0 (https://www.standardwebhooks.com, spec/standard-webhooks.md; algorithm of libraries/go/webhook.go). Vector 1 is the Svix reference test (svix/svix-webhooks go/webhook_test.go, TestWebhookSign); vector 2 was computed independently with Python hmac.",
+  "cases": [
+    {
+      "name": "svix reference vector",
+      "secret": "whsec_MfKQ9r8GKYqrTwjUPD8ILPZIo2LaLaSw",
+      "id": "msg_p5jXN8AQM9LWM0D4loKWxJek",
+      "timestamp": 1614265330,
+      "body": "{\"test\": 2432232314}",
+      "signature": "v1,g0hM9SsE+OTPJTGt/tmIKtSyZlE3uFJELVlNIOLJ1OE="
+    },
+    {
+      "name": "larynth event body",
+      "secret": "whsec_AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=",
+      "id": "msg_0123456789abcdef",
+      "timestamp": 1793534400,
+      "body": "{\"id\":\"msg_0123456789abcdef\",\"type\":\"call.ended\",\"timestamp\":\"2026-11-01T12:00:00Z\",\"data\":{\"call_id\":\"c1\"}}",
+      "signature": "v1,49s/QnkINzN3EO848IVtTP/5Tpo+qBtrkQsYjg9+dhs="
+    }
+  ],
+  "verify": [
+    {
+      "name": "valid among several signatures",
+      "case": 0,
+      "header": "v1,Ceo5qEr07ixe2NLpvHk3FH9bwy/WavXrAFQ/9tdO6mc= v2,Ceo5qEr07ixe2NLpvHk3FH9bwy/WavXrAFQ/9tdO6mc= v1,g0hM9SsE+OTPJTGt/tmIKtSyZlE3uFJELVlNIOLJ1OE=",
+      "valid": true
+    },
+    {
+      "name": "wrong signature",
+      "case": 0,
+      "header": "v1,Ceo5qEr07ixe2NLpvHk3FH9bwy/WavXrAFQ/9tdO6mc=",
+      "valid": false
+    },
+    {
+      "name": "empty signature",
+      "case": 0,
+      "header": "v1,",
+      "valid": false
+    },
+    {
+      "name": "other version",
+      "case": 0,
+      "header": "v2,g0hM9SsE+OTPJTGt/tmIKtSyZlE3uFJELVlNIOLJ1OE=",
+      "valid": false
+    },
+    {
+      "name": "trailing data",
+      "case": 0,
+      "header": "v1,g0hM9SsE+OTPJTGt/tmIKtSyZlE3uFJELVlNIOLJ1OE=x",
+      "valid": false
+    }
+  ]
+}

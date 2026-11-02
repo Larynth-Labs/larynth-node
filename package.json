@@ -1,0 +1,66 @@
+{
+  "name": "@larynth/sdk",
+  "version": "0.1.0",
+  "description": "Official TypeScript SDK for the Larynth voice AI API and webhook signature verification",
+  "keywords": [
+    "larynth",
+    "voice",
+    "ai",
+    "telephony",
+    "sdk",
+    "webhooks"
+  ],
+  "homepage": "https://docs.larynth.com/sdks/typescript",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Larynth-Labs/larynth-node.git"
+  },
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./webhooks": {
+      "types": "./dist/webhooks.d.ts",
+      "import": "./dist/webhooks.js",
+      "default": "./dist/webhooks.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "!dist/**/*.map",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "generate": "openapi-ts -f openapi-ts.config.ts",
+    "build": "node build.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run test/webhooks.test.ts",
+    "smoke": "vitest run test/smoke.test.ts",
+    "prepack": "npm run build"
+  },
+  "devDependencies": {
+    "@hey-api/openapi-ts": "0.99.0",
+    "@types/node": "22.19.1",
+    "esbuild": "0.28.2",
+    "typescript": "5.9.3",
+    "vitest": "5.0.5"
+  },
+  "bugs": {
+    "url": "https://github.com/Larynth-Labs/larynth-node/issues"
+  }
+}
