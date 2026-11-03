@@ -25,13 +25,182 @@ export type AddCampaignContactsResult = {
 
 export type Assistant = {
     archived_at?: string;
+    /**
+     * Working hours derived from number routing; null until schedules ship
+     */
+    coverage?: AssistantCoverage;
     created_at: string;
+    /**
+     * The job line
+     */
+    description?: string;
+    draft?: AssistantDraftInfo;
+    has_unpublished_changes: boolean;
     id: string;
+    /**
+     * Main language of the current spec, then the languages it switches to
+     */
+    languages: Array<string>;
+    /**
+     * Reply-time target the call pages compare against
+     */
+    latency_target_ms: number;
     latest_version: number;
     name: string;
+    /**
+     * Numbers routed to this assistant
+     */
+    number_ids: Array<string>;
+    paused?: AssistantPause;
+    published?: AssistantPublished;
     published_version?: number;
+    source?: 'manual' | 'setup' | 'duplicate' | 'template' | 'import';
+    state: 'live' | 'paused' | 'draft' | 'archived';
     status: 'active' | 'archived';
+    /**
+     * Always single_prompt until flows ship
+     */
+    type: 'single_prompt' | 'flow';
     updated_at: string;
+};
+
+export type AssistantCoverage = {
+    bands: Array<AssistantCoverageBand>;
+    /**
+     * i18n key of the plain summary, for example around_the_clock
+     */
+    summary_key: string;
+};
+
+export type AssistantCoverageBand = {
+    /**
+     * mon to sun
+     */
+    days: Array<string>;
+    end_minute: number;
+    start_minute: number;
+};
+
+export type AssistantDraft = {
+    assistant_id: string;
+    call_handling?: CallHandling;
+    /**
+     * basics, instructions, voice, model, knowledge, tools, call_handling, disclosures, guardrails, post_call, advanced
+     */
+    changed_sections: Array<string>;
+    created_at: string;
+    created_by: string;
+    denoise?: boolean;
+    disclosure?: DisclosureSpec;
+    fillers?: Array<string>;
+    greeting_text: string;
+    /**
+     * Owner-added guardrails; the built-in rules from listGuardrailRules always apply and cannot be removed
+     */
+    guardrails?: GuardrailsSpec;
+    id: string;
+    interruption_profile?: InterruptionProfile;
+    /**
+     * Knowledge bases the assistant can search with the search_knowledge tool; each must be ready when the version is published
+     */
+    knowledge_base_ids?: Array<string>;
+    language: string;
+    /**
+     * Languages the agent switches to when the caller speaks them; only languages the catalog marks switchable
+     */
+    languages_extra?: Array<string>;
+    latency?: LatencySettings;
+    llm_fallback_model_ids?: Array<string>;
+    /**
+     * Required for cascade
+     */
+    llm_model_id?: string;
+    llm_params?: {
+        [key: string]: unknown;
+    };
+    max_call_seconds?: number;
+    mode: 'cascade' | 's2s';
+    /**
+     * Post-call summary, data extraction and success evaluation
+     */
+    post_call?: PostCallSettings;
+    published_at?: string;
+    revision: number;
+    /**
+     * Required for s2s
+     */
+    s2s_model_id?: string;
+    s2s_params?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Required for cascade
+     */
+    stt_model_id?: string;
+    stt_params?: {
+        [key: string]: unknown;
+    };
+    system_prompt: string;
+    tools?: Array<AssistantTool>;
+    /**
+     * What happens when nobody picks up a transfer
+     */
+    transfer_fallback?: 'take_message' | 'next_target' | 'end';
+    /**
+     * Required for cascade
+     */
+    tts_model_id?: string;
+    tts_params?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Required for cascade
+     */
+    tts_voice_id?: string;
+    /**
+     * Turn-taking preset from listTurnPresets; custom means turn_profile and interruption_profile hold the advanced values. Unset is balanced
+     */
+    turn_preset?: 'patient' | 'balanced' | 'snappy' | 'custom';
+    turn_profile?: TurnProfile;
+    updated_at: string;
+    updated_by_name?: string;
+    version: number;
+    warnings: Array<DraftWarning>;
+};
+
+export type AssistantDraftInfo = {
+    /**
+     * Editor sections that differ from the published version
+     */
+    changed_sections: Array<string>;
+    revision: number;
+    updated_at: string;
+    updated_by_name?: string;
+    version: number;
+};
+
+export type AssistantPause = {
+    at: string;
+    by_user_id?: string;
+    reason?: string;
+};
+
+export type AssistantPublish = {
+    at: string;
+    by_name?: string;
+    by_user_id?: string;
+    id?: string;
+    kind: 'publish' | 'rollback';
+    note?: string;
+    previous_version?: number;
+    version: number;
+};
+
+export type AssistantPublished = {
+    at: string;
+    by_name?: string;
+    by_user_id?: string;
+    version: number;
 };
 
 export type AssistantTool = {
@@ -55,11 +224,17 @@ export type AssistantTool = {
 
 export type AssistantVersion = {
     assistant_id: string;
+    call_handling?: CallHandling;
     created_at: string;
     created_by: string;
     denoise?: boolean;
+    disclosure?: DisclosureSpec;
     fillers?: Array<string>;
     greeting_text: string;
+    /**
+     * Owner-added guardrails; the built-in rules from listGuardrailRules always apply and cannot be removed
+     */
+    guardrails?: GuardrailsSpec;
     id: string;
     interruption_profile?: InterruptionProfile;
     /**
@@ -67,6 +242,10 @@ export type AssistantVersion = {
      */
     knowledge_base_ids?: Array<string>;
     language: string;
+    /**
+     * Languages the agent switches to when the caller speaks them; only languages the catalog marks switchable
+     */
+    languages_extra?: Array<string>;
     latency?: LatencySettings;
     llm_fallback_model_ids?: Array<string>;
     /**
@@ -100,6 +279,10 @@ export type AssistantVersion = {
     system_prompt: string;
     tools?: Array<AssistantTool>;
     /**
+     * What happens when nobody picks up a transfer
+     */
+    transfer_fallback?: 'take_message' | 'next_target' | 'end';
+    /**
      * Required for cascade
      */
     tts_model_id?: string;
@@ -110,20 +293,34 @@ export type AssistantVersion = {
      * Required for cascade
      */
     tts_voice_id?: string;
+    /**
+     * Turn-taking preset from listTurnPresets; custom means turn_profile and interruption_profile hold the advanced values. Unset is balanced
+     */
+    turn_preset?: 'patient' | 'balanced' | 'snappy' | 'custom';
     turn_profile?: TurnProfile;
     version: number;
 };
 
 export type AssistantVersionSpec = {
+    call_handling?: CallHandling;
     denoise?: boolean;
+    disclosure?: DisclosureSpec;
     fillers?: Array<string>;
     greeting_text: string;
+    /**
+     * Owner-added guardrails; the built-in rules from listGuardrailRules always apply and cannot be removed
+     */
+    guardrails?: GuardrailsSpec;
     interruption_profile?: InterruptionProfile;
     /**
      * Knowledge bases the assistant can search with the search_knowledge tool; each must be ready when the version is published
      */
     knowledge_base_ids?: Array<string>;
     language: string;
+    /**
+     * Languages the agent switches to when the caller speaks them; only languages the catalog marks switchable
+     */
+    languages_extra?: Array<string>;
     latency?: LatencySettings;
     llm_fallback_model_ids?: Array<string>;
     /**
@@ -156,6 +353,10 @@ export type AssistantVersionSpec = {
     system_prompt: string;
     tools?: Array<AssistantTool>;
     /**
+     * What happens when nobody picks up a transfer
+     */
+    transfer_fallback?: 'take_message' | 'next_target' | 'end';
+    /**
      * Required for cascade
      */
     tts_model_id?: string;
@@ -166,7 +367,16 @@ export type AssistantVersionSpec = {
      * Required for cascade
      */
     tts_voice_id?: string;
+    /**
+     * Turn-taking preset from listTurnPresets; custom means turn_profile and interruption_profile hold the advanced values. Unset is balanced
+     */
+    turn_preset?: 'patient' | 'balanced' | 'snappy' | 'custom';
     turn_profile?: TurnProfile;
+};
+
+export type AttestationStatement = {
+    key: string;
+    text: string;
 };
 
 export type AutoTopUp = {
@@ -201,6 +411,21 @@ export type Balance = {
      */
     promo_credit_micro: number;
     updated_at: string;
+};
+
+export type BlockedCaller = {
+    /**
+     * Calls dropped since the block
+     */
+    blocked_calls: number;
+    created_at: string;
+    created_by?: string;
+    created_by_name?: string;
+    e164: string;
+    id: string;
+    last_blocked_at?: string;
+    reason?: string;
+    source_call_id?: string;
 };
 
 export type Call = {
@@ -242,38 +467,91 @@ export type Call = {
      */
     bridged_price_micro?: number;
     call_id: string;
+    /**
+     * Detail only: set when the caller's number is on the workspace block list
+     */
+    caller_blocked?: CallerBlockRef;
+    /**
+     * The contact name, else the name the caller gave
+     */
+    caller_name?: string;
     campaign_contact_id?: string;
     campaign_id?: string;
     cause?: string;
     codec?: 'G722' | 'PCMU' | 'PCMA' | 'opus';
+    contact_id?: string;
     created_at: string;
+    /**
+     * Opaque; pass as after or before to page from this call
+     */
+    cursor?: string;
     direction: 'inbound' | 'outbound' | 'web_test';
     disclosure_played_at?: string;
     ended_at?: string;
+    flagged?: CallFlag;
     from_e164?: string;
     hangup_by?: 'local' | 'remote' | 'system';
+    /**
+     * Detail only
+     */
+    latency?: CallLatency;
     mode: 'cascade' | 's2s';
+    not_billed_reason?: 'short_call' | 'spam' | 'blocked';
     number_id?: string;
     opted_out: boolean;
-    outcome?: string;
+    /**
+     * Fixed platform list; null while live and until analysis finishes
+     */
+    outcome?: 'booked_appointment' | 'rescheduled' | 'answered_question' | 'message_taken' | 'transferred_to_staff' | 'no_resolution' | 'carrier_error' | 'voicemail_left' | 'caller_hung_up' | 'no_answer' | 'line_busy' | 'spam_blocked' | 'caller_blocked';
+    outcome_group?: 'handled' | 'needs_look' | 'not_connected';
     /**
      * Settled price in micro-USD
      */
     price_micro?: number;
+    /**
+     * Detail only
+     */
+    quality?: CallQuality;
+    /**
+     * Automatic call quality check score
+     */
+    quality_score?: number;
+    /**
+     * Detail only
+     */
+    receipt?: CallReceipt;
+    /**
+     * Detail only
+     */
+    recording?: CallRecordingInfo;
     recording_allowed: boolean;
     recording_notice_played_at?: string;
+    /**
+     * Caller sentiment from the post-call analysis, on every call
+     */
+    sentiment?: 'positive' | 'neutral' | 'negative';
     sip_code?: number;
+    spam_flagged: boolean;
     status: 'queued' | 'dialing' | 'ringing' | 'in_progress' | 'completed' | 'no_answer' | 'busy' | 'failed' | 'canceled' | 'rejected';
+    successful?: boolean;
     /**
      * Short post-call summary, present on list items once analysed
      */
     summary?: string;
+    tags: Array<string>;
     to_e164?: string;
+    transfer?: CallTransfer;
     updated_at: string;
 };
 
 export type CallAnalysis = {
     call_id: string;
+    /**
+     * As the caller said it, for example "before 10"
+     */
+    callback_by?: string;
+    callback_requested: boolean;
+    caller_name?: string;
     /**
      * Analysis cost in micro-USD
      */
@@ -282,11 +560,19 @@ export type CallAnalysis = {
     data: {
         [key: string]: unknown;
     };
+    key_moment?: InboxSnippet;
     model_id?: string;
+    outcome?: 'booked_appointment' | 'rescheduled' | 'answered_question' | 'message_taken' | 'transferred_to_staff' | 'no_resolution' | 'carrier_error' | 'voicemail_left' | 'caller_hung_up' | 'no_answer' | 'line_busy' | 'spam_blocked' | 'caller_blocked';
+    /**
+     * Automatic call quality checks, included in every plan
+     */
+    quality?: CallQuality;
     reason?: string;
+    sentiment?: 'positive' | 'neutral' | 'negative';
     successful?: boolean;
     summary: string;
     tokens: number;
+    unanswered_question?: string;
 };
 
 export type CallEvent = {
@@ -300,6 +586,106 @@ export type CallEvent = {
         [key: string]: unknown;
     };
     seq: number;
+};
+
+export type CallFlag = {
+    at: string;
+    by_user_id?: string;
+};
+
+export type CallHandling = {
+    /**
+     * Accept keypad input
+     */
+    dtmf_input?: boolean;
+    end_on_goodbye?: boolean;
+    /**
+     * Navigate phone menus on outbound calls
+     */
+    ivr_navigation?: boolean;
+    max_reply?: 'short' | 'normal' | 'long';
+    /**
+     * End the call after this much caller silence. Unset is 30
+     */
+    silence_end_s?: 15 | 30 | 60;
+    voicemail_detection?: boolean;
+    voicemail_message?: string;
+};
+
+export type CallLatency = {
+    avg_ms: number;
+    /**
+     * Agent turns slower than the target
+     */
+    over_target: number;
+    p95_ms: number;
+    target_ms: number;
+};
+
+export type CallPage = {
+    data: Array<Call>;
+    /**
+     * Cursor for the older page; null on the last page
+     */
+    next_cursor: string | null;
+    /**
+     * Cursor for the newer page; null on the first page
+     */
+    prev_cursor: string | null;
+};
+
+export type CallQuality = {
+    checked_at: string;
+    checks: Array<CallQualityCheck>;
+    score: number;
+};
+
+export type CallQualityCheck = {
+    /**
+     * Offset of the moment the check refers to
+     */
+    at_ms?: number;
+    key: 'greeting' | 'understood_caller' | 'stayed_on_task' | 'followed_guardrails' | 'accurate_answers' | 'handled_next_step' | 'reply_speed' | 'ended_cleanly';
+    note?: string;
+    passed: boolean;
+};
+
+export type CallReceipt = {
+    free_under_ms: number;
+    ledger_transaction_id?: string;
+    lines: Array<CallReceiptLine>;
+    not_billed_reason?: 'short_call' | 'spam' | 'blocked';
+    rounding: 'started_minute';
+    settled_at?: string;
+    total_micro: number;
+};
+
+export type CallReceiptLine = {
+    amount_micro: number;
+    billed_minutes: number;
+    kind: 'agent_minutes' | 'bridged_minutes' | 'premium_voice' | 'premium_model';
+    quantity_ms: number;
+    unit_price_micro: number;
+};
+
+export type CallRecordingInfo = {
+    deleted_at?: string;
+    deleted_by_name?: string;
+    deleted_reason?: 'retention' | 'user' | 'data_request' | 'key_destroyed';
+    id: string;
+    retention_until: string;
+    state: 'pending' | 'uploaded' | 'verified' | 'failed' | 'purged';
+};
+
+export type CallTransfer = {
+    answered: boolean;
+    attempts: number;
+    destination_name: string;
+    leg_call_id?: string;
+    mode: 'warm' | 'cold';
+    ring_ms: number;
+    started_at?: string;
+    talk_ms: number;
 };
 
 export type CallTurn = {
@@ -326,6 +712,44 @@ export type CallTurn = {
     tts_ttfb_ms?: number;
     turn_index: number;
     user_text?: string;
+};
+
+export type CallerBlockRef = {
+    created_at: string;
+    id: string;
+};
+
+export type CallsNotBilled = {
+    blocked: number;
+    short_call: number;
+    spam: number;
+};
+
+export type CallsSummary = {
+    avg_billed_ms: number;
+    billed_ms: number;
+    by_outcome: {
+        [key: string]: number;
+    };
+    calls: number;
+    connected: number;
+    groups?: Array<CallsSummaryGroup>;
+    not_billed: CallsNotBilled;
+    not_connected: number;
+    rate_micro_per_min: number;
+    spend_micro: number;
+};
+
+export type CallsSummaryGroup = {
+    billed_ms: number;
+    booked: number;
+    calls: number;
+    connected: number;
+    /**
+     * Assistant id, outcome or local date (YYYY-MM-DD)
+     */
+    key: string;
+    spend_micro: number;
 };
 
 export type Campaign = {
@@ -410,6 +834,10 @@ export type CatalogModel = {
     defaults: {
         [key: string]: unknown;
     };
+    /**
+     * Plain description written by Larynth
+     */
+    description?: string;
     display_name: string;
     id: string;
     is_default: boolean;
@@ -420,9 +848,25 @@ export type CatalogModel = {
     params_schema: {
         [key: string]: unknown;
     };
+    /**
+     * Added to the call-minute rate; 0 when no premium rate row exists. Equals what billing charges
+     */
+    premium_micro_per_min: number;
     provider_key: string;
     provider_name: string;
+    /**
+     * The recommended model of its tier
+     */
+    recommended: boolean;
     status: 'enabled' | 'deprecated';
+    /**
+     * Quality tier the editor shows by default; unset for models listed only under Advanced
+     */
+    tier?: 'fast' | 'balanced' | 'best';
+    /**
+     * Typical time this model adds to a reply, measured on our cells
+     */
+    typical_reply_ms?: number;
     wire_rates: Array<number>;
 };
 
@@ -430,14 +874,59 @@ export type CatalogVoice = {
     attributes: {
         [key: string]: unknown;
     };
+    /**
+     * Plain description written by Larynth
+     */
+    description?: string;
     id: string;
     language: string;
+    /**
+     * Languages the voice speaks well; the first is its main language
+     */
+    languages: Array<string>;
     model_id?: string;
     name: string;
+    /**
+     * Added to the call-minute rate; 0 when no premium rate row exists. Equals what billing charges
+     */
+    premium_micro_per_min: number;
     preview_url?: string;
     provider_key: string;
     status: 'enabled' | 'deprecated';
+    tags: Array<string>;
     voice_key: string;
+};
+
+export type CompareChange = {
+    after?: unknown;
+    before?: unknown;
+    /**
+     * Spec path
+     */
+    path: string;
+};
+
+export type ComparePrice = {
+    after_micro_per_min: number;
+    before_micro_per_min: number;
+};
+
+export type CompareResult = {
+    from_version: number;
+    instructions_diff: InstructionsDiff;
+    numbers_affected: Array<NumberRef>;
+    price: ComparePrice;
+    sections: Array<CompareSection>;
+    /**
+     * Reserved; null until simulations ship
+     */
+    simulations: SimulationsSummary;
+    to_version: number;
+};
+
+export type CompareSection = {
+    changes: Array<CompareChange>;
+    key: 'basics' | 'instructions' | 'voice' | 'model' | 'knowledge' | 'tools' | 'call_handling' | 'disclosures' | 'guardrails' | 'post_call' | 'advanced';
 };
 
 export type ComplianceDecision = {
@@ -455,6 +944,25 @@ export type ComplianceDecision = {
      */
     rule: string;
     rules_version: string;
+};
+
+export type ComplianceTextView = {
+    active: boolean;
+    body: string;
+    counsel_reviewed: boolean;
+    id: string;
+    kind: 'disclosure_inbound' | 'disclosure_outbound' | 'optout_instruction' | 'recording_notice' | 'optout_ack' | 'voicemail_intro' | 'voicemail_optout' | 'screener_line' | 'unavailable' | 'goodbye' | 'inbound_ai_attestation';
+    language: string;
+    /**
+     * inbound_ai_attestation only: the statements the owner confirms one by one
+     */
+    statements?: Array<AttestationStatement>;
+    version: number;
+};
+
+export type Concurrency = {
+    in_use: number;
+    limit: number;
 };
 
 export type Consent = {
@@ -506,8 +1014,71 @@ export type ContactImport = {
     status: 'uploaded' | 'processing' | 'done' | 'failed';
 };
 
+export type Conversation = {
+    answered_at?: string;
+    call_id: string;
+    duration_ms: number;
+    items: Array<ConversationItem>;
+    latency_target_ms: number;
+    live: boolean;
+    next_cursor: string | null;
+};
+
+export type ConversationItem = {
+    /**
+     * Offset from answered_at
+     */
+    at_ms: number;
+    barged_in?: boolean;
+    end_ms?: number;
+    kind: 'turn' | 'tool' | 'transfer' | 'marker';
+    latency?: TurnLatency;
+    marker?: ConversationMarker;
+    speaker?: 'caller' | 'agent' | 'staff' | 'system';
+    text?: string;
+    tool?: ConversationTool;
+    transfer?: CallTransfer;
+    /**
+     * Realtime only: text over 4 KB was cut; fetch the conversation
+     */
+    truncated?: boolean;
+    turn_index?: number;
+};
+
+export type ConversationMarker = {
+    /**
+     * Keypad digits are always masked
+     */
+    digits_masked?: string;
+    kind: 'disclosure' | 'recording_notice' | 'dtmf' | 'opt_out' | 'voicemail';
+};
+
+export type ConversationTool = {
+    args?: {
+        [key: string]: unknown;
+    };
+    duration_ms: number;
+    name: string;
+    result?: {
+        [key: string]: unknown;
+    };
+    status: 'ok' | 'error' | 'timeout';
+};
+
 export type CreateAssistantRequest = {
     name: string;
+};
+
+export type CreateBlockedCallerRequest = {
+    /**
+     * Block the caller of this call
+     */
+    call_id?: string;
+    /**
+     * Set e164 or call_id
+     */
+    e164?: string;
+    reason?: string;
 };
 
 export type CreateCallRequest = {
@@ -622,7 +1193,7 @@ export type CreateWebCallRequest = {
      */
     sdp_offer: string;
     /**
-     * Use the latest version instead of the published one
+     * Use the open draft (else the latest version) instead of the published one
      */
     use_draft?: boolean;
     variables?: {
@@ -632,7 +1203,7 @@ export type CreateWebCallRequest = {
 
 export type CreateWebhookRequest = {
     description?: string;
-    event_types: Array<'call.started' | 'call.answered' | 'call.ended' | 'call.analyzed' | 'call.recording.ready' | 'call.transferred' | 'campaign.started' | 'campaign.paused' | 'campaign.completed' | 'campaign.contact.completed' | 'compliance.opt_out' | 'billing.balance.low' | 'billing.top_up.succeeded' | 'billing.auto_top_up.failed' | 'number.provisioned' | 'number.released'>;
+    event_types: Array<'call.started' | 'call.answered' | 'call.ended' | 'call.analyzed' | 'call.recording.ready' | 'call.transferred' | 'campaign.started' | 'campaign.paused' | 'campaign.completed' | 'campaign.contact.completed' | 'compliance.opt_out' | 'billing.balance.low' | 'billing.top_up.succeeded' | 'billing.auto_top_up.failed' | 'number.provisioned' | 'number.released' | 'notification.call.summary' | 'notification.campaign.completed' | 'notification.campaign.paused' | 'notification.billing.balance_low' | 'notification.billing.top_up_succeeded' | 'notification.billing.auto_top_up_failed' | 'notification.spending_request.created' | 'notification.number.provisioned' | 'notification.number.released' | 'notification.compliance.optout_alert'>;
     url: string;
 };
 
@@ -663,6 +1234,44 @@ export type DncEntry = {
     removed_at?: string;
     scope: 'tenant' | 'platform';
     source: 'internal' | 'in_call_opt_out' | 'revocation' | 'api' | 'import' | 'operator';
+};
+
+export type DiffLine = {
+    /**
+     * Line number in the older text
+     */
+    a?: number;
+    /**
+     * Line number in the newer text
+     */
+    b?: number;
+    op: 'equal' | 'add' | 'del' | 'elided';
+    text: string;
+};
+
+export type DisclosureSpec = {
+    /**
+     * The inbound AI disclosure; publishing off needs an active owner attestation. Unset is on
+     */
+    inbound_ai?: 'on' | 'off';
+};
+
+export type DraftWarning = {
+    code: 'unknown_variable' | 'knowledge_not_ready' | 'voice_language_mismatch' | 'language_not_switchable';
+    /**
+     * Spec path, for example system_prompt
+     */
+    field: string;
+    params?: {
+        [key: string]: string;
+    };
+};
+
+export type DuplicateAssistantRequest = {
+    /**
+     * Unset is the original name with a copy suffix
+     */
+    name?: string;
 };
 
 export type EndCallRequest = {
@@ -698,6 +1307,37 @@ export type ExtractionField = {
     type: 'string' | 'number' | 'boolean' | 'enum' | 'date';
 };
 
+export type GuardrailBuiltIn = {
+    category: 'safety' | 'privacy' | 'honesty' | 'compliance' | 'scope';
+    description: string;
+    key: string;
+    title: string;
+    version: number;
+};
+
+export type GuardrailCustomRule = {
+    /**
+     * A rule in plain words, applied on top of the built-in rules
+     */
+    text: string;
+};
+
+export type GuardrailTopic = {
+    /**
+     * What the agent says instead; unset uses the built-in polite refusal
+     */
+    response?: string;
+    /**
+     * A topic the agent must not discuss
+     */
+    topic: string;
+};
+
+export type GuardrailsSpec = {
+    blocked_topics?: Array<GuardrailTopic>;
+    custom_rules?: Array<GuardrailCustomRule>;
+};
+
 export type IceServer = {
     credential?: string;
     urls: Array<string>;
@@ -713,6 +1353,21 @@ export type IceServers = {
      * Pass as RTCConfiguration.iceServers
      */
     ice_servers: Array<IceServer>;
+};
+
+export type InboxSnippet = {
+    at_ms: number;
+    speaker: 'caller' | 'agent' | 'staff';
+    text: string;
+};
+
+export type InstructionsDiff = {
+    adds: number;
+    dels: number;
+    /**
+     * Equal runs longer than 3 lines are elided
+     */
+    lines: Array<DiffLine>;
 };
 
 export type InterruptionProfile = {
@@ -825,6 +1480,50 @@ export type LedgerEntry = {
     transaction_id: string;
 };
 
+export type ListComplianceTextView = {
+    data: Array<ComplianceTextView>;
+};
+
+export type ListGuardrailBuiltIn = {
+    data: Array<GuardrailBuiltIn>;
+};
+
+export type ListTurnPreset = {
+    data: Array<TurnPreset>;
+};
+
+export type LiveCall = {
+    answered_at?: string;
+    assistant_id: string;
+    assistant_version: number;
+    call_id: string;
+    caller_e164?: string;
+    caller_name?: string;
+    campaign_id?: string;
+    direction: 'inbound' | 'outbound' | 'web_test';
+    flags: Array<LiveCallFlag>;
+    last_line?: LiveCallLine;
+    number_id?: string;
+    started_at: string;
+    status: 'queued' | 'dialing' | 'ringing' | 'in_progress';
+};
+
+export type LiveCallFlag = {
+    kind: 'human_requested' | 'long_silence' | 'tool_failing' | 'opt_out' | 'transfer_in_progress';
+    since: string;
+};
+
+export type LiveCallLine = {
+    at: string;
+    speaker: 'caller' | 'agent' | 'staff';
+    text: string;
+};
+
+export type LiveCalls = {
+    concurrency: Concurrency;
+    data: Array<LiveCall>;
+};
+
 export type Number = {
     assistant_id?: string;
     country: string;
@@ -832,6 +1531,7 @@ export type Number = {
     e164: string;
     forward_to_e164?: string;
     id: string;
+    label?: string;
     monthly_price_micro: number;
     purchased_at?: string;
     region?: string;
@@ -839,6 +1539,12 @@ export type Number = {
     route_type: 'assistant' | 'forward' | 'none';
     status: 'ordering' | 'active' | 'suspended' | 'releasing' | 'released' | 'failed';
     updated_at: string;
+};
+
+export type NumberRef = {
+    e164: string;
+    id: string;
+    label?: string;
 };
 
 export type NumberRouting = {
@@ -850,6 +1556,10 @@ export type NumberRouting = {
      * Required when route_type is forward
      */
     forward_to_e164?: string;
+    /**
+     * Name shown in the Line column; empty clears it
+     */
+    label?: string;
     route_type?: 'assistant' | 'forward' | 'none';
 };
 
@@ -863,11 +1573,23 @@ export type OrderNumberRequest = {
      * Required when route_type is forward
      */
     forward_to_e164?: string;
+    /**
+     * Name shown in the Line column; empty clears it
+     */
+    label?: string;
     route_type?: 'assistant' | 'forward' | 'none';
 };
 
 export type PageAssistant = {
     data: Array<Assistant>;
+    /**
+     * Cursor for the next page; null on the last page
+     */
+    next_cursor: string | null;
+};
+
+export type PageAssistantPublish = {
+    data: Array<AssistantPublish>;
     /**
      * Cursor for the next page; null on the last page
      */
@@ -890,8 +1612,8 @@ export type PageAvailableNumber = {
     next_cursor: string | null;
 };
 
-export type PageCall = {
-    data: Array<Call>;
+export type PageBlockedCaller = {
+    data: Array<BlockedCaller>;
     /**
      * Cursor for the next page; null on the last page
      */
@@ -1042,6 +1764,10 @@ export type PageWebhookEndpoint = {
     next_cursor: string | null;
 };
 
+export type PauseAssistantRequest = {
+    reason?: string;
+};
+
 export type PostCallSettings = {
     extraction_fields?: Array<ExtractionField>;
     /**
@@ -1060,12 +1786,28 @@ export type PostCallSettings = {
 
 export type Problem = {
     /**
+     * API base URL of the workspace's home region (workspace.other_region)
+     */
+    api_base?: string;
+    /**
+     * Code attempts left in this sign-in step
+     */
+    attempts_left?: number;
+    /**
      * Stable machine-readable error code; compliance denials carry the dial.* rule id
      */
     code: string;
     detail?: string;
     errors?: Array<ErrorDetail>;
     instance?: string;
+    /**
+     * Ways to re-authenticate, in preference order (auth.reauth_required)
+     */
+    reauth_methods?: Array<string>;
+    /**
+     * Spending request kind to file instead (spending.approval_required)
+     */
+    request_kind?: 'number_purchase' | 'campaign_launch';
     /**
      * Next moment the request may succeed (calling windows)
      */
@@ -1077,6 +1819,15 @@ export type Problem = {
      */
     type: string;
     [key: string]: unknown;
+};
+
+export type PublishAssistantVersionRequest = {
+    note?: string;
+};
+
+export type PublishResult = {
+    assistant: Assistant;
+    publish: AssistantPublish;
 };
 
 export type Rate = {
@@ -1097,6 +1848,9 @@ export type Recording = {
     bytes?: number;
     call_id: string;
     created_at: string;
+    deleted_at?: string;
+    deleted_by_name?: string;
+    deleted_reason?: 'retention' | 'user' | 'data_request' | 'key_destroyed';
     dropped?: number;
     format: string;
     frames?: number;
@@ -1107,6 +1861,14 @@ export type Recording = {
     source: string;
     state: 'pending' | 'uploaded' | 'verified' | 'failed' | 'purged';
     verified_at?: string;
+};
+
+export type RecordingPeaks = {
+    duration_ms: number;
+    /**
+     * Normalised 0 to 1
+     */
+    points: Array<number>;
 };
 
 export type RetryPolicy = {
@@ -1134,8 +1896,26 @@ export type Revocation = {
     revoked_at: string;
 };
 
+export type SameCallerCalls = {
+    caller_e164?: string;
+    data: Array<Call>;
+    /**
+     * All calls from this caller; the calls list filtered by caller_e164 shows them
+     */
+    total: number;
+};
+
+export type SaveAssistantDraftRequest = {
+    spec: AssistantVersionSpec;
+};
+
+export type SimulationsSummary = {
+    passed: number;
+    total: number;
+};
+
 export type TestWebhookRequest = {
-    event_type?: 'call.started' | 'call.answered' | 'call.ended' | 'call.analyzed' | 'call.recording.ready' | 'call.transferred' | 'campaign.started' | 'campaign.paused' | 'campaign.completed' | 'campaign.contact.completed' | 'compliance.opt_out' | 'billing.balance.low' | 'billing.top_up.succeeded' | 'billing.auto_top_up.failed' | 'number.provisioned' | 'number.released';
+    event_type?: 'call.started' | 'call.answered' | 'call.ended' | 'call.analyzed' | 'call.recording.ready' | 'call.transferred' | 'campaign.started' | 'campaign.paused' | 'campaign.completed' | 'campaign.contact.completed' | 'compliance.opt_out' | 'billing.balance.low' | 'billing.top_up.succeeded' | 'billing.auto_top_up.failed' | 'number.provisioned' | 'number.released' | 'notification.call.summary' | 'notification.campaign.completed' | 'notification.campaign.paused' | 'notification.billing.balance_low' | 'notification.billing.top_up_succeeded' | 'notification.billing.auto_top_up_failed' | 'notification.spending_request.created' | 'notification.number.provisioned' | 'notification.number.released' | 'notification.compliance.optout_alert';
 };
 
 export type TransferDestination = {
@@ -1169,6 +1949,38 @@ export type TransferDestination = {
     whisper?: string;
 };
 
+export type TurnLatency = {
+    /**
+     * Caller finished
+     */
+    eot_ms: number;
+    /**
+     * Thought
+     */
+    llm_ms: number;
+    over_target: boolean;
+    /**
+     * Heard
+     */
+    stt_ms: number;
+    /**
+     * Caller finished to agent heard
+     */
+    total_ms: number;
+    /**
+     * Voice
+     */
+    tts_ms: number;
+};
+
+export type TurnPreset = {
+    interruption_profile: InterruptionProfile;
+    key: 'patient' | 'balanced' | 'snappy';
+    position: number;
+    recommended: boolean;
+    turn_profile: TurnProfile;
+};
+
 export type TurnProfile = {
     commit_prob?: number;
     /**
@@ -1191,7 +2003,17 @@ export type TurnProfile = {
 };
 
 export type UpdateAssistantRequest = {
+    description?: string;
+    latency_target_ms?: number;
     name?: string;
+};
+
+export type UpdateCallRequest = {
+    flagged?: boolean;
+    /**
+     * Each 1 to 24 characters, lower case; replaces the call's tags
+     */
+    tags?: Array<string>;
 };
 
 export type UpdateCampaignRequest = {
@@ -1235,7 +2057,7 @@ export type UpdateKnowledgeBaseRequest = {
 
 export type UpdateWebhookRequest = {
     description?: string;
-    event_types?: Array<'call.started' | 'call.answered' | 'call.ended' | 'call.analyzed' | 'call.recording.ready' | 'call.transferred' | 'campaign.started' | 'campaign.paused' | 'campaign.completed' | 'campaign.contact.completed' | 'compliance.opt_out' | 'billing.balance.low' | 'billing.top_up.succeeded' | 'billing.auto_top_up.failed' | 'number.provisioned' | 'number.released'>;
+    event_types?: Array<'call.started' | 'call.answered' | 'call.ended' | 'call.analyzed' | 'call.recording.ready' | 'call.transferred' | 'campaign.started' | 'campaign.paused' | 'campaign.completed' | 'campaign.contact.completed' | 'compliance.opt_out' | 'billing.balance.low' | 'billing.top_up.succeeded' | 'billing.auto_top_up.failed' | 'number.provisioned' | 'number.released' | 'notification.call.summary' | 'notification.campaign.completed' | 'notification.campaign.paused' | 'notification.billing.balance_low' | 'notification.billing.top_up_succeeded' | 'notification.billing.auto_top_up_failed' | 'notification.spending_request.created' | 'notification.number.provisioned' | 'notification.number.released' | 'notification.compliance.optout_alert'>;
     status?: 'active' | 'disabled';
     url?: string;
 };
@@ -1243,10 +2065,23 @@ export type UpdateWebhookRequest = {
 export type WebCall = {
     call_id: string;
     /**
+     * Calls shorter than this are not billed
+     */
+    free_under_ms?: number;
+    /**
      * The engine ends the call after this many seconds
      */
     max_duration_s: number;
+    /**
+     * Applied per-minute rate including premiums
+     */
+    rate_micro_per_min?: number;
+    rounding?: 'started_minute';
     sdp_answer: string;
+    /**
+     * Assistant version the call runs
+     */
+    version?: number;
 };
 
 export type WebhookDelivery = {
@@ -1309,6 +2144,7 @@ export type ListAssistantsData = {
          */
         after?: string;
         status?: 'active' | 'archived';
+        state?: 'live' | 'paused' | 'draft' | 'archived';
     };
     url: '/v1/assistants';
 };
@@ -1628,6 +2464,464 @@ export type UpdateAssistantResponses = {
 
 export type UpdateAssistantResponse = UpdateAssistantResponses[keyof UpdateAssistantResponses];
 
+export type DiscardAssistantDraftData = {
+    body?: never;
+    headers: {
+        'If-Match': string;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/assistants/{id}/draft';
+};
+
+export type DiscardAssistantDraftErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Precondition Required
+     */
+    428: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type DiscardAssistantDraftError = DiscardAssistantDraftErrors[keyof DiscardAssistantDraftErrors];
+
+export type DiscardAssistantDraftResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type DiscardAssistantDraftResponse = DiscardAssistantDraftResponses[keyof DiscardAssistantDraftResponses];
+
+export type GetAssistantDraftData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/assistants/{id}/draft';
+};
+
+export type GetAssistantDraftErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetAssistantDraftError = GetAssistantDraftErrors[keyof GetAssistantDraftErrors];
+
+export type GetAssistantDraftResponses = {
+    /**
+     * OK
+     */
+    200: AssistantDraft;
+};
+
+export type GetAssistantDraftResponse = GetAssistantDraftResponses[keyof GetAssistantDraftResponses];
+
+export type SaveAssistantDraftData = {
+    body: SaveAssistantDraftRequest;
+    headers?: {
+        /**
+         * Required once a draft exists
+         */
+        'If-Match'?: string;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/assistants/{id}/draft';
+};
+
+export type SaveAssistantDraftErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Precondition Required
+     */
+    428: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type SaveAssistantDraftError = SaveAssistantDraftErrors[keyof SaveAssistantDraftErrors];
+
+export type SaveAssistantDraftResponses = {
+    /**
+     * OK
+     */
+    200: AssistantDraft;
+};
+
+export type SaveAssistantDraftResponse = SaveAssistantDraftResponses[keyof SaveAssistantDraftResponses];
+
+export type DuplicateAssistantData = {
+    body?: DuplicateAssistantRequest;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/assistants/{id}/duplicate';
+};
+
+export type DuplicateAssistantErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type DuplicateAssistantError = DuplicateAssistantErrors[keyof DuplicateAssistantErrors];
+
+export type DuplicateAssistantResponses = {
+    /**
+     * Created
+     */
+    201: Assistant;
+};
+
+export type DuplicateAssistantResponse = DuplicateAssistantResponses[keyof DuplicateAssistantResponses];
+
+export type PauseAssistantData = {
+    body?: PauseAssistantRequest;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/assistants/{id}/pause';
+};
+
+export type PauseAssistantErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type PauseAssistantError = PauseAssistantErrors[keyof PauseAssistantErrors];
+
+export type PauseAssistantResponses = {
+    /**
+     * OK
+     */
+    200: Assistant;
+};
+
+export type PauseAssistantResponse = PauseAssistantResponses[keyof PauseAssistantResponses];
+
+export type ListAssistantPublishesData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        /**
+         * Page size
+         */
+        limit?: number;
+        /**
+         * Opaque cursor from next_cursor of the previous page
+         */
+        after?: string;
+    };
+    url: '/v1/assistants/{id}/publishes';
+};
+
+export type ListAssistantPublishesErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListAssistantPublishesError = ListAssistantPublishesErrors[keyof ListAssistantPublishesErrors];
+
+export type ListAssistantPublishesResponses = {
+    /**
+     * OK
+     */
+    200: PageAssistantPublish;
+};
+
+export type ListAssistantPublishesResponse = ListAssistantPublishesResponses[keyof ListAssistantPublishesResponses];
+
+export type RestoreAssistantData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/assistants/{id}/restore';
+};
+
+export type RestoreAssistantErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type RestoreAssistantError = RestoreAssistantErrors[keyof RestoreAssistantErrors];
+
+export type RestoreAssistantResponses = {
+    /**
+     * OK
+     */
+    200: Assistant;
+};
+
+export type RestoreAssistantResponse = RestoreAssistantResponses[keyof RestoreAssistantResponses];
+
+export type ResumeAssistantData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/assistants/{id}/resume';
+};
+
+export type ResumeAssistantErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ResumeAssistantError = ResumeAssistantErrors[keyof ResumeAssistantErrors];
+
+export type ResumeAssistantResponses = {
+    /**
+     * OK
+     */
+    200: Assistant;
+};
+
+export type ResumeAssistantResponse = ResumeAssistantResponses[keyof ResumeAssistantResponses];
+
 export type ListAssistantVersionsData = {
     body?: never;
     path: {
@@ -1795,8 +3089,71 @@ export type GetAssistantVersionResponses = {
 
 export type GetAssistantVersionResponse = GetAssistantVersionResponses[keyof GetAssistantVersionResponses];
 
-export type PublishAssistantVersionData = {
+export type CompareAssistantVersionsData = {
     body?: never;
+    path: {
+        id: string;
+        v: number;
+    };
+    query?: {
+        /**
+         * published, or a version number
+         */
+        against?: string;
+    };
+    url: '/v1/assistants/{id}/versions/{v}/compare';
+};
+
+export type CompareAssistantVersionsErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type CompareAssistantVersionsError = CompareAssistantVersionsErrors[keyof CompareAssistantVersionsErrors];
+
+export type CompareAssistantVersionsResponses = {
+    /**
+     * OK
+     */
+    200: CompareResult;
+};
+
+export type CompareAssistantVersionsResponse = CompareAssistantVersionsResponses[keyof CompareAssistantVersionsResponses];
+
+export type PublishAssistantVersionData = {
+    body?: PublishAssistantVersionRequest;
+    headers?: {
+        /**
+         * Draft revision from the draft ETag; required when v is the open draft
+         */
+        'If-Match'?: string;
+    };
     path: {
         id: string;
         v: number;
@@ -1831,6 +3188,10 @@ export type PublishAssistantVersionErrors = {
      */
     422: Problem;
     /**
+     * Precondition Required
+     */
+    428: Problem;
+    /**
      * Too Many Requests
      */
     429: Problem;
@@ -1846,7 +3207,7 @@ export type PublishAssistantVersionResponses = {
     /**
      * OK
      */
-    200: AssistantVersion;
+    200: PublishResult;
 };
 
 export type PublishAssistantVersionResponse = PublishAssistantVersionResponses[keyof PublishAssistantVersionResponses];
@@ -2045,6 +3406,165 @@ export type ListRatesResponses = {
 
 export type ListRatesResponse = ListRatesResponses[keyof ListRatesResponses];
 
+export type ListBlockedCallersData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page size
+         */
+        limit?: number;
+        /**
+         * Opaque cursor from next_cursor of the previous page
+         */
+        after?: string;
+        e164?: string;
+    };
+    url: '/v1/blocked-callers';
+};
+
+export type ListBlockedCallersErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListBlockedCallersError = ListBlockedCallersErrors[keyof ListBlockedCallersErrors];
+
+export type ListBlockedCallersResponses = {
+    /**
+     * OK
+     */
+    200: PageBlockedCaller;
+};
+
+export type ListBlockedCallersResponse = ListBlockedCallersResponses[keyof ListBlockedCallersResponses];
+
+export type CreateBlockedCallerData = {
+    body: CreateBlockedCallerRequest;
+    path?: never;
+    query?: never;
+    url: '/v1/blocked-callers';
+};
+
+export type CreateBlockedCallerErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type CreateBlockedCallerError = CreateBlockedCallerErrors[keyof CreateBlockedCallerErrors];
+
+export type CreateBlockedCallerResponses = {
+    /**
+     * Created
+     */
+    201: BlockedCaller;
+};
+
+export type CreateBlockedCallerResponse = CreateBlockedCallerResponses[keyof CreateBlockedCallerResponses];
+
+export type DeleteBlockedCallerData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/blocked-callers/{id}';
+};
+
+export type DeleteBlockedCallerErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type DeleteBlockedCallerError = DeleteBlockedCallerErrors[keyof DeleteBlockedCallerErrors];
+
+export type DeleteBlockedCallerResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type DeleteBlockedCallerResponse = DeleteBlockedCallerResponses[keyof DeleteBlockedCallerResponses];
+
 export type ListCallsData = {
     body?: never;
     path?: never;
@@ -2057,11 +3577,45 @@ export type ListCallsData = {
          * Opaque cursor from next_cursor of the previous page
          */
         after?: string;
+        /**
+         * Opaque cursor from prev_cursor, or a call's cursor, for the newer page
+         */
+        before?: string;
+        /**
+         * duration and price need a window of at most 90 days
+         */
+        order?: 'started' | '-started' | 'duration' | '-duration' | 'price' | '-price';
         status?: 'queued' | 'dialing' | 'ringing' | 'in_progress' | 'completed' | 'no_answer' | 'busy' | 'failed' | 'canceled' | 'rejected';
         direction?: 'inbound' | 'outbound' | 'web_test';
         campaign_id?: string;
         since?: string;
         until?: string;
+        /**
+         * Repeat the key for several
+         */
+        assistant_id?: Array<string>;
+        number_id?: Array<string>;
+        /**
+         * The Web test line
+         */
+        web_tests?: 'include' | 'only' | 'exclude';
+        outcome?: Array<string>;
+        billed?: 'billed' | 'not_billed';
+        contact_id?: string;
+        /**
+         * Calls from or to this number
+         */
+        caller_e164?: string;
+        /**
+         * Caller name, number digits (3 or more), call id prefix and summary words
+         */
+        q?: string;
+        /**
+         * Only flagged calls
+         */
+        flagged?: boolean;
+        tag?: string;
+        sentiment?: 'positive' | 'neutral' | 'negative';
     };
     url: '/v1/calls';
 };
@@ -2099,7 +3653,7 @@ export type ListCallsResponses = {
     /**
      * OK
      */
-    200: PageCall;
+    200: CallPage;
 };
 
 export type ListCallsResponse = ListCallsResponses[keyof ListCallsResponses];
@@ -2167,6 +3721,84 @@ export type CreateCallResponses = {
 
 export type CreateCallResponse = CreateCallResponses[keyof CreateCallResponses];
 
+export type GetCallsSummaryData = {
+    body?: never;
+    path?: never;
+    query?: {
+        status?: 'queued' | 'dialing' | 'ringing' | 'in_progress' | 'completed' | 'no_answer' | 'busy' | 'failed' | 'canceled' | 'rejected';
+        direction?: 'inbound' | 'outbound' | 'web_test';
+        campaign_id?: string;
+        since?: string;
+        until?: string;
+        group_by?: 'none' | 'assistant' | 'outcome' | 'day';
+        /**
+         * Repeat the key for several
+         */
+        assistant_id?: Array<string>;
+        number_id?: Array<string>;
+        /**
+         * The Web test line
+         */
+        web_tests?: 'include' | 'only' | 'exclude';
+        outcome?: Array<string>;
+        billed?: 'billed' | 'not_billed';
+        contact_id?: string;
+        /**
+         * Calls from or to this number
+         */
+        caller_e164?: string;
+        /**
+         * Caller name, number digits (3 or more), call id prefix and summary words
+         */
+        q?: string;
+        /**
+         * Only flagged calls
+         */
+        flagged?: boolean;
+        tag?: string;
+        sentiment?: 'positive' | 'neutral' | 'negative';
+    };
+    url: '/v1/calls/summary';
+};
+
+export type GetCallsSummaryErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetCallsSummaryError = GetCallsSummaryErrors[keyof GetCallsSummaryErrors];
+
+export type GetCallsSummaryResponses = {
+    /**
+     * OK
+     */
+    200: CallsSummary;
+};
+
+export type GetCallsSummaryResponse = GetCallsSummaryResponses[keyof GetCallsSummaryResponses];
+
 export type GetCallData = {
     body?: never;
     path: {
@@ -2221,6 +3853,64 @@ export type GetCallResponses = {
 
 export type GetCallResponse = GetCallResponses[keyof GetCallResponses];
 
+export type UpdateCallData = {
+    body: UpdateCallRequest;
+    path: {
+        /**
+         * <cell>_<ULID>
+         */
+        call_id: string;
+    };
+    query?: never;
+    url: '/v1/calls/{call_id}';
+};
+
+export type UpdateCallErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type UpdateCallError = UpdateCallErrors[keyof UpdateCallErrors];
+
+export type UpdateCallResponses = {
+    /**
+     * OK
+     */
+    200: Call;
+};
+
+export type UpdateCallResponse = UpdateCallResponses[keyof UpdateCallResponses];
+
 export type GetCallAnalysisData = {
     body?: never;
     path: {
@@ -2274,6 +3964,63 @@ export type GetCallAnalysisResponses = {
 };
 
 export type GetCallAnalysisResponse = GetCallAnalysisResponses[keyof GetCallAnalysisResponses];
+
+export type GetCallConversationData = {
+    body?: never;
+    path: {
+        /**
+         * <cell>_<ULID>
+         */
+        call_id: string;
+    };
+    query?: {
+        limit?: number;
+        after?: string;
+    };
+    url: '/v1/calls/{call_id}/conversation';
+};
+
+export type GetCallConversationErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetCallConversationError = GetCallConversationErrors[keyof GetCallConversationErrors];
+
+export type GetCallConversationResponses = {
+    /**
+     * OK
+     */
+    200: Conversation;
+};
+
+export type GetCallConversationResponse = GetCallConversationResponses[keyof GetCallConversationResponses];
 
 export type EndCallData = {
     body?: EndCallRequest;
@@ -2449,6 +4196,62 @@ export type ListCallRecordingsResponses = {
 };
 
 export type ListCallRecordingsResponse = ListCallRecordingsResponses[keyof ListCallRecordingsResponses];
+
+export type ListSameCallerCallsData = {
+    body?: never;
+    path: {
+        /**
+         * <cell>_<ULID>
+         */
+        call_id: string;
+    };
+    query?: {
+        limit?: number;
+    };
+    url: '/v1/calls/{call_id}/same-caller';
+};
+
+export type ListSameCallerCallsErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListSameCallerCallsError = ListSameCallerCallsErrors[keyof ListSameCallerCallsErrors];
+
+export type ListSameCallerCallsResponses = {
+    /**
+     * OK
+     */
+    200: SameCallerCalls;
+};
+
+export type ListSameCallerCallsResponse = ListSameCallerCallsResponses[keyof ListSameCallerCallsResponses];
 
 export type ListCallTurnsData = {
     body?: never;
@@ -3132,6 +4935,53 @@ export type GetCampaignStatsResponses = {
 
 export type GetCampaignStatsResponse = GetCampaignStatsResponses[keyof GetCampaignStatsResponses];
 
+export type ListGuardrailRulesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        language?: string;
+    };
+    url: '/v1/catalog/guardrails';
+};
+
+export type ListGuardrailRulesErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListGuardrailRulesError = ListGuardrailRulesErrors[keyof ListGuardrailRulesErrors];
+
+export type ListGuardrailRulesResponses = {
+    /**
+     * OK
+     */
+    200: ListGuardrailBuiltIn;
+};
+
+export type ListGuardrailRulesResponse = ListGuardrailRulesResponses[keyof ListGuardrailRulesResponses];
+
 export type ListCatalogModelsData = {
     body?: never;
     path?: never;
@@ -3187,6 +5037,51 @@ export type ListCatalogModelsResponses = {
 };
 
 export type ListCatalogModelsResponse = ListCatalogModelsResponses[keyof ListCatalogModelsResponses];
+
+export type ListTurnPresetsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/catalog/turn-presets';
+};
+
+export type ListTurnPresetsErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListTurnPresetsError = ListTurnPresetsErrors[keyof ListTurnPresetsErrors];
+
+export type ListTurnPresetsResponses = {
+    /**
+     * OK
+     */
+    200: ListTurnPreset;
+};
+
+export type ListTurnPresetsResponse = ListTurnPresetsResponses[keyof ListTurnPresetsResponses];
 
 export type ListCatalogVoicesData = {
     body?: never;
@@ -3561,6 +5456,54 @@ export type CreateRevocationResponses = {
 };
 
 export type CreateRevocationResponse = CreateRevocationResponses[keyof CreateRevocationResponses];
+
+export type ListComplianceTextsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        kind?: 'disclosure_inbound' | 'disclosure_outbound' | 'optout_instruction' | 'recording_notice' | 'optout_ack' | 'voicemail_intro' | 'voicemail_optout' | 'screener_line' | 'unavailable' | 'goodbye' | 'inbound_ai_attestation';
+        language?: string;
+    };
+    url: '/v1/compliance/texts';
+};
+
+export type ListComplianceTextsErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListComplianceTextsError = ListComplianceTextsErrors[keyof ListComplianceTextsErrors];
+
+export type ListComplianceTextsResponses = {
+    /**
+     * OK
+     */
+    200: ListComplianceTextView;
+};
+
+export type ListComplianceTextsResponse = ListComplianceTextsResponses[keyof ListComplianceTextsResponses];
 
 export type ListContactsData = {
     body?: never;
@@ -4609,6 +6552,51 @@ export type SyncKnowledgeSourceResponses = {
 
 export type SyncKnowledgeSourceResponse = SyncKnowledgeSourceResponses[keyof SyncKnowledgeSourceResponses];
 
+export type ListLiveCallsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/live-calls';
+};
+
+export type ListLiveCallsErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListLiveCallsError = ListLiveCallsErrors[keyof ListLiveCallsErrors];
+
+export type ListLiveCallsResponses = {
+    /**
+     * OK
+     */
+    200: LiveCalls;
+};
+
+export type ListLiveCallsResponse = ListLiveCallsResponses[keyof ListLiveCallsResponses];
+
 export type ListNumbersData = {
     body?: never;
     path?: never;
@@ -4925,6 +6913,12 @@ export type UpdateNumberResponse = UpdateNumberResponses[keyof UpdateNumberRespo
 
 export type GetRecordingAudioData = {
     body?: never;
+    headers?: {
+        /**
+         * bytes=<start>-[<end>]; recordings over 60 minutes answer 200 only
+         */
+        Range?: string;
+    };
     path: {
         id: string;
     };
@@ -4950,6 +6944,18 @@ export type GetRecordingAudioErrors = {
      */
     404: Problem;
     /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Gone
+     */
+    410: Problem;
+    /**
+     * Requested Range Not Satisfiable
+     */
+    416: Problem;
+    /**
      * Unprocessable Entity
      */
     422: Problem;
@@ -4970,9 +6976,68 @@ export type GetRecordingAudioResponses = {
      * Decrypted recording
      */
     200: Blob | File;
+    /**
+     * Requested byte range of the decrypted recording
+     */
+    206: Blob | File;
 };
 
 export type GetRecordingAudioResponse = GetRecordingAudioResponses[keyof GetRecordingAudioResponses];
+
+export type GetRecordingPeaksData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/recordings/{id}/peaks';
+};
+
+export type GetRecordingPeaksErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Gone
+     */
+    410: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetRecordingPeaksError = GetRecordingPeaksErrors[keyof GetRecordingPeaksErrors];
+
+export type GetRecordingPeaksResponses = {
+    /**
+     * OK
+     */
+    200: RecordingPeaks;
+};
+
+export type GetRecordingPeaksResponse = GetRecordingPeaksResponses[keyof GetRecordingPeaksResponses];
 
 export type CreateIceServersData = {
     body?: never;
