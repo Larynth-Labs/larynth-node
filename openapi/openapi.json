@@ -2198,7 +2198,17 @@
                 "billing.top_up.succeeded",
                 "billing.auto_top_up.failed",
                 "number.provisioned",
-                "number.released"
+                "number.released",
+                "notification.call.summary",
+                "notification.campaign.completed",
+                "notification.campaign.paused",
+                "notification.billing.balance_low",
+                "notification.billing.top_up_succeeded",
+                "notification.billing.auto_top_up_failed",
+                "notification.spending_request.created",
+                "notification.number.provisioned",
+                "notification.number.released",
+                "notification.compliance.optout_alert"
               ],
               "type": "string"
             },
@@ -3422,6 +3432,15 @@
       "Problem": {
         "additionalProperties": true,
         "properties": {
+          "api_base": {
+            "description": "API base URL of the workspace's home region (workspace.other_region)",
+            "type": "string"
+          },
+          "attempts_left": {
+            "description": "Code attempts left in this sign-in step",
+            "format": "int64",
+            "type": "integer"
+          },
           "code": {
             "description": "Stable machine-readable error code; compliance denials carry the dial.* rule id",
             "type": "string"
@@ -3436,6 +3455,21 @@
             "type": "array"
           },
           "instance": {
+            "type": "string"
+          },
+          "reauth_methods": {
+            "description": "Ways to re-authenticate, in preference order (auth.reauth_required)",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "request_kind": {
+            "description": "Spending request kind to file instead (spending.approval_required)",
+            "enum": [
+              "number_purchase",
+              "campaign_launch"
+            ],
             "type": "string"
           },
           "retry_at": {
@@ -3690,7 +3724,17 @@
               "billing.top_up.succeeded",
               "billing.auto_top_up.failed",
               "number.provisioned",
-              "number.released"
+              "number.released",
+              "notification.call.summary",
+              "notification.campaign.completed",
+              "notification.campaign.paused",
+              "notification.billing.balance_low",
+              "notification.billing.top_up_succeeded",
+              "notification.billing.auto_top_up_failed",
+              "notification.spending_request.created",
+              "notification.number.provisioned",
+              "notification.number.released",
+              "notification.compliance.optout_alert"
             ],
             "type": "string"
           }
@@ -3969,7 +4013,17 @@
                 "billing.top_up.succeeded",
                 "billing.auto_top_up.failed",
                 "number.provisioned",
-                "number.released"
+                "number.released",
+                "notification.call.summary",
+                "notification.campaign.completed",
+                "notification.campaign.paused",
+                "notification.billing.balance_low",
+                "notification.billing.top_up_succeeded",
+                "notification.billing.auto_top_up_failed",
+                "notification.spending_request.created",
+                "notification.number.provisioned",
+                "notification.number.released",
+                "notification.compliance.optout_alert"
               ],
               "type": "string"
             },
@@ -4216,7 +4270,7 @@
       "session": {
         "description": "Dashboard session cookie",
         "in": "cookie",
-        "name": "lx_session",
+        "name": "__Host-lx_session",
         "type": "apiKey"
       }
     }
@@ -4309,7 +4363,7 @@
           "assistants"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "assistants:read",
         "x-larynth-sdk": true
       },
@@ -4373,7 +4427,7 @@
           "assistants"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
         "x-larynth-scope": "assistants:write",
         "x-larynth-sdk": true
       }
@@ -4525,7 +4579,8 @@
           "assistants"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
+        "x-larynth-reauth": true,
         "x-larynth-scope": "assistants:write",
         "x-larynth-sdk": true
       },
@@ -4590,7 +4645,7 @@
           "assistants"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "assistants:read",
         "x-larynth-sdk": true
       },
@@ -4668,7 +4723,7 @@
           "assistants"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
         "x-larynth-scope": "assistants:write",
         "x-larynth-sdk": true
       }
@@ -4760,7 +4815,7 @@
           "assistants"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "assistants:read",
         "x-larynth-sdk": true
       },
@@ -4838,7 +4893,7 @@
           "assistants"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
         "x-larynth-scope": "assistants:write",
         "x-larynth-sdk": true
       }
@@ -4915,7 +4970,7 @@
           "assistants"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "assistants:read",
         "x-larynth-sdk": true
       }
@@ -4995,7 +5050,7 @@
           "assistants"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
         "x-larynth-scope": "assistants:write",
         "x-larynth-sdk": true
       }
@@ -5048,7 +5103,7 @@
           "billing"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "owner",
+        "x-larynth-min-role": "admin",
         "x-larynth-scope": "billing:read",
         "x-larynth-sdk": true
       }
@@ -5101,7 +5156,7 @@
           "billing"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "billing:read",
         "x-larynth-sdk": true
       }
@@ -5238,7 +5293,7 @@
           "billing"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "owner",
+        "x-larynth-min-role": "admin",
         "x-larynth-scope": "billing:read",
         "x-larynth-sdk": true
       }
@@ -5291,7 +5346,7 @@
           "billing"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "billing:read",
         "x-larynth-sdk": true
       }
@@ -5431,7 +5486,7 @@
           "calls"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "calls:read",
         "x-larynth-sdk": true
       },
@@ -5585,7 +5640,7 @@
           "calls"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "calls:read",
         "x-larynth-sdk": true
       }
@@ -5654,7 +5709,7 @@
           "calls"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "calls:read",
         "x-larynth-sdk": true
       }
@@ -5829,7 +5884,7 @@
           "calls"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "calls:read",
         "x-larynth-sdk": true
       }
@@ -5898,7 +5953,7 @@
           "recordings"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "recordings:read",
         "x-larynth-sdk": true
       }
@@ -5992,7 +6047,7 @@
           "calls"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "calls:read",
         "x-larynth-sdk": true
       }
@@ -6087,7 +6142,7 @@
           "campaigns"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "campaigns:read",
         "x-larynth-sdk": true
       },
@@ -6151,7 +6206,7 @@
           "campaigns"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
         "x-larynth-scope": "campaigns:write",
         "x-larynth-sdk": true
       }
@@ -6218,7 +6273,7 @@
           "campaigns"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "campaigns:read",
         "x-larynth-sdk": true
       },
@@ -6296,7 +6351,7 @@
           "campaigns"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
         "x-larynth-scope": "campaigns:write",
         "x-larynth-sdk": true
       }
@@ -6477,7 +6532,7 @@
           "campaigns"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "campaigns:read",
         "x-larynth-sdk": true
       },
@@ -6555,7 +6610,7 @@
           "campaigns"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
         "x-larynth-scope": "campaigns:write",
         "x-larynth-sdk": true
       }
@@ -6625,7 +6680,7 @@
           "campaigns"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
         "x-larynth-scope": "campaigns:write",
         "x-larynth-sdk": true
       }
@@ -6792,7 +6847,8 @@
         "x-larynth-idempotency": "required",
         "x-larynth-min-role": "admin",
         "x-larynth-scope": "campaigns:write",
-        "x-larynth-sdk": true
+        "x-larynth-sdk": true,
+        "x-larynth-spend": "campaign_launch"
       }
     },
     "/v1/campaigns/{id}/stats": {
@@ -6857,7 +6913,7 @@
           "campaigns"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "campaigns:read",
         "x-larynth-sdk": true
       }
@@ -6961,7 +7017,7 @@
           "catalog"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "assistants:read",
         "x-larynth-sdk": true
       }
@@ -7059,7 +7115,7 @@
           "catalog"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "assistants:read",
         "x-larynth-sdk": true
       }
@@ -7148,7 +7204,7 @@
           "compliance"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "compliance:read",
         "x-larynth-sdk": true
       },
@@ -7349,7 +7405,7 @@
           "compliance"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "compliance:read",
         "x-larynth-sdk": true
       }
@@ -7446,7 +7502,7 @@
           "compliance"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "compliance:read",
         "x-larynth-sdk": true
       },
@@ -7665,7 +7721,7 @@
           "contacts"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "contacts:read",
         "x-larynth-sdk": true
       },
@@ -7729,7 +7785,7 @@
           "contacts"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
         "x-larynth-scope": "contacts:write",
         "x-larynth-sdk": true
       }
@@ -7866,7 +7922,7 @@
         ],
         "x-larynth-auth": "session_or_api_key",
         "x-larynth-idempotency": "required",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
         "x-larynth-scope": "contacts:write",
         "x-larynth-sdk": true
       }
@@ -7933,7 +7989,7 @@
           "contacts"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "contacts:read",
         "x-larynth-sdk": true
       }
@@ -7997,6 +8053,7 @@
         ],
         "x-larynth-auth": "session_or_api_key",
         "x-larynth-min-role": "admin",
+        "x-larynth-reauth": true,
         "x-larynth-scope": "contacts:write",
         "x-larynth-sdk": true
       },
@@ -8061,7 +8118,7 @@
           "contacts"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "contacts:read",
         "x-larynth-sdk": true
       },
@@ -8139,7 +8196,7 @@
           "contacts"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
         "x-larynth-scope": "contacts:write",
         "x-larynth-sdk": true
       }
@@ -8219,7 +8276,7 @@
           "knowledge"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "knowledge:read",
         "x-larynth-sdk": true
       },
@@ -8283,7 +8340,7 @@
           "knowledge"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
         "x-larynth-scope": "knowledge:write",
         "x-larynth-sdk": true
       }
@@ -8346,7 +8403,8 @@
           "knowledge"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
+        "x-larynth-reauth": true,
         "x-larynth-scope": "knowledge:write",
         "x-larynth-sdk": true
       },
@@ -8411,7 +8469,7 @@
           "knowledge"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "knowledge:read",
         "x-larynth-sdk": true
       },
@@ -8489,7 +8547,7 @@
           "knowledge"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
         "x-larynth-scope": "knowledge:write",
         "x-larynth-sdk": true
       }
@@ -8579,7 +8637,7 @@
           "knowledge"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "knowledge:read",
         "x-larynth-sdk": true
       }
@@ -8671,7 +8729,7 @@
           "knowledge"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "knowledge:read",
         "x-larynth-sdk": true
       }
@@ -8775,7 +8833,7 @@
           "knowledge"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
         "x-larynth-scope": "knowledge:write",
         "x-larynth-sdk": true
       }
@@ -8855,7 +8913,7 @@
           "knowledge"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
         "x-larynth-scope": "knowledge:write",
         "x-larynth-sdk": true
       }
@@ -8927,7 +8985,7 @@
           "knowledge"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
         "x-larynth-scope": "knowledge:write",
         "x-larynth-sdk": true
       },
@@ -9001,7 +9059,7 @@
           "knowledge"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "knowledge:read",
         "x-larynth-sdk": true
       }
@@ -9080,7 +9138,7 @@
           "knowledge"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
         "x-larynth-scope": "knowledge:write",
         "x-larynth-sdk": true
       }
@@ -9176,7 +9234,7 @@
           "numbers"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "numbers:read",
         "x-larynth-sdk": true
       },
@@ -9242,7 +9300,8 @@
         "x-larynth-auth": "session_or_api_key",
         "x-larynth-min-role": "admin",
         "x-larynth-scope": "numbers:write",
-        "x-larynth-sdk": true
+        "x-larynth-sdk": true,
+        "x-larynth-spend": "number_purchase"
       }
     },
     "/v1/numbers/available": {
@@ -9326,7 +9385,7 @@
           "numbers"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "numbers:read",
         "x-larynth-sdk": true
       }
@@ -9461,7 +9520,7 @@
           "numbers"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "numbers:read",
         "x-larynth-sdk": true
       },
@@ -9608,7 +9667,7 @@
           "recordings"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "recordings:read",
         "x-larynth-sdk": true
       }
@@ -10291,8 +10350,18 @@
       "x-larynth-sdk": true
     },
     {
-      "description": "Audit log. Dashboard session only.",
+      "description": "Activity log and its exports. Dashboard session only.",
       "name": "audit",
+      "x-larynth-sdk": true
+    },
+    {
+      "description": "Notification preferences, Slack and Telegram channels, browser push. Dashboard session only.",
+      "name": "notifications",
+      "x-larynth-sdk": true
+    },
+    {
+      "description": "Export and deletion requests for a workspace or account. Dashboard session only.",
+      "name": "data-rights",
       "x-larynth-sdk": true
     },
     {
@@ -10359,9 +10428,25 @@
       "description": "Platform operator endpoints. Excluded from SDKs.",
       "name": "admin",
       "x-larynth-sdk": false
+    },
+    {
+      "description": "Workspaces of the signed-in user. Dashboard session only.",
+      "name": "workspaces",
+      "x-larynth-sdk": true
+    },
+    {
+      "description": "Spending requests from Members to Owners and Admins. Dashboard session only.",
+      "name": "spending",
+      "x-larynth-sdk": true
     }
   ],
   "x-larynth-error-codes": [
+    {
+      "code": "account.sole_owner",
+      "status": 409,
+      "type": "https://larynth.com/problems/account.sole_owner",
+      "title": "Transfer ownership before closing this account"
+    },
     {
       "code": "assistant.not_published",
       "status": 409,
@@ -10375,10 +10460,40 @@
       "title": "Assistant version is published and immutable"
     },
     {
+      "code": "auth.account_disabled",
+      "status": 403,
+      "type": "https://larynth.com/problems/auth.account_disabled",
+      "title": "Account disabled"
+    },
+    {
       "code": "auth.api_key_not_allowed",
       "status": 403,
       "type": "https://larynth.com/problems/auth.api_key_not_allowed",
       "title": "Operation requires a dashboard session"
+    },
+    {
+      "code": "auth.code_expired",
+      "status": 410,
+      "type": "https://larynth.com/problems/auth.code_expired",
+      "title": "Code has expired"
+    },
+    {
+      "code": "auth.code_invalid",
+      "status": 400,
+      "type": "https://larynth.com/problems/auth.code_invalid",
+      "title": "Code is not valid"
+    },
+    {
+      "code": "auth.email_taken",
+      "status": 409,
+      "type": "https://larynth.com/problems/auth.email_taken",
+      "title": "An account with this email exists"
+    },
+    {
+      "code": "auth.flow_expired",
+      "status": 410,
+      "type": "https://larynth.com/problems/auth.flow_expired",
+      "title": "Sign-in step expired"
     },
     {
       "code": "auth.forbidden",
@@ -10393,16 +10508,70 @@
       "title": "Login failed"
     },
     {
+      "code": "auth.mfa_required",
+      "status": 403,
+      "type": "https://larynth.com/problems/auth.mfa_required",
+      "title": "Two-step verification required"
+    },
+    {
       "code": "auth.origin_mismatch",
       "status": 403,
       "type": "https://larynth.com/problems/auth.origin_mismatch",
       "title": "Origin not allowed"
     },
     {
+      "code": "auth.password_invalid",
+      "status": 401,
+      "type": "https://larynth.com/problems/auth.password_invalid",
+      "title": "Email or password is not valid"
+    },
+    {
+      "code": "auth.password_paused",
+      "status": 429,
+      "type": "https://larynth.com/problems/auth.password_paused",
+      "title": "Password sign-in is paused"
+    },
+    {
+      "code": "auth.password_weak",
+      "status": 422,
+      "type": "https://larynth.com/problems/auth.password_weak",
+      "title": "Password does not meet the policy"
+    },
+    {
+      "code": "auth.provider_failed",
+      "status": 502,
+      "type": "https://larynth.com/problems/auth.provider_failed",
+      "title": "Sign-in provider failed"
+    },
+    {
+      "code": "auth.reauth_required",
+      "status": 403,
+      "type": "https://larynth.com/problems/auth.reauth_required",
+      "title": "Confirm it's you to continue"
+    },
+    {
+      "code": "auth.region_unavailable",
+      "status": 409,
+      "type": "https://larynth.com/problems/auth.region_unavailable",
+      "title": "Region not available"
+    },
+    {
       "code": "auth.scope_missing",
       "status": 403,
       "type": "https://larynth.com/problems/auth.scope_missing",
       "title": "API key lacks the required scope"
+    },
+    {
+      "code": "auth.too_many_attempts",
+      "status": 429,
+      "type": "https://larynth.com/problems/auth.too_many_attempts",
+      "title": "Too many attempts"
+    },
+    {
+      "code": "auth.turnstile_failed",
+      "status": 400,
+      "type": "https://larynth.com/problems/auth.turnstile_failed",
+      "title": "Human check failed"
     },
     {
       "code": "auth.unauthenticated",
@@ -10471,6 +10640,12 @@
       "title": "Campaign state does not allow this transition"
     },
     {
+      "code": "data_request.open_exists",
+      "status": 409,
+      "type": "https://larynth.com/problems/data_request.open_exists",
+      "title": "A request of this kind is already open"
+    },
+    {
       "code": "dial.caller_id.not_allowed",
       "status": 422,
       "type": "https://larynth.com/problems/dial.caller_id.not_allowed",
@@ -10519,6 +10694,30 @@
       "title": "Internal error"
     },
     {
+      "code": "invitation.already_member",
+      "status": 409,
+      "type": "https://larynth.com/problems/invitation.already_member",
+      "title": "Already a member of this workspace"
+    },
+    {
+      "code": "invitation.expired",
+      "status": 410,
+      "type": "https://larynth.com/problems/invitation.expired",
+      "title": "Invitation expired"
+    },
+    {
+      "code": "invitation.revoked",
+      "status": 410,
+      "type": "https://larynth.com/problems/invitation.revoked",
+      "title": "Invitation revoked"
+    },
+    {
+      "code": "invitation.wrong_account",
+      "status": 409,
+      "type": "https://larynth.com/problems/invitation.wrong_account",
+      "title": "Invitation is for a different account"
+    },
+    {
       "code": "knowledge.file_invalid",
       "status": 422,
       "type": "https://larynth.com/problems/knowledge.file_invalid",
@@ -10529,6 +10728,24 @@
       "status": 422,
       "type": "https://larynth.com/problems/knowledge.url_not_allowed",
       "title": "Knowledge source address not allowed"
+    },
+    {
+      "code": "member.last_owner",
+      "status": 409,
+      "type": "https://larynth.com/problems/member.last_owner",
+      "title": "A workspace must keep at least one owner"
+    },
+    {
+      "code": "member.role_ceiling",
+      "status": 403,
+      "type": "https://larynth.com/problems/member.role_ceiling",
+      "title": "Role change exceeds your own role"
+    },
+    {
+      "code": "mfa.required",
+      "status": 409,
+      "type": "https://larynth.com/problems/mfa.required",
+      "title": "Two-step verification is required"
     },
     {
       "code": "not_implemented",
@@ -10597,6 +10814,18 @@
       "title": "Not found"
     },
     {
+      "code": "spending.approval_required",
+      "status": 403,
+      "type": "https://larynth.com/problems/spending.approval_required",
+      "title": "An Owner or Admin must approve this"
+    },
+    {
+      "code": "spending.request_not_pending",
+      "status": 409,
+      "type": "https://larynth.com/problems/spending.request_not_pending",
+      "title": "Spending request is no longer pending"
+    },
+    {
       "code": "stripe.signature_invalid",
       "status": 400,
       "type": "https://larynth.com/problems/stripe.signature_invalid",
@@ -10631,6 +10860,18 @@
       "status": 422,
       "type": "https://larynth.com/problems/webhook.url_not_allowed",
       "title": "Webhook URL not allowed"
+    },
+    {
+      "code": "workspace.limit_reached",
+      "status": 409,
+      "type": "https://larynth.com/problems/workspace.limit_reached",
+      "title": "Workspace limit reached"
+    },
+    {
+      "code": "workspace.other_region",
+      "status": 409,
+      "type": "https://larynth.com/problems/workspace.other_region",
+      "title": "Workspace is served from another region"
     }
   ]
 }
