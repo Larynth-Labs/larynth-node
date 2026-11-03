@@ -73,6 +73,26 @@
         },
         "description": "Conflict"
       },
+      "Problem410": {
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        },
+        "description": "Gone"
+      },
+      "Problem416": {
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        },
+        "description": "Requested Range Not Satisfiable"
+      },
       "Problem422": {
         "content": {
           "application/problem+json": {
@@ -82,6 +102,16 @@
           }
         },
         "description": "Unprocessable Entity"
+      },
+      "Problem428": {
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        },
+        "description": "Precondition Required"
       },
       "Problem429": {
         "content": {
@@ -198,13 +228,40 @@
             "format": "date-time",
             "type": "string"
           },
+          "coverage": {
+            "$ref": "#/components/schemas/AssistantCoverage",
+            "description": "Working hours derived from number routing; null until schedules ship"
+          },
           "created_at": {
             "format": "date-time",
             "type": "string"
           },
+          "description": {
+            "description": "The job line",
+            "maxLength": 200,
+            "type": "string"
+          },
+          "draft": {
+            "$ref": "#/components/schemas/AssistantDraftInfo"
+          },
+          "has_unpublished_changes": {
+            "type": "boolean"
+          },
           "id": {
             "format": "uuid",
             "type": "string"
+          },
+          "languages": {
+            "description": "Main language of the current spec, then the languages it switches to",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "latency_target_ms": {
+            "description": "Reply-time target the call pages compare against",
+            "format": "int64",
+            "type": "integer"
           },
           "latest_version": {
             "format": "int64",
@@ -213,14 +270,54 @@
           "name": {
             "type": "string"
           },
+          "number_ids": {
+            "description": "Numbers routed to this assistant",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "paused": {
+            "$ref": "#/components/schemas/AssistantPause"
+          },
+          "published": {
+            "$ref": "#/components/schemas/AssistantPublished"
+          },
           "published_version": {
             "format": "int64",
             "type": "integer"
+          },
+          "source": {
+            "enum": [
+              "manual",
+              "setup",
+              "duplicate",
+              "template",
+              "import"
+            ],
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "live",
+              "paused",
+              "draft",
+              "archived"
+            ],
+            "type": "string"
           },
           "status": {
             "enum": [
               "active",
               "archived"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "description": "Always single_prompt until flows ship",
+            "enum": [
+              "single_prompt",
+              "flow"
             ],
             "type": "string"
           },
@@ -235,7 +332,408 @@
           "status",
           "latest_version",
           "created_at",
+          "updated_at",
+          "type",
+          "languages",
+          "number_ids",
+          "state",
+          "has_unpublished_changes",
+          "latency_target_ms"
+        ],
+        "type": "object"
+      },
+      "AssistantCoverage": {
+        "additionalProperties": false,
+        "properties": {
+          "bands": {
+            "items": {
+              "$ref": "#/components/schemas/AssistantCoverageBand"
+            },
+            "type": "array"
+          },
+          "summary_key": {
+            "description": "i18n key of the plain summary, for example around_the_clock",
+            "type": "string"
+          }
+        },
+        "required": [
+          "summary_key",
+          "bands"
+        ],
+        "type": "object"
+      },
+      "AssistantCoverageBand": {
+        "additionalProperties": false,
+        "properties": {
+          "days": {
+            "description": "mon to sun",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "end_minute": {
+            "format": "int64",
+            "maximum": 1440,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "start_minute": {
+            "format": "int64",
+            "maximum": 1439,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "days",
+          "start_minute",
+          "end_minute"
+        ],
+        "type": "object"
+      },
+      "AssistantDraft": {
+        "additionalProperties": false,
+        "properties": {
+          "assistant_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "call_handling": {
+            "$ref": "#/components/schemas/CallHandling"
+          },
+          "changed_sections": {
+            "description": "basics, instructions, voice, model, knowledge, tools, call_handling, disclosures, guardrails, post_call, advanced",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "created_by": {
+            "type": "string"
+          },
+          "denoise": {
+            "type": "boolean"
+          },
+          "disclosure": {
+            "$ref": "#/components/schemas/DisclosureSpec"
+          },
+          "fillers": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 20,
+            "type": "array"
+          },
+          "greeting_text": {
+            "maxLength": 1000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "guardrails": {
+            "$ref": "#/components/schemas/GuardrailsSpec",
+            "description": "Owner-added guardrails; the built-in rules from listGuardrailRules always apply and cannot be removed"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "interruption_profile": {
+            "$ref": "#/components/schemas/InterruptionProfile"
+          },
+          "knowledge_base_ids": {
+            "description": "Knowledge bases the assistant can search with the search_knowledge tool; each must be ready when the version is published",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 5,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "language": {
+            "pattern": "^[a-z]{2,3}(-[A-Z]{2})?$",
+            "type": "string"
+          },
+          "languages_extra": {
+            "description": "Languages the agent switches to when the caller speaks them; only languages the catalog marks switchable",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 4,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "latency": {
+            "$ref": "#/components/schemas/LatencySettings"
+          },
+          "llm_fallback_model_ids": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 3,
+            "type": "array"
+          },
+          "llm_model_id": {
+            "description": "Required for cascade",
+            "format": "uuid",
+            "type": "string"
+          },
+          "llm_params": {
+            "additionalProperties": {},
+            "type": "object"
+          },
+          "max_call_seconds": {
+            "default": 1800,
+            "format": "int64",
+            "maximum": 14400,
+            "minimum": 60,
+            "type": "integer"
+          },
+          "mode": {
+            "enum": [
+              "cascade",
+              "s2s"
+            ],
+            "type": "string"
+          },
+          "post_call": {
+            "$ref": "#/components/schemas/PostCallSettings",
+            "description": "Post-call summary, data extraction and success evaluation"
+          },
+          "published_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "revision": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "s2s_model_id": {
+            "description": "Required for s2s",
+            "format": "uuid",
+            "type": "string"
+          },
+          "s2s_params": {
+            "additionalProperties": {},
+            "type": "object"
+          },
+          "stt_model_id": {
+            "description": "Required for cascade",
+            "format": "uuid",
+            "type": "string"
+          },
+          "stt_params": {
+            "additionalProperties": {},
+            "type": "object"
+          },
+          "system_prompt": {
+            "maxLength": 32000,
+            "type": "string"
+          },
+          "tools": {
+            "items": {
+              "$ref": "#/components/schemas/AssistantTool"
+            },
+            "maxItems": 32,
+            "type": "array"
+          },
+          "transfer_fallback": {
+            "description": "What happens when nobody picks up a transfer",
+            "enum": [
+              "take_message",
+              "next_target",
+              "end"
+            ],
+            "type": "string"
+          },
+          "tts_model_id": {
+            "description": "Required for cascade",
+            "format": "uuid",
+            "type": "string"
+          },
+          "tts_params": {
+            "additionalProperties": {},
+            "type": "object"
+          },
+          "tts_voice_id": {
+            "description": "Required for cascade",
+            "format": "uuid",
+            "type": "string"
+          },
+          "turn_preset": {
+            "description": "Turn-taking preset from listTurnPresets; custom means turn_profile and interruption_profile hold the advanced values. Unset is balanced",
+            "enum": [
+              "patient",
+              "balanced",
+              "snappy",
+              "custom"
+            ],
+            "type": "string"
+          },
+          "turn_profile": {
+            "$ref": "#/components/schemas/TurnProfile"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_by_name": {
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "warnings": {
+            "items": {
+              "$ref": "#/components/schemas/DraftWarning"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "revision",
+          "changed_sections",
+          "warnings",
+          "updated_at",
+          "id",
+          "assistant_id",
+          "version",
+          "created_by",
+          "created_at",
+          "mode",
+          "language",
+          "system_prompt",
+          "greeting_text"
+        ],
+        "type": "object"
+      },
+      "AssistantDraftInfo": {
+        "additionalProperties": false,
+        "properties": {
+          "changed_sections": {
+            "description": "Editor sections that differ from the published version",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "revision": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_by_name": {
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "version",
+          "revision",
+          "changed_sections",
           "updated_at"
+        ],
+        "type": "object"
+      },
+      "AssistantPause": {
+        "additionalProperties": false,
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "by_user_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 200,
+            "type": "string"
+          }
+        },
+        "required": [
+          "at"
+        ],
+        "type": "object"
+      },
+      "AssistantPublish": {
+        "additionalProperties": false,
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "by_name": {
+            "type": "string"
+          },
+          "by_user_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "publish",
+              "rollback"
+            ],
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 200,
+            "type": "string"
+          },
+          "previous_version": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "version",
+          "kind",
+          "at"
+        ],
+        "type": "object"
+      },
+      "AssistantPublished": {
+        "additionalProperties": false,
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "by_name": {
+            "type": "string"
+          },
+          "by_user_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "version",
+          "at"
         ],
         "type": "object"
       },
@@ -312,6 +810,9 @@
             "format": "uuid",
             "type": "string"
           },
+          "call_handling": {
+            "$ref": "#/components/schemas/CallHandling"
+          },
           "created_at": {
             "format": "date-time",
             "type": "string"
@@ -321,6 +822,9 @@
           },
           "denoise": {
             "type": "boolean"
+          },
+          "disclosure": {
+            "$ref": "#/components/schemas/DisclosureSpec"
           },
           "fillers": {
             "items": {
@@ -333,6 +837,10 @@
             "maxLength": 1000,
             "minLength": 1,
             "type": "string"
+          },
+          "guardrails": {
+            "$ref": "#/components/schemas/GuardrailsSpec",
+            "description": "Owner-added guardrails; the built-in rules from listGuardrailRules always apply and cannot be removed"
           },
           "id": {
             "format": "uuid",
@@ -353,6 +861,15 @@
           "language": {
             "pattern": "^[a-z]{2,3}(-[A-Z]{2})?$",
             "type": "string"
+          },
+          "languages_extra": {
+            "description": "Languages the agent switches to when the caller speaks them; only languages the catalog marks switchable",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 4,
+            "type": "array",
+            "uniqueItems": true
           },
           "latency": {
             "$ref": "#/components/schemas/LatencySettings"
@@ -424,6 +941,15 @@
             "maxItems": 32,
             "type": "array"
           },
+          "transfer_fallback": {
+            "description": "What happens when nobody picks up a transfer",
+            "enum": [
+              "take_message",
+              "next_target",
+              "end"
+            ],
+            "type": "string"
+          },
           "tts_model_id": {
             "description": "Required for cascade",
             "format": "uuid",
@@ -436,6 +962,16 @@
           "tts_voice_id": {
             "description": "Required for cascade",
             "format": "uuid",
+            "type": "string"
+          },
+          "turn_preset": {
+            "description": "Turn-taking preset from listTurnPresets; custom means turn_profile and interruption_profile hold the advanced values. Unset is balanced",
+            "enum": [
+              "patient",
+              "balanced",
+              "snappy",
+              "custom"
+            ],
             "type": "string"
           },
           "turn_profile": {
@@ -462,8 +998,14 @@
       "AssistantVersionSpec": {
         "additionalProperties": false,
         "properties": {
+          "call_handling": {
+            "$ref": "#/components/schemas/CallHandling"
+          },
           "denoise": {
             "type": "boolean"
+          },
+          "disclosure": {
+            "$ref": "#/components/schemas/DisclosureSpec"
           },
           "fillers": {
             "items": {
@@ -476,6 +1018,10 @@
             "maxLength": 1000,
             "minLength": 1,
             "type": "string"
+          },
+          "guardrails": {
+            "$ref": "#/components/schemas/GuardrailsSpec",
+            "description": "Owner-added guardrails; the built-in rules from listGuardrailRules always apply and cannot be removed"
           },
           "interruption_profile": {
             "$ref": "#/components/schemas/InterruptionProfile"
@@ -492,6 +1038,15 @@
           "language": {
             "pattern": "^[a-z]{2,3}(-[A-Z]{2})?$",
             "type": "string"
+          },
+          "languages_extra": {
+            "description": "Languages the agent switches to when the caller speaks them; only languages the catalog marks switchable",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 4,
+            "type": "array",
+            "uniqueItems": true
           },
           "latency": {
             "$ref": "#/components/schemas/LatencySettings"
@@ -559,6 +1114,15 @@
             "maxItems": 32,
             "type": "array"
           },
+          "transfer_fallback": {
+            "description": "What happens when nobody picks up a transfer",
+            "enum": [
+              "take_message",
+              "next_target",
+              "end"
+            ],
+            "type": "string"
+          },
           "tts_model_id": {
             "description": "Required for cascade",
             "format": "uuid",
@@ -573,6 +1137,16 @@
             "format": "uuid",
             "type": "string"
           },
+          "turn_preset": {
+            "description": "Turn-taking preset from listTurnPresets; custom means turn_profile and interruption_profile hold the advanced values. Unset is balanced",
+            "enum": [
+              "patient",
+              "balanced",
+              "snappy",
+              "custom"
+            ],
+            "type": "string"
+          },
           "turn_profile": {
             "$ref": "#/components/schemas/TurnProfile"
           }
@@ -582,6 +1156,25 @@
           "language",
           "system_prompt",
           "greeting_text"
+        ],
+        "type": "object"
+      },
+      "AttestationStatement": {
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}$",
+            "type": "string"
+          },
+          "text": {
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "text"
         ],
         "type": "object"
       },
@@ -690,6 +1283,51 @@
         ],
         "type": "object"
       },
+      "BlockedCaller": {
+        "additionalProperties": false,
+        "properties": {
+          "blocked_calls": {
+            "description": "Calls dropped since the block",
+            "format": "int64",
+            "type": "integer"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "created_by": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "created_by_name": {
+            "type": "string"
+          },
+          "e164": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "last_blocked_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "source_call_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "e164",
+          "created_at",
+          "blocked_calls"
+        ],
+        "type": "object"
+      },
       "Call": {
         "additionalProperties": false,
         "properties": {
@@ -784,6 +1422,14 @@
             "pattern": "^[a-z0-9]{2,8}_[0-9A-HJKMNP-TV-Z]{26}$",
             "type": "string"
           },
+          "caller_blocked": {
+            "$ref": "#/components/schemas/CallerBlockRef",
+            "description": "Detail only: set when the caller's number is on the workspace block list"
+          },
+          "caller_name": {
+            "description": "The contact name, else the name the caller gave",
+            "type": "string"
+          },
           "campaign_contact_id": {
             "format": "uuid",
             "type": "string"
@@ -804,8 +1450,16 @@
             ],
             "type": "string"
           },
+          "contact_id": {
+            "format": "uuid",
+            "type": "string"
+          },
           "created_at": {
             "format": "date-time",
+            "type": "string"
+          },
+          "cursor": {
+            "description": "Opaque; pass as after or before to page from this call",
             "type": "string"
           },
           "direction": {
@@ -824,6 +1478,9 @@
             "format": "date-time",
             "type": "string"
           },
+          "flagged": {
+            "$ref": "#/components/schemas/CallFlag"
+          },
           "from_e164": {
             "type": "string"
           },
@@ -835,10 +1492,23 @@
             ],
             "type": "string"
           },
+          "latency": {
+            "$ref": "#/components/schemas/CallLatency",
+            "description": "Detail only"
+          },
           "mode": {
             "enum": [
               "cascade",
               "s2s"
+            ],
+            "type": "string"
+          },
+          "not_billed_reason": {
+            "enum": [
+              "short_call",
+              "spam",
+              "blocked",
+              "agent_paused"
             ],
             "type": "string"
           },
@@ -850,12 +1520,55 @@
             "type": "boolean"
           },
           "outcome": {
+            "description": "Fixed platform list; null while live and until analysis finishes",
+            "enum": [
+              "booked_appointment",
+              "rescheduled",
+              "answered_question",
+              "message_taken",
+              "transferred_to_staff",
+              "no_resolution",
+              "carrier_error",
+              "voicemail_left",
+              "caller_hung_up",
+              "no_answer",
+              "line_busy",
+              "spam_blocked",
+              "caller_blocked"
+            ],
+            "type": "string"
+          },
+          "outcome_group": {
+            "enum": [
+              "handled",
+              "needs_look",
+              "not_connected"
+            ],
             "type": "string"
           },
           "price_micro": {
             "description": "Settled price in micro-USD",
             "format": "int64",
             "type": "integer"
+          },
+          "quality": {
+            "$ref": "#/components/schemas/CallQuality",
+            "description": "Detail only"
+          },
+          "quality_score": {
+            "description": "Automatic call quality check score",
+            "format": "int64",
+            "maximum": 100,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "receipt": {
+            "$ref": "#/components/schemas/CallReceipt",
+            "description": "Detail only"
+          },
+          "recording": {
+            "$ref": "#/components/schemas/CallRecordingInfo",
+            "description": "Detail only"
           },
           "recording_allowed": {
             "type": "boolean"
@@ -864,9 +1577,21 @@
             "format": "date-time",
             "type": "string"
           },
+          "sentiment": {
+            "description": "Caller sentiment from the post-call analysis, on every call",
+            "enum": [
+              "positive",
+              "neutral",
+              "negative"
+            ],
+            "type": "string"
+          },
           "sip_code": {
             "format": "int64",
             "type": "integer"
+          },
+          "spam_flagged": {
+            "type": "boolean"
           },
           "status": {
             "enum": [
@@ -883,12 +1608,24 @@
             ],
             "type": "string"
           },
+          "successful": {
+            "type": "boolean"
+          },
           "summary": {
             "description": "Short post-call summary, present on list items once analysed",
             "type": "string"
           },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
           "to_e164": {
             "type": "string"
+          },
+          "transfer": {
+            "$ref": "#/components/schemas/CallTransfer"
           },
           "updated_at": {
             "format": "date-time",
@@ -903,7 +1640,9 @@
           "recording_allowed",
           "opted_out",
           "created_at",
-          "updated_at"
+          "updated_at",
+          "spam_flagged",
+          "tags"
         ],
         "type": "object"
       },
@@ -912,6 +1651,18 @@
         "properties": {
           "call_id": {
             "pattern": "^[a-z0-9]{2,8}_[0-9A-HJKMNP-TV-Z]{26}$",
+            "type": "string"
+          },
+          "callback_by": {
+            "description": "As the caller said it, for example \"before 10\"",
+            "maxLength": 80,
+            "type": "string"
+          },
+          "callback_requested": {
+            "type": "boolean"
+          },
+          "caller_name": {
+            "maxLength": 120,
             "type": "string"
           },
           "cost_micro": {
@@ -927,11 +1678,44 @@
             "additionalProperties": {},
             "type": "object"
           },
+          "key_moment": {
+            "$ref": "#/components/schemas/InboxSnippet"
+          },
           "model_id": {
             "format": "uuid",
             "type": "string"
           },
+          "outcome": {
+            "enum": [
+              "booked_appointment",
+              "rescheduled",
+              "answered_question",
+              "message_taken",
+              "transferred_to_staff",
+              "no_resolution",
+              "carrier_error",
+              "voicemail_left",
+              "caller_hung_up",
+              "no_answer",
+              "line_busy",
+              "spam_blocked",
+              "caller_blocked"
+            ],
+            "type": "string"
+          },
+          "quality": {
+            "$ref": "#/components/schemas/CallQuality",
+            "description": "Automatic call quality checks, included in every plan"
+          },
           "reason": {
+            "type": "string"
+          },
+          "sentiment": {
+            "enum": [
+              "positive",
+              "neutral",
+              "negative"
+            ],
             "type": "string"
           },
           "successful": {
@@ -943,6 +1727,10 @@
           "tokens": {
             "format": "int64",
             "type": "integer"
+          },
+          "unanswered_question": {
+            "maxLength": 500,
+            "type": "string"
           }
         },
         "required": [
@@ -951,7 +1739,8 @@
           "data",
           "tokens",
           "cost_micro",
-          "created_at"
+          "created_at",
+          "callback_requested"
         ],
         "type": "object"
       },
@@ -997,6 +1786,365 @@
           "at",
           "kind",
           "payload"
+        ],
+        "type": "object"
+      },
+      "CallFlag": {
+        "additionalProperties": false,
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "by_user_id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "at"
+        ],
+        "type": "object"
+      },
+      "CallHandling": {
+        "additionalProperties": false,
+        "properties": {
+          "dtmf_input": {
+            "description": "Accept keypad input",
+            "type": "boolean"
+          },
+          "end_on_goodbye": {
+            "type": "boolean"
+          },
+          "ivr_navigation": {
+            "description": "Navigate phone menus on outbound calls",
+            "type": "boolean"
+          },
+          "max_reply": {
+            "enum": [
+              "short",
+              "normal",
+              "long"
+            ],
+            "type": "string"
+          },
+          "silence_end_s": {
+            "description": "End the call after this much caller silence. Unset is 30",
+            "enum": [
+              15,
+              30,
+              60
+            ],
+            "format": "int64",
+            "type": "integer"
+          },
+          "voicemail_detection": {
+            "type": "boolean"
+          },
+          "voicemail_message": {
+            "maxLength": 500,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CallLatency": {
+        "additionalProperties": false,
+        "properties": {
+          "avg_ms": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "over_target": {
+            "description": "Agent turns slower than the target",
+            "format": "int64",
+            "type": "integer"
+          },
+          "p95_ms": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "target_ms": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "avg_ms",
+          "p95_ms",
+          "target_ms",
+          "over_target"
+        ],
+        "type": "object"
+      },
+      "CallPage": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/Call"
+            },
+            "type": "array"
+          },
+          "next_cursor": {
+            "description": "Cursor for the older page; null on the last page",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "prev_cursor": {
+            "description": "Cursor for the newer page; null on the first page",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "data",
+          "next_cursor",
+          "prev_cursor"
+        ],
+        "type": "object"
+      },
+      "CallQuality": {
+        "additionalProperties": false,
+        "properties": {
+          "checked_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/CallQualityCheck"
+            },
+            "type": "array"
+          },
+          "score": {
+            "format": "int64",
+            "maximum": 100,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "score",
+          "checks",
+          "checked_at"
+        ],
+        "type": "object"
+      },
+      "CallQualityCheck": {
+        "additionalProperties": false,
+        "properties": {
+          "at_ms": {
+            "description": "Offset of the moment the check refers to",
+            "format": "int64",
+            "type": "integer"
+          },
+          "key": {
+            "enum": [
+              "greeting",
+              "understood_caller",
+              "stayed_on_task",
+              "followed_guardrails",
+              "accurate_answers",
+              "handled_next_step",
+              "reply_speed",
+              "ended_cleanly"
+            ],
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 300,
+            "type": "string"
+          },
+          "passed": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "key",
+          "passed"
+        ],
+        "type": "object"
+      },
+      "CallReceipt": {
+        "additionalProperties": false,
+        "properties": {
+          "free_under_ms": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "ledger_transaction_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/CallReceiptLine"
+            },
+            "type": "array"
+          },
+          "not_billed_reason": {
+            "enum": [
+              "short_call",
+              "spam",
+              "blocked",
+              "agent_paused"
+            ],
+            "type": "string"
+          },
+          "rounding": {
+            "enum": [
+              "started_minute"
+            ],
+            "type": "string"
+          },
+          "settled_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "total_micro": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "lines",
+          "total_micro",
+          "rounding",
+          "free_under_ms"
+        ],
+        "type": "object"
+      },
+      "CallReceiptLine": {
+        "additionalProperties": false,
+        "properties": {
+          "amount_micro": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "billed_minutes": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "kind": {
+            "enum": [
+              "agent_minutes",
+              "bridged_minutes",
+              "premium_voice",
+              "premium_model"
+            ],
+            "type": "string"
+          },
+          "quantity_ms": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "unit_price_micro": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "kind",
+          "quantity_ms",
+          "billed_minutes",
+          "unit_price_micro",
+          "amount_micro"
+        ],
+        "type": "object"
+      },
+      "CallRecordingInfo": {
+        "additionalProperties": false,
+        "properties": {
+          "deleted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "deleted_by_name": {
+            "type": "string"
+          },
+          "deleted_reason": {
+            "enum": [
+              "retention",
+              "user",
+              "data_request",
+              "key_destroyed"
+            ],
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "retention_until": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "pending",
+              "uploaded",
+              "verified",
+              "failed",
+              "purged"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "state",
+          "retention_until"
+        ],
+        "type": "object"
+      },
+      "CallTransfer": {
+        "additionalProperties": false,
+        "properties": {
+          "answered": {
+            "type": "boolean"
+          },
+          "attempts": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "destination_name": {
+            "type": "string"
+          },
+          "leg_call_id": {
+            "type": "string"
+          },
+          "mode": {
+            "enum": [
+              "warm",
+              "cold"
+            ],
+            "type": "string"
+          },
+          "ring_ms": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "started_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "talk_ms": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "destination_name",
+          "mode",
+          "answered",
+          "ring_ms",
+          "talk_ms",
+          "attempts"
         ],
         "type": "object"
       },
@@ -1072,6 +2220,151 @@
           "barged_in",
           "from_interim",
           "created_at"
+        ],
+        "type": "object"
+      },
+      "CallerBlockRef": {
+        "additionalProperties": false,
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "created_at"
+        ],
+        "type": "object"
+      },
+      "CallsNotBilled": {
+        "additionalProperties": false,
+        "properties": {
+          "agent_paused": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "blocked": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "short_call": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "spam": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "short_call",
+          "spam",
+          "blocked",
+          "agent_paused"
+        ],
+        "type": "object"
+      },
+      "CallsSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "avg_billed_ms": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "billed_ms": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "by_outcome": {
+            "additionalProperties": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "object"
+          },
+          "calls": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "connected": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/CallsSummaryGroup"
+            },
+            "type": "array"
+          },
+          "not_billed": {
+            "$ref": "#/components/schemas/CallsNotBilled"
+          },
+          "not_connected": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "rate_micro_per_min": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "spend_micro": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "calls",
+          "connected",
+          "not_connected",
+          "billed_ms",
+          "avg_billed_ms",
+          "spend_micro",
+          "not_billed",
+          "rate_micro_per_min",
+          "by_outcome"
+        ],
+        "type": "object"
+      },
+      "CallsSummaryGroup": {
+        "additionalProperties": false,
+        "properties": {
+          "billed_ms": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "booked": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "calls": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "connected": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "key": {
+            "description": "Assistant id, outcome or local date (YYYY-MM-DD)",
+            "type": "string"
+          },
+          "spend_micro": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "key",
+          "calls",
+          "connected",
+          "booked",
+          "billed_ms",
+          "spend_micro"
         ],
         "type": "object"
       },
@@ -1407,6 +2700,10 @@
             "additionalProperties": {},
             "type": "object"
           },
+          "description": {
+            "description": "Plain description written by Larynth",
+            "type": "string"
+          },
           "display_name": {
             "type": "string"
           },
@@ -1443,11 +2740,20 @@
             "additionalProperties": {},
             "type": "object"
           },
+          "premium_micro_per_min": {
+            "description": "Added to the call-minute rate; 0 when no premium rate row exists. Equals what billing charges",
+            "format": "int64",
+            "type": "integer"
+          },
           "provider_key": {
             "type": "string"
           },
           "provider_name": {
             "type": "string"
+          },
+          "recommended": {
+            "description": "The recommended model of its tier",
+            "type": "boolean"
           },
           "status": {
             "enum": [
@@ -1455,6 +2761,20 @@
               "deprecated"
             ],
             "type": "string"
+          },
+          "tier": {
+            "description": "Quality tier the editor shows by default; unset for models listed only under Advanced",
+            "enum": [
+              "fast",
+              "balanced",
+              "best"
+            ],
+            "type": "string"
+          },
+          "typical_reply_ms": {
+            "description": "Typical time this model adds to a reply, measured on our cells",
+            "format": "int64",
+            "type": "integer"
           },
           "wire_rates": {
             "items": {
@@ -1477,7 +2797,9 @@
           "defaults",
           "status",
           "is_default",
-          "is_default_fallback"
+          "is_default_fallback",
+          "premium_micro_per_min",
+          "recommended"
         ],
         "type": "object"
       },
@@ -1488,6 +2810,10 @@
             "additionalProperties": {},
             "type": "object"
           },
+          "description": {
+            "description": "Plain description written by Larynth",
+            "type": "string"
+          },
           "id": {
             "format": "uuid",
             "type": "string"
@@ -1495,12 +2821,24 @@
           "language": {
             "type": "string"
           },
+          "languages": {
+            "description": "Languages the voice speaks well; the first is its main language",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
           "model_id": {
             "format": "uuid",
             "type": "string"
           },
           "name": {
             "type": "string"
+          },
+          "premium_micro_per_min": {
+            "description": "Added to the call-minute rate; 0 when no premium rate row exists. Equals what billing charges",
+            "format": "int64",
+            "type": "integer"
           },
           "preview_url": {
             "format": "uri",
@@ -1516,6 +2854,12 @@
             ],
             "type": "string"
           },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
           "voice_key": {
             "type": "string"
           }
@@ -1527,7 +2871,120 @@
           "name",
           "language",
           "attributes",
-          "status"
+          "status",
+          "languages",
+          "tags",
+          "premium_micro_per_min"
+        ],
+        "type": "object"
+      },
+      "CompareChange": {
+        "additionalProperties": false,
+        "properties": {
+          "after": {},
+          "before": {},
+          "path": {
+            "description": "Spec path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "type": "object"
+      },
+      "ComparePrice": {
+        "additionalProperties": false,
+        "properties": {
+          "after_micro_per_min": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "before_micro_per_min": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "before_micro_per_min",
+          "after_micro_per_min"
+        ],
+        "type": "object"
+      },
+      "CompareResult": {
+        "additionalProperties": false,
+        "properties": {
+          "from_version": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "instructions_diff": {
+            "$ref": "#/components/schemas/InstructionsDiff"
+          },
+          "numbers_affected": {
+            "items": {
+              "$ref": "#/components/schemas/NumberRef"
+            },
+            "type": "array"
+          },
+          "price": {
+            "$ref": "#/components/schemas/ComparePrice"
+          },
+          "sections": {
+            "items": {
+              "$ref": "#/components/schemas/CompareSection"
+            },
+            "type": "array"
+          },
+          "simulations": {
+            "$ref": "#/components/schemas/SimulationsSummary",
+            "description": "Reserved; null until simulations ship"
+          },
+          "to_version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "from_version",
+          "to_version",
+          "sections",
+          "instructions_diff",
+          "price",
+          "numbers_affected",
+          "simulations"
+        ],
+        "type": "object"
+      },
+      "CompareSection": {
+        "additionalProperties": false,
+        "properties": {
+          "changes": {
+            "items": {
+              "$ref": "#/components/schemas/CompareChange"
+            },
+            "type": "array"
+          },
+          "key": {
+            "enum": [
+              "basics",
+              "instructions",
+              "voice",
+              "model",
+              "knowledge",
+              "tools",
+              "call_handling",
+              "disclosures",
+              "guardrails",
+              "post_call",
+              "advanced"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "changes"
         ],
         "type": "object"
       },
@@ -1586,6 +3043,82 @@
           "rule",
           "reason",
           "rules_version"
+        ],
+        "type": "object"
+      },
+      "ComplianceTextView": {
+        "additionalProperties": false,
+        "properties": {
+          "active": {
+            "type": "boolean"
+          },
+          "body": {
+            "type": "string"
+          },
+          "counsel_reviewed": {
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "disclosure_inbound",
+              "disclosure_outbound",
+              "optout_instruction",
+              "recording_notice",
+              "optout_ack",
+              "voicemail_intro",
+              "voicemail_optout",
+              "screener_line",
+              "unavailable",
+              "goodbye",
+              "inbound_ai_attestation"
+            ],
+            "type": "string"
+          },
+          "language": {
+            "type": "string"
+          },
+          "statements": {
+            "description": "inbound_ai_attestation only: the statements the owner confirms one by one",
+            "items": {
+              "$ref": "#/components/schemas/AttestationStatement"
+            },
+            "type": "array"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "language",
+          "version",
+          "body",
+          "counsel_reviewed",
+          "active"
+        ],
+        "type": "object"
+      },
+      "Concurrency": {
+        "additionalProperties": false,
+        "properties": {
+          "in_use": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "limit": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "limit",
+          "in_use"
         ],
         "type": "object"
       },
@@ -1800,6 +3333,170 @@
         ],
         "type": "object"
       },
+      "Conversation": {
+        "additionalProperties": false,
+        "properties": {
+          "answered_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "call_id": {
+            "type": "string"
+          },
+          "duration_ms": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ConversationItem"
+            },
+            "type": "array"
+          },
+          "latency_target_ms": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "live": {
+            "type": "boolean"
+          },
+          "next_cursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "call_id",
+          "duration_ms",
+          "latency_target_ms",
+          "live",
+          "items",
+          "next_cursor"
+        ],
+        "type": "object"
+      },
+      "ConversationItem": {
+        "additionalProperties": false,
+        "properties": {
+          "at_ms": {
+            "description": "Offset from answered_at",
+            "format": "int64",
+            "type": "integer"
+          },
+          "barged_in": {
+            "type": "boolean"
+          },
+          "end_ms": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "kind": {
+            "enum": [
+              "turn",
+              "tool",
+              "transfer",
+              "marker"
+            ],
+            "type": "string"
+          },
+          "latency": {
+            "$ref": "#/components/schemas/TurnLatency"
+          },
+          "marker": {
+            "$ref": "#/components/schemas/ConversationMarker"
+          },
+          "speaker": {
+            "enum": [
+              "caller",
+              "agent",
+              "staff",
+              "system"
+            ],
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "tool": {
+            "$ref": "#/components/schemas/ConversationTool"
+          },
+          "transfer": {
+            "$ref": "#/components/schemas/CallTransfer"
+          },
+          "truncated": {
+            "description": "Realtime only: text over 4 KB was cut; fetch the conversation",
+            "type": "boolean"
+          },
+          "turn_index": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "kind",
+          "at_ms"
+        ],
+        "type": "object"
+      },
+      "ConversationMarker": {
+        "additionalProperties": false,
+        "properties": {
+          "digits_masked": {
+            "description": "Keypad digits are always masked",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "disclosure",
+              "recording_notice",
+              "dtmf",
+              "opt_out",
+              "voicemail"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "type": "object"
+      },
+      "ConversationTool": {
+        "additionalProperties": false,
+        "properties": {
+          "args": {
+            "additionalProperties": {},
+            "type": "object"
+          },
+          "duration_ms": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "result": {
+            "additionalProperties": {},
+            "type": "object"
+          },
+          "status": {
+            "enum": [
+              "ok",
+              "error",
+              "timeout"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "status",
+          "duration_ms"
+        ],
+        "type": "object"
+      },
       "CreateAssistantRequest": {
         "additionalProperties": false,
         "properties": {
@@ -1812,6 +3509,26 @@
         "required": [
           "name"
         ],
+        "type": "object"
+      },
+      "CreateBlockedCallerRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "call_id": {
+            "description": "Block the caller of this call",
+            "maxLength": 40,
+            "type": "string"
+          },
+          "e164": {
+            "description": "Set e164 or call_id",
+            "pattern": "^\\+[1-9][0-9]{6,14}$",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 200,
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "CreateCallRequest": {
@@ -2158,7 +3875,7 @@
           },
           "use_draft": {
             "default": false,
-            "description": "Use the latest version instead of the published one",
+            "description": "Use the open draft (else the latest version) instead of the published one",
             "type": "boolean"
           },
           "variables": {
@@ -2198,7 +3915,17 @@
                 "billing.top_up.succeeded",
                 "billing.auto_top_up.failed",
                 "number.provisioned",
-                "number.released"
+                "number.released",
+                "notification.call.summary",
+                "notification.campaign.completed",
+                "notification.campaign.paused",
+                "notification.billing.balance_low",
+                "notification.billing.top_up_succeeded",
+                "notification.billing.auto_top_up_failed",
+                "notification.spending_request.created",
+                "notification.number.provisioned",
+                "notification.number.released",
+                "notification.compliance.optout_alert"
               ],
               "type": "string"
             },
@@ -2312,6 +4039,93 @@
         ],
         "type": "object"
       },
+      "DiffLine": {
+        "additionalProperties": false,
+        "properties": {
+          "a": {
+            "description": "Line number in the older text",
+            "format": "int64",
+            "type": "integer"
+          },
+          "b": {
+            "description": "Line number in the newer text",
+            "format": "int64",
+            "type": "integer"
+          },
+          "op": {
+            "enum": [
+              "equal",
+              "add",
+              "del",
+              "elided"
+            ],
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "op",
+          "text"
+        ],
+        "type": "object"
+      },
+      "DisclosureSpec": {
+        "additionalProperties": false,
+        "properties": {
+          "inbound_ai": {
+            "description": "The inbound AI disclosure; publishing off needs an active owner attestation. Unset is on",
+            "enum": [
+              "on",
+              "off"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DraftWarning": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "enum": [
+              "unknown_variable",
+              "knowledge_not_ready",
+              "voice_language_mismatch",
+              "language_not_switchable"
+            ],
+            "type": "string"
+          },
+          "field": {
+            "description": "Spec path, for example system_prompt",
+            "type": "string"
+          },
+          "params": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "code",
+          "field"
+        ],
+        "type": "object"
+      },
+      "DuplicateAssistantRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "description": "Unset is the original name with a copy suffix",
+            "maxLength": 120,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "EndCallRequest": {
         "additionalProperties": false,
         "properties": {
@@ -2379,6 +4193,97 @@
         ],
         "type": "object"
       },
+      "GuardrailBuiltIn": {
+        "additionalProperties": false,
+        "properties": {
+          "category": {
+            "enum": [
+              "safety",
+              "privacy",
+              "honesty",
+              "compliance",
+              "scope"
+            ],
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "key",
+          "version",
+          "category",
+          "title",
+          "description"
+        ],
+        "type": "object"
+      },
+      "GuardrailCustomRule": {
+        "additionalProperties": false,
+        "properties": {
+          "text": {
+            "description": "A rule in plain words, applied on top of the built-in rules",
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "type": "object"
+      },
+      "GuardrailTopic": {
+        "additionalProperties": false,
+        "properties": {
+          "response": {
+            "description": "What the agent says instead; unset uses the built-in polite refusal",
+            "maxLength": 500,
+            "type": "string"
+          },
+          "topic": {
+            "description": "A topic the agent must not discuss",
+            "maxLength": 120,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "topic"
+        ],
+        "type": "object"
+      },
+      "GuardrailsSpec": {
+        "additionalProperties": false,
+        "properties": {
+          "blocked_topics": {
+            "items": {
+              "$ref": "#/components/schemas/GuardrailTopic"
+            },
+            "maxItems": 30,
+            "type": "array"
+          },
+          "custom_rules": {
+            "items": {
+              "$ref": "#/components/schemas/GuardrailCustomRule"
+            },
+            "maxItems": 20,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "ICEServer": {
         "additionalProperties": false,
         "properties": {
@@ -2421,6 +4326,59 @@
         "required": [
           "ice_servers",
           "expires_at"
+        ],
+        "type": "object"
+      },
+      "InboxSnippet": {
+        "additionalProperties": false,
+        "properties": {
+          "at_ms": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "speaker": {
+            "enum": [
+              "caller",
+              "agent",
+              "staff"
+            ],
+            "type": "string"
+          },
+          "text": {
+            "maxLength": 300,
+            "type": "string"
+          }
+        },
+        "required": [
+          "speaker",
+          "at_ms",
+          "text"
+        ],
+        "type": "object"
+      },
+      "InstructionsDiff": {
+        "additionalProperties": false,
+        "properties": {
+          "adds": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "dels": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "lines": {
+            "description": "Equal runs longer than 3 lines are elided",
+            "items": {
+              "$ref": "#/components/schemas/DiffLine"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "lines",
+          "adds",
+          "dels"
         ],
         "type": "object"
       },
@@ -2756,6 +4714,196 @@
         ],
         "type": "object"
       },
+      "ListComplianceTextView": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/ComplianceTextView"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "ListGuardrailBuiltIn": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/GuardrailBuiltIn"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "ListTurnPreset": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/TurnPreset"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "LiveCall": {
+        "additionalProperties": false,
+        "properties": {
+          "answered_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "assistant_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "assistant_version": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "call_id": {
+            "pattern": "^[a-z0-9]{2,8}_[0-9A-HJKMNP-TV-Z]{26}$",
+            "type": "string"
+          },
+          "caller_e164": {
+            "type": "string"
+          },
+          "caller_name": {
+            "type": "string"
+          },
+          "campaign_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "direction": {
+            "enum": [
+              "inbound",
+              "outbound",
+              "web_test"
+            ],
+            "type": "string"
+          },
+          "flags": {
+            "items": {
+              "$ref": "#/components/schemas/LiveCallFlag"
+            },
+            "type": "array"
+          },
+          "last_line": {
+            "$ref": "#/components/schemas/LiveCallLine"
+          },
+          "number_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "started_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "queued",
+              "dialing",
+              "ringing",
+              "in_progress"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "call_id",
+          "direction",
+          "status",
+          "started_at",
+          "assistant_id",
+          "assistant_version",
+          "flags"
+        ],
+        "type": "object"
+      },
+      "LiveCallFlag": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "enum": [
+              "human_requested",
+              "long_silence",
+              "tool_failing",
+              "opt_out",
+              "transfer_in_progress"
+            ],
+            "type": "string"
+          },
+          "since": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "since"
+        ],
+        "type": "object"
+      },
+      "LiveCallLine": {
+        "additionalProperties": false,
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "speaker": {
+            "enum": [
+              "caller",
+              "agent",
+              "staff"
+            ],
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "speaker",
+          "text",
+          "at"
+        ],
+        "type": "object"
+      },
+      "LiveCalls": {
+        "additionalProperties": false,
+        "properties": {
+          "concurrency": {
+            "$ref": "#/components/schemas/Concurrency"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/LiveCall"
+            },
+            "maxItems": 200,
+            "type": "array"
+          }
+        },
+        "required": [
+          "data",
+          "concurrency"
+        ],
+        "type": "object"
+      },
       "Number": {
         "additionalProperties": false,
         "properties": {
@@ -2778,6 +4926,9 @@
           },
           "id": {
             "format": "uuid",
+            "type": "string"
+          },
+          "label": {
             "type": "string"
           },
           "monthly_price_micro": {
@@ -2831,6 +4982,26 @@
         ],
         "type": "object"
       },
+      "NumberRef": {
+        "additionalProperties": false,
+        "properties": {
+          "e164": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "e164"
+        ],
+        "type": "object"
+      },
       "NumberRouting": {
         "additionalProperties": false,
         "properties": {
@@ -2840,8 +5011,13 @@
             "type": "string"
           },
           "forward_to_e164": {
-            "description": "Required when route_type is forward",
+            "description": "Required when route_type is forward. With route_type assistant it is the forward line callers reach while the agent is paused",
             "pattern": "^\\+[1-9][0-9]{6,14}$",
+            "type": "string"
+          },
+          "label": {
+            "description": "Name shown in the Line column; empty clears it",
+            "maxLength": 40,
             "type": "string"
           },
           "route_type": {
@@ -2868,8 +5044,13 @@
             "type": "string"
           },
           "forward_to_e164": {
-            "description": "Required when route_type is forward",
+            "description": "Required when route_type is forward. With route_type assistant it is the forward line callers reach while the agent is paused",
             "pattern": "^\\+[1-9][0-9]{6,14}$",
+            "type": "string"
+          },
+          "label": {
+            "description": "Name shown in the Line column; empty clears it",
+            "maxLength": 40,
             "type": "string"
           },
           "route_type": {
@@ -2892,6 +5073,29 @@
           "data": {
             "items": {
               "$ref": "#/components/schemas/Assistant"
+            },
+            "type": "array"
+          },
+          "next_cursor": {
+            "description": "Cursor for the next page; null on the last page",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "data",
+          "next_cursor"
+        ],
+        "type": "object"
+      },
+      "PageAssistantPublish": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/AssistantPublish"
             },
             "type": "array"
           },
@@ -2955,12 +5159,12 @@
         ],
         "type": "object"
       },
-      "PageCall": {
+      "PageBlockedCaller": {
         "additionalProperties": false,
         "properties": {
           "data": {
             "items": {
-              "$ref": "#/components/schemas/Call"
+              "$ref": "#/components/schemas/BlockedCaller"
             },
             "type": "array"
           },
@@ -3392,6 +5596,16 @@
         ],
         "type": "object"
       },
+      "PauseAssistantRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "maxLength": 200,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "PostCallSettings": {
         "additionalProperties": false,
         "properties": {
@@ -3422,6 +5636,15 @@
       "Problem": {
         "additionalProperties": true,
         "properties": {
+          "api_base": {
+            "description": "API base URL of the workspace's home region (workspace.other_region)",
+            "type": "string"
+          },
+          "attempts_left": {
+            "description": "Code attempts left in this sign-in step",
+            "format": "int64",
+            "type": "integer"
+          },
           "code": {
             "description": "Stable machine-readable error code; compliance denials carry the dial.* rule id",
             "type": "string"
@@ -3436,6 +5659,21 @@
             "type": "array"
           },
           "instance": {
+            "type": "string"
+          },
+          "reauth_methods": {
+            "description": "Ways to re-authenticate, in preference order (auth.reauth_required)",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "request_kind": {
+            "description": "Spending request kind to file instead (spending.approval_required)",
+            "enum": [
+              "number_purchase",
+              "campaign_launch"
+            ],
             "type": "string"
           },
           "retry_at": {
@@ -3460,6 +5698,32 @@
           "title",
           "status",
           "code"
+        ],
+        "type": "object"
+      },
+      "PublishAssistantVersionRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "note": {
+            "maxLength": 200,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PublishResult": {
+        "additionalProperties": false,
+        "properties": {
+          "assistant": {
+            "$ref": "#/components/schemas/Assistant"
+          },
+          "publish": {
+            "$ref": "#/components/schemas/AssistantPublish"
+          }
+        },
+        "required": [
+          "assistant",
+          "publish"
         ],
         "type": "object"
       },
@@ -3536,6 +5800,22 @@
             "format": "date-time",
             "type": "string"
           },
+          "deleted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "deleted_by_name": {
+            "type": "string"
+          },
+          "deleted_reason": {
+            "enum": [
+              "retention",
+              "user",
+              "data_request",
+              "key_destroyed"
+            ],
+            "type": "string"
+          },
           "dropped": {
             "format": "int64",
             "type": "integer"
@@ -3589,6 +5869,29 @@
           "state",
           "retention_until",
           "created_at"
+        ],
+        "type": "object"
+      },
+      "RecordingPeaks": {
+        "additionalProperties": false,
+        "properties": {
+          "duration_ms": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "points": {
+            "description": "Normalised 0 to 1",
+            "items": {
+              "format": "double",
+              "type": "number"
+            },
+            "maxItems": 1800,
+            "type": "array"
+          }
+        },
+        "required": [
+          "duration_ms",
+          "points"
         ],
         "type": "object"
       },
@@ -3669,6 +5972,61 @@
         ],
         "type": "object"
       },
+      "SameCallerCalls": {
+        "additionalProperties": false,
+        "properties": {
+          "caller_e164": {
+            "type": "string"
+          },
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/Call"
+            },
+            "maxItems": 10,
+            "type": "array"
+          },
+          "total": {
+            "description": "All calls from this caller; the calls list filtered by caller_e164 shows them",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "data",
+          "total"
+        ],
+        "type": "object"
+      },
+      "SaveAssistantDraftRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "spec": {
+            "$ref": "#/components/schemas/AssistantVersionSpec"
+          }
+        },
+        "required": [
+          "spec"
+        ],
+        "type": "object"
+      },
+      "SimulationsSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "passed": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "passed",
+          "total"
+        ],
+        "type": "object"
+      },
       "TestWebhookRequest": {
         "additionalProperties": false,
         "properties": {
@@ -3690,7 +6048,17 @@
               "billing.top_up.succeeded",
               "billing.auto_top_up.failed",
               "number.provisioned",
-              "number.released"
+              "number.released",
+              "notification.call.summary",
+              "notification.campaign.completed",
+              "notification.campaign.paused",
+              "notification.billing.balance_low",
+              "notification.billing.top_up_succeeded",
+              "notification.billing.auto_top_up_failed",
+              "notification.spending_request.created",
+              "notification.number.provisioned",
+              "notification.number.released",
+              "notification.compliance.optout_alert"
             ],
             "type": "string"
           }
@@ -3745,6 +6113,82 @@
         "required": [
           "name",
           "mode"
+        ],
+        "type": "object"
+      },
+      "TurnLatency": {
+        "additionalProperties": false,
+        "properties": {
+          "eot_ms": {
+            "description": "Caller finished",
+            "format": "int64",
+            "type": "integer"
+          },
+          "llm_ms": {
+            "description": "Thought",
+            "format": "int64",
+            "type": "integer"
+          },
+          "over_target": {
+            "type": "boolean"
+          },
+          "stt_ms": {
+            "description": "Heard",
+            "format": "int64",
+            "type": "integer"
+          },
+          "total_ms": {
+            "description": "Caller finished to agent heard",
+            "format": "int64",
+            "type": "integer"
+          },
+          "tts_ms": {
+            "description": "Voice",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total_ms",
+          "eot_ms",
+          "stt_ms",
+          "llm_ms",
+          "tts_ms",
+          "over_target"
+        ],
+        "type": "object"
+      },
+      "TurnPreset": {
+        "additionalProperties": false,
+        "properties": {
+          "interruption_profile": {
+            "$ref": "#/components/schemas/InterruptionProfile"
+          },
+          "key": {
+            "enum": [
+              "patient",
+              "balanced",
+              "snappy"
+            ],
+            "type": "string"
+          },
+          "position": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "recommended": {
+            "type": "boolean"
+          },
+          "turn_profile": {
+            "$ref": "#/components/schemas/TurnProfile"
+          }
+        },
+        "required": [
+          "key",
+          "position",
+          "recommended",
+          "turn_profile",
+          "interruption_profile"
         ],
         "type": "object"
       },
@@ -3808,10 +6252,38 @@
       "UpdateAssistantRequest": {
         "additionalProperties": false,
         "properties": {
+          "description": {
+            "maxLength": 200,
+            "type": "string"
+          },
+          "latency_target_ms": {
+            "format": "int64",
+            "maximum": 3000,
+            "minimum": 300,
+            "type": "integer"
+          },
           "name": {
             "maxLength": 120,
             "minLength": 1,
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UpdateCallRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "flagged": {
+            "type": "boolean"
+          },
+          "tags": {
+            "description": "Each 1 to 24 characters, lower case; replaces the call's tags",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 10,
+            "type": "array",
+            "uniqueItems": true
           }
         },
         "type": "object"
@@ -3969,7 +6441,17 @@
                 "billing.top_up.succeeded",
                 "billing.auto_top_up.failed",
                 "number.provisioned",
-                "number.released"
+                "number.released",
+                "notification.call.summary",
+                "notification.campaign.completed",
+                "notification.campaign.paused",
+                "notification.billing.balance_low",
+                "notification.billing.top_up_succeeded",
+                "notification.billing.auto_top_up_failed",
+                "notification.spending_request.created",
+                "notification.number.provisioned",
+                "notification.number.released",
+                "notification.compliance.optout_alert"
               ],
               "type": "string"
             },
@@ -3999,13 +6481,34 @@
             "pattern": "^[a-z0-9]{2,8}_[0-9A-HJKMNP-TV-Z]{26}$",
             "type": "string"
           },
+          "free_under_ms": {
+            "description": "Calls shorter than this are not billed",
+            "format": "int64",
+            "type": "integer"
+          },
           "max_duration_s": {
             "description": "The engine ends the call after this many seconds",
             "format": "int64",
             "type": "integer"
           },
+          "rate_micro_per_min": {
+            "description": "Applied per-minute rate including premiums",
+            "format": "int64",
+            "type": "integer"
+          },
+          "rounding": {
+            "enum": [
+              "started_minute"
+            ],
+            "type": "string"
+          },
           "sdp_answer": {
             "type": "string"
+          },
+          "version": {
+            "description": "Assistant version the call runs",
+            "format": "int64",
+            "type": "integer"
           }
         },
         "required": [
@@ -4216,7 +6719,7 @@
       "session": {
         "description": "Dashboard session cookie",
         "in": "cookie",
-        "name": "lx_session",
+        "name": "__Host-lx_session",
         "type": "apiKey"
       }
     }
@@ -4258,6 +6761,20 @@
             "schema": {
               "enum": [
                 "active",
+                "archived"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "enum": [
+                "live",
+                "paused",
+                "draft",
                 "archived"
               ],
               "type": "string"
@@ -4309,7 +6826,7 @@
           "assistants"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "assistants:read",
         "x-larynth-sdk": true
       },
@@ -4373,7 +6890,7 @@
           "assistants"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
         "x-larynth-scope": "assistants:write",
         "x-larynth-sdk": true
       }
@@ -4525,7 +7042,8 @@
           "assistants"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
+        "x-larynth-reauth": true,
         "x-larynth-scope": "assistants:write",
         "x-larynth-sdk": true
       },
@@ -4590,7 +7108,7 @@
           "assistants"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "assistants:read",
         "x-larynth-sdk": true
       },
@@ -4663,12 +7181,649 @@
             ]
           }
         ],
-        "summary": "Rename an assistant",
+        "summary": "Rename an assistant or change its job line and reply-time target",
         "tags": [
           "assistants"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
+        "x-larynth-scope": "assistants:write",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/assistants/{id}/draft": {
+      "delete": {
+        "operationId": "discardAssistantDraft",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "If-Match",
+            "required": true,
+            "schema": {
+              "maxLength": 64,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Problem428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "assistants:write"
+            ]
+          }
+        ],
+        "summary": "Discard the open draft; it is kept for audit and never shown again",
+        "tags": [
+          "assistants"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "member",
+        "x-larynth-scope": "assistants:write",
+        "x-larynth-sdk": true
+      },
+      "get": {
+        "operationId": "getAssistantDraft",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistantDraft"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "ETag": {
+                "schema": {
+                  "description": "Quoted draft revision; send it back as If-Match",
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "assistants:read"
+            ]
+          }
+        ],
+        "summary": "Get the open draft with its revision as ETag",
+        "tags": [
+          "assistants"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "assistants:read",
+        "x-larynth-sdk": true
+      },
+      "put": {
+        "operationId": "saveAssistantDraft",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Required once a draft exists",
+            "in": "header",
+            "name": "If-Match",
+            "schema": {
+              "description": "Required once a draft exists",
+              "maxLength": 64,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveAssistantDraftRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistantDraft"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "ETag": {
+                "schema": {
+                  "description": "Quoted draft revision; send it back as If-Match",
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "428": {
+            "$ref": "#/components/responses/Problem428"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "assistants:write"
+            ]
+          }
+        ],
+        "summary": "Create or autosave the open draft",
+        "tags": [
+          "assistants"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "member",
+        "x-larynth-scope": "assistants:write",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/assistants/{id}/duplicate": {
+      "post": {
+        "operationId": "duplicateAssistant",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DuplicateAssistantRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Assistant"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "assistants:write"
+            ]
+          }
+        ],
+        "summary": "Copy the draft, else the live spec, into a new assistant with only a draft",
+        "tags": [
+          "assistants"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "member",
+        "x-larynth-scope": "assistants:write",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/assistants/{id}/pause": {
+      "post": {
+        "operationId": "pauseAssistant",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PauseAssistantRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Assistant"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "assistants:write"
+            ]
+          }
+        ],
+        "summary": "Stop answering new calls; calls in progress finish",
+        "tags": [
+          "assistants"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "member",
+        "x-larynth-scope": "assistants:write",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/assistants/{id}/publishes": {
+      "get": {
+        "operationId": "listAssistantPublishes",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Page size",
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 50,
+              "description": "Page size",
+              "format": "int64",
+              "maximum": 200,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Opaque cursor from next_cursor of the previous page",
+            "explode": false,
+            "in": "query",
+            "name": "after",
+            "schema": {
+              "description": "Opaque cursor from next_cursor of the previous page",
+              "maxLength": 512,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageAssistantPublish"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "assistants:read"
+            ]
+          }
+        ],
+        "summary": "Publish and rollback history, newest first",
+        "tags": [
+          "assistants"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "assistants:read",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/assistants/{id}/restore": {
+      "post": {
+        "operationId": "restoreAssistant",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Assistant"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "assistants:write"
+            ]
+          }
+        ],
+        "summary": "Undo an archive; numbers are not reattached",
+        "tags": [
+          "assistants"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "member",
+        "x-larynth-scope": "assistants:write",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/assistants/{id}/resume": {
+      "post": {
+        "operationId": "resumeAssistant",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Assistant"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "assistants:write"
+            ]
+          }
+        ],
+        "summary": "Answer calls again; paused campaigns stay paused",
+        "tags": [
+          "assistants"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "member",
         "x-larynth-scope": "assistants:write",
         "x-larynth-sdk": true
       }
@@ -4760,7 +7915,7 @@
           "assistants"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "assistants:read",
         "x-larynth-sdk": true
       },
@@ -4838,7 +7993,7 @@
           "assistants"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
         "x-larynth-scope": "assistants:write",
         "x-larynth-sdk": true
       }
@@ -4915,7 +8070,96 @@
           "assistants"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "assistants:read",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/assistants/{id}/versions/{v}/compare": {
+      "get": {
+        "operationId": "compareAssistantVersions",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "v",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "published, or a version number",
+            "explode": false,
+            "in": "query",
+            "name": "against",
+            "schema": {
+              "default": "published",
+              "description": "published, or a version number",
+              "maxLength": 12,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompareResult"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "assistants:read"
+            ]
+          }
+        ],
+        "summary": "Field and instruction differences between two versions, with price and numbers affected",
+        "tags": [
+          "assistants"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "assistants:read",
         "x-larynth-sdk": true
       }
@@ -4942,14 +8186,33 @@
               "minimum": 1,
               "type": "integer"
             }
+          },
+          {
+            "description": "Draft revision from the draft ETag; required when v is the open draft",
+            "in": "header",
+            "name": "If-Match",
+            "schema": {
+              "description": "Draft revision from the draft ETag; required when v is the open draft",
+              "maxLength": 64,
+              "type": "string"
+            }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishAssistantVersionRequest"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AssistantVersion"
+                  "$ref": "#/components/schemas/PublishResult"
                 }
               }
             },
@@ -4973,6 +8236,9 @@
           "422": {
             "$ref": "#/components/responses/Problem422"
           },
+          "428": {
+            "$ref": "#/components/responses/Problem428"
+          },
           "429": {
             "$ref": "#/components/responses/Problem429"
           },
@@ -4990,12 +8256,12 @@
             ]
           }
         ],
-        "summary": "Publish a version; it becomes immutable",
+        "summary": "Publish a version; it becomes immutable. Publishing an older version is a rollback",
         "tags": [
           "assistants"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
         "x-larynth-scope": "assistants:write",
         "x-larynth-sdk": true
       }
@@ -5048,7 +8314,7 @@
           "billing"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "owner",
+        "x-larynth-min-role": "admin",
         "x-larynth-scope": "billing:read",
         "x-larynth-sdk": true
       }
@@ -5101,7 +8367,7 @@
           "billing"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "billing:read",
         "x-larynth-sdk": true
       }
@@ -5238,7 +8504,7 @@
           "billing"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "owner",
+        "x-larynth-min-role": "admin",
         "x-larynth-scope": "billing:read",
         "x-larynth-sdk": true
       }
@@ -5291,8 +8557,224 @@
           "billing"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "billing:read",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/blocked-callers": {
+      "get": {
+        "operationId": "listBlockedCallers",
+        "parameters": [
+          {
+            "description": "Page size",
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 50,
+              "description": "Page size",
+              "format": "int64",
+              "maximum": 200,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Opaque cursor from next_cursor of the previous page",
+            "explode": false,
+            "in": "query",
+            "name": "after",
+            "schema": {
+              "description": "Opaque cursor from next_cursor of the previous page",
+              "maxLength": 512,
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "e164",
+            "schema": {
+              "pattern": "^\\+[1-9][0-9]{6,14}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageBlockedCaller"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "calls:read"
+            ]
+          }
+        ],
+        "summary": "Numbers this workspace does not answer; their calls are not billed",
+        "tags": [
+          "calls"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "calls:read",
+        "x-larynth-sdk": true
+      },
+      "post": {
+        "operationId": "createBlockedCaller",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBlockedCallerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlockedCaller"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "calls:write"
+            ]
+          }
+        ],
+        "summary": "Block a caller: their calls are dropped before answering and not billed",
+        "tags": [
+          "calls"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "member",
+        "x-larynth-scope": "calls:write",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/blocked-callers/{id}": {
+      "delete": {
+        "operationId": "deleteBlockedCaller",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "calls:write"
+            ]
+          }
+        ],
+        "summary": "Unblock a caller",
+        "tags": [
+          "calls"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "member",
+        "x-larynth-scope": "calls:write",
         "x-larynth-sdk": true
       }
     },
@@ -5322,6 +8804,36 @@
             "schema": {
               "description": "Opaque cursor from next_cursor of the previous page",
               "maxLength": 512,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Opaque cursor from prev_cursor, or a call's cursor, for the newer page",
+            "explode": false,
+            "in": "query",
+            "name": "before",
+            "schema": {
+              "description": "Opaque cursor from prev_cursor, or a call's cursor, for the newer page",
+              "maxLength": 512,
+              "type": "string"
+            }
+          },
+          {
+            "description": "duration and price need a window of at most 90 days",
+            "explode": false,
+            "in": "query",
+            "name": "order",
+            "schema": {
+              "default": "-started",
+              "description": "duration and price need a window of at most 90 days",
+              "enum": [
+                "started",
+                "-started",
+                "duration",
+                "-duration",
+                "price",
+                "-price"
+              ],
               "type": "string"
             }
           },
@@ -5384,6 +8896,134 @@
               "format": "date-time",
               "type": "string"
             }
+          },
+          {
+            "description": "Repeat the key for several",
+            "explode": true,
+            "in": "query",
+            "name": "assistant_id",
+            "schema": {
+              "description": "Repeat the key for several",
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 50,
+              "type": "array"
+            }
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "number_id",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 50,
+              "type": "array"
+            }
+          },
+          {
+            "description": "The Web test line",
+            "explode": false,
+            "in": "query",
+            "name": "web_tests",
+            "schema": {
+              "description": "The Web test line",
+              "enum": [
+                "include",
+                "only",
+                "exclude"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "outcome",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 13,
+              "type": "array"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "billed",
+            "schema": {
+              "enum": [
+                "billed",
+                "not_billed"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "contact_id",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Calls from or to this number",
+            "explode": false,
+            "in": "query",
+            "name": "caller_e164",
+            "schema": {
+              "description": "Calls from or to this number",
+              "pattern": "^\\+[1-9][0-9]{6,14}$",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Caller name, number digits (3 or more), call id prefix and summary words",
+            "explode": false,
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "description": "Caller name, number digits (3 or more), call id prefix and summary words",
+              "maxLength": 200,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only flagged calls",
+            "explode": false,
+            "in": "query",
+            "name": "flagged",
+            "schema": {
+              "description": "Only flagged calls",
+              "type": "boolean"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "tag",
+            "schema": {
+              "maxLength": 24,
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "sentiment",
+            "schema": {
+              "enum": [
+                "positive",
+                "neutral",
+                "negative"
+              ],
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -5391,7 +9031,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PageCall"
+                  "$ref": "#/components/schemas/CallPage"
                 }
               }
             },
@@ -5426,12 +9066,12 @@
             ]
           }
         ],
-        "summary": "List calls, newest first",
+        "summary": "List calls with filters; newest first unless order says otherwise",
         "tags": [
           "calls"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "calls:read",
         "x-larynth-sdk": true
       },
@@ -5521,6 +9161,264 @@
         "x-larynth-sdk": true
       }
     },
+    "/v1/calls/summary": {
+      "get": {
+        "operationId": "getCallsSummary",
+        "parameters": [
+          {
+            "explode": false,
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "enum": [
+                "queued",
+                "dialing",
+                "ringing",
+                "in_progress",
+                "completed",
+                "no_answer",
+                "busy",
+                "failed",
+                "canceled",
+                "rejected"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "direction",
+            "schema": {
+              "enum": [
+                "inbound",
+                "outbound",
+                "web_test"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "campaign_id",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "since",
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "until",
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "group_by",
+            "schema": {
+              "default": "none",
+              "enum": [
+                "none",
+                "assistant",
+                "outcome",
+                "day"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Repeat the key for several",
+            "explode": true,
+            "in": "query",
+            "name": "assistant_id",
+            "schema": {
+              "description": "Repeat the key for several",
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 50,
+              "type": "array"
+            }
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "number_id",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 50,
+              "type": "array"
+            }
+          },
+          {
+            "description": "The Web test line",
+            "explode": false,
+            "in": "query",
+            "name": "web_tests",
+            "schema": {
+              "description": "The Web test line",
+              "enum": [
+                "include",
+                "only",
+                "exclude"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "explode": true,
+            "in": "query",
+            "name": "outcome",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 13,
+              "type": "array"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "billed",
+            "schema": {
+              "enum": [
+                "billed",
+                "not_billed"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "contact_id",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Calls from or to this number",
+            "explode": false,
+            "in": "query",
+            "name": "caller_e164",
+            "schema": {
+              "description": "Calls from or to this number",
+              "pattern": "^\\+[1-9][0-9]{6,14}$",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Caller name, number digits (3 or more), call id prefix and summary words",
+            "explode": false,
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "description": "Caller name, number digits (3 or more), call id prefix and summary words",
+              "maxLength": 200,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only flagged calls",
+            "explode": false,
+            "in": "query",
+            "name": "flagged",
+            "schema": {
+              "description": "Only flagged calls",
+              "type": "boolean"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "tag",
+            "schema": {
+              "maxLength": 24,
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "sentiment",
+            "schema": {
+              "enum": [
+                "positive",
+                "neutral",
+                "negative"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CallsSummary"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "calls:read"
+            ]
+          }
+        ],
+        "summary": "Totals for a call filter: counts, billed time, spend and not-billed split",
+        "tags": [
+          "calls"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "calls:read",
+        "x-larynth-sdk": true
+      }
+    },
     "/v1/calls/{call_id}": {
       "get": {
         "operationId": "getCall",
@@ -5585,8 +9483,88 @@
           "calls"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "calls:read",
+        "x-larynth-sdk": true
+      },
+      "patch": {
+        "operationId": "updateCall",
+        "parameters": [
+          {
+            "description": "<cell>_<ULID>",
+            "in": "path",
+            "name": "call_id",
+            "required": true,
+            "schema": {
+              "description": "<cell>_<ULID>",
+              "pattern": "^[a-z0-9]{2,8}_[0-9A-HJKMNP-TV-Z]{26}$",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCallRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Call"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "calls:write"
+            ]
+          }
+        ],
+        "summary": "Flag a call or set its tags",
+        "tags": [
+          "calls"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "member",
+        "x-larynth-scope": "calls:write",
         "x-larynth-sdk": true
       }
     },
@@ -5654,7 +9632,97 @@
           "calls"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "calls:read",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/calls/{call_id}/conversation": {
+      "get": {
+        "operationId": "getCallConversation",
+        "parameters": [
+          {
+            "description": "<cell>_<ULID>",
+            "in": "path",
+            "name": "call_id",
+            "required": true,
+            "schema": {
+              "description": "<cell>_<ULID>",
+              "pattern": "^[a-z0-9]{2,8}_[0-9A-HJKMNP-TV-Z]{26}$",
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 500,
+              "format": "int64",
+              "maximum": 2000,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "after",
+            "schema": {
+              "maxLength": 512,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Conversation"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "calls:read"
+            ]
+          }
+        ],
+        "summary": "Turns, tools, transfers and markers with offsets and reply latency",
+        "tags": [
+          "calls"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "calls:read",
         "x-larynth-sdk": true
       }
@@ -5829,7 +9897,7 @@
           "calls"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "calls:read",
         "x-larynth-sdk": true
       }
@@ -5898,8 +9966,89 @@
           "recordings"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "recordings:read",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/calls/{call_id}/same-caller": {
+      "get": {
+        "operationId": "listSameCallerCalls",
+        "parameters": [
+          {
+            "description": "<cell>_<ULID>",
+            "in": "path",
+            "name": "call_id",
+            "required": true,
+            "schema": {
+              "description": "<cell>_<ULID>",
+              "pattern": "^[a-z0-9]{2,8}_[0-9A-HJKMNP-TV-Z]{26}$",
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 10,
+              "format": "int64",
+              "maximum": 10,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SameCallerCalls"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "calls:read"
+            ]
+          }
+        ],
+        "summary": "Earlier calls from the same caller, newest first",
+        "tags": [
+          "calls"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "calls:read",
         "x-larynth-sdk": true
       }
     },
@@ -5992,7 +10141,7 @@
           "calls"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "calls:read",
         "x-larynth-sdk": true
       }
@@ -6087,7 +10236,7 @@
           "campaigns"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "campaigns:read",
         "x-larynth-sdk": true
       },
@@ -6151,7 +10300,7 @@
           "campaigns"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
         "x-larynth-scope": "campaigns:write",
         "x-larynth-sdk": true
       }
@@ -6218,7 +10367,7 @@
           "campaigns"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "campaigns:read",
         "x-larynth-sdk": true
       },
@@ -6296,7 +10445,7 @@
           "campaigns"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
         "x-larynth-scope": "campaigns:write",
         "x-larynth-sdk": true
       }
@@ -6477,7 +10626,7 @@
           "campaigns"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "campaigns:read",
         "x-larynth-sdk": true
       },
@@ -6555,7 +10704,7 @@
           "campaigns"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
         "x-larynth-scope": "campaigns:write",
         "x-larynth-sdk": true
       }
@@ -6625,7 +10774,7 @@
           "campaigns"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
         "x-larynth-scope": "campaigns:write",
         "x-larynth-sdk": true
       }
@@ -6792,7 +10941,8 @@
         "x-larynth-idempotency": "required",
         "x-larynth-min-role": "admin",
         "x-larynth-scope": "campaigns:write",
-        "x-larynth-sdk": true
+        "x-larynth-sdk": true,
+        "x-larynth-spend": "campaign_launch"
       }
     },
     "/v1/campaigns/{id}/stats": {
@@ -6857,8 +11007,72 @@
           "campaigns"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "campaigns:read",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/catalog/guardrails": {
+      "get": {
+        "operationId": "listGuardrailRules",
+        "parameters": [
+          {
+            "explode": false,
+            "in": "query",
+            "name": "language",
+            "schema": {
+              "pattern": "^[a-z]{2,3}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListGuardrailBuiltIn"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "assistants:read"
+            ]
+          }
+        ],
+        "summary": "Built-in guardrail rules every agent follows; they cannot be switched off",
+        "tags": [
+          "catalog"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "assistants:read",
         "x-larynth-sdk": true
       }
     },
@@ -6961,7 +11175,60 @@
           "catalog"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "assistants:read",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/catalog/turn-presets": {
+      "get": {
+        "operationId": "listTurnPresets",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListTurnPreset"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "assistants:read"
+            ]
+          }
+        ],
+        "summary": "Turn-taking presets (patient, balanced, snappy) with their advanced values",
+        "tags": [
+          "catalog"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "assistants:read",
         "x-larynth-sdk": true
       }
@@ -7059,7 +11326,7 @@
           "catalog"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "assistants:read",
         "x-larynth-sdk": true
       }
@@ -7148,7 +11415,7 @@
           "compliance"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "compliance:read",
         "x-larynth-sdk": true
       },
@@ -7349,7 +11616,7 @@
           "compliance"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "compliance:read",
         "x-larynth-sdk": true
       }
@@ -7446,7 +11713,7 @@
           "compliance"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "compliance:read",
         "x-larynth-sdk": true
       },
@@ -7581,6 +11848,91 @@
         "x-larynth-sdk": true
       }
     },
+    "/v1/compliance/texts": {
+      "get": {
+        "operationId": "listComplianceTexts",
+        "parameters": [
+          {
+            "explode": false,
+            "in": "query",
+            "name": "kind",
+            "schema": {
+              "enum": [
+                "disclosure_inbound",
+                "disclosure_outbound",
+                "optout_instruction",
+                "recording_notice",
+                "optout_ack",
+                "voicemail_intro",
+                "voicemail_optout",
+                "screener_line",
+                "unavailable",
+                "goodbye",
+                "inbound_ai_attestation"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "language",
+            "schema": {
+              "pattern": "^[a-z]{2,3}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListComplianceTextView"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "compliance:read"
+            ]
+          }
+        ],
+        "summary": "Active compliance texts the platform plays or asks to attest",
+        "tags": [
+          "compliance"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "compliance:read",
+        "x-larynth-sdk": true
+      }
+    },
     "/v1/contacts": {
       "get": {
         "operationId": "listContacts",
@@ -7665,7 +12017,7 @@
           "contacts"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "contacts:read",
         "x-larynth-sdk": true
       },
@@ -7729,7 +12081,7 @@
           "contacts"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
         "x-larynth-scope": "contacts:write",
         "x-larynth-sdk": true
       }
@@ -7866,7 +12218,7 @@
         ],
         "x-larynth-auth": "session_or_api_key",
         "x-larynth-idempotency": "required",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
         "x-larynth-scope": "contacts:write",
         "x-larynth-sdk": true
       }
@@ -7933,7 +12285,7 @@
           "contacts"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "contacts:read",
         "x-larynth-sdk": true
       }
@@ -7997,6 +12349,7 @@
         ],
         "x-larynth-auth": "session_or_api_key",
         "x-larynth-min-role": "admin",
+        "x-larynth-reauth": true,
         "x-larynth-scope": "contacts:write",
         "x-larynth-sdk": true
       },
@@ -8061,7 +12414,7 @@
           "contacts"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "contacts:read",
         "x-larynth-sdk": true
       },
@@ -8139,7 +12492,7 @@
           "contacts"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
         "x-larynth-scope": "contacts:write",
         "x-larynth-sdk": true
       }
@@ -8219,7 +12572,7 @@
           "knowledge"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "knowledge:read",
         "x-larynth-sdk": true
       },
@@ -8283,7 +12636,7 @@
           "knowledge"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
         "x-larynth-scope": "knowledge:write",
         "x-larynth-sdk": true
       }
@@ -8346,7 +12699,8 @@
           "knowledge"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
+        "x-larynth-reauth": true,
         "x-larynth-scope": "knowledge:write",
         "x-larynth-sdk": true
       },
@@ -8411,7 +12765,7 @@
           "knowledge"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "knowledge:read",
         "x-larynth-sdk": true
       },
@@ -8489,7 +12843,7 @@
           "knowledge"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
         "x-larynth-scope": "knowledge:write",
         "x-larynth-sdk": true
       }
@@ -8579,7 +12933,7 @@
           "knowledge"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "knowledge:read",
         "x-larynth-sdk": true
       }
@@ -8671,7 +13025,7 @@
           "knowledge"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "knowledge:read",
         "x-larynth-sdk": true
       }
@@ -8775,7 +13129,7 @@
           "knowledge"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
         "x-larynth-scope": "knowledge:write",
         "x-larynth-sdk": true
       }
@@ -8855,7 +13209,7 @@
           "knowledge"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
         "x-larynth-scope": "knowledge:write",
         "x-larynth-sdk": true
       }
@@ -8927,7 +13281,7 @@
           "knowledge"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
         "x-larynth-scope": "knowledge:write",
         "x-larynth-sdk": true
       },
@@ -9001,7 +13355,7 @@
           "knowledge"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "knowledge:read",
         "x-larynth-sdk": true
       }
@@ -9080,8 +13434,61 @@
           "knowledge"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
         "x-larynth-scope": "knowledge:write",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/live-calls": {
+      "get": {
+        "operationId": "listLiveCalls",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LiveCalls"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "calls:read"
+            ]
+          }
+        ],
+        "summary": "Calls in progress with their last line and flags",
+        "tags": [
+          "calls"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "member",
+        "x-larynth-scope": "calls:read",
         "x-larynth-sdk": true
       }
     },
@@ -9176,7 +13583,7 @@
           "numbers"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "numbers:read",
         "x-larynth-sdk": true
       },
@@ -9242,7 +13649,8 @@
         "x-larynth-auth": "session_or_api_key",
         "x-larynth-min-role": "admin",
         "x-larynth-scope": "numbers:write",
-        "x-larynth-sdk": true
+        "x-larynth-sdk": true,
+        "x-larynth-spend": "number_purchase"
       }
     },
     "/v1/numbers/available": {
@@ -9326,7 +13734,7 @@
           "numbers"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "numbers:read",
         "x-larynth-sdk": true
       }
@@ -9461,7 +13869,7 @@
           "numbers"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "member",
+        "x-larynth-min-role": "viewer",
         "x-larynth-scope": "numbers:read",
         "x-larynth-sdk": true
       },
@@ -9556,6 +13964,16 @@
               "format": "uuid",
               "type": "string"
             }
+          },
+          {
+            "description": "bytes=<start>-[<end>]; recordings over 60 minutes answer 200 only",
+            "in": "header",
+            "name": "Range",
+            "schema": {
+              "description": "bytes=<start>-[<end>]; recordings over 60 minutes answer 200 only",
+              "maxLength": 100,
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -9571,6 +13989,18 @@
             },
             "description": "Decrypted recording"
           },
+          "206": {
+            "content": {
+              "audio/wav": {
+                "schema": {
+                  "contentMediaType": "application/octet-stream",
+                  "format": "binary",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Requested byte range of the decrypted recording"
+          },
           "400": {
             "$ref": "#/components/responses/Problem400"
           },
@@ -9582,6 +14012,15 @@
           },
           "404": {
             "$ref": "#/components/responses/Problem404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Problem410"
+          },
+          "416": {
+            "$ref": "#/components/responses/Problem416"
           },
           "422": {
             "$ref": "#/components/responses/Problem422"
@@ -9603,12 +14042,82 @@
             ]
           }
         ],
-        "summary": "Stream the decrypted WAV; audited",
+        "summary": "Stream the decrypted WAV, with byte ranges; each playback is logged",
         "tags": [
           "recordings"
         ],
         "x-larynth-auth": "session_or_api_key",
-        "x-larynth-min-role": "admin",
+        "x-larynth-min-role": "member",
+        "x-larynth-scope": "recordings:read",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/recordings/{id}/peaks": {
+      "get": {
+        "operationId": "getRecordingPeaks",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordingPeaks"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "410": {
+            "$ref": "#/components/responses/Problem410"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "recordings:read"
+            ]
+          }
+        ],
+        "summary": "Waveform peaks of a recording",
+        "tags": [
+          "recordings"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "member",
         "x-larynth-scope": "recordings:read",
         "x-larynth-sdk": true
       }
@@ -10291,8 +14800,18 @@
       "x-larynth-sdk": true
     },
     {
-      "description": "Audit log. Dashboard session only.",
+      "description": "Activity log and its exports. Dashboard session only.",
       "name": "audit",
+      "x-larynth-sdk": true
+    },
+    {
+      "description": "Notification preferences, Slack and Telegram channels, browser push. Dashboard session only.",
+      "name": "notifications",
+      "x-larynth-sdk": true
+    },
+    {
+      "description": "Export and deletion requests for a workspace or account. Dashboard session only.",
+      "name": "data-rights",
       "x-larynth-sdk": true
     },
     {
@@ -10359,9 +14878,95 @@
       "description": "Platform operator endpoints. Excluded from SDKs.",
       "name": "admin",
       "x-larynth-sdk": false
+    },
+    {
+      "description": "Workspaces of the signed-in user. Dashboard session only.",
+      "name": "workspaces",
+      "x-larynth-sdk": true
+    },
+    {
+      "description": "Spending requests from Members to Owners and Admins. Dashboard session only.",
+      "name": "spending",
+      "x-larynth-sdk": true
+    },
+    {
+      "description": "Home brief and setup checklist. Dashboard session only.",
+      "name": "home",
+      "x-larynth-sdk": true
+    },
+    {
+      "description": "Shared action inbox of a workspace. Dashboard session only.",
+      "name": "inbox",
+      "x-larynth-sdk": true
     }
   ],
   "x-larynth-error-codes": [
+    {
+      "code": "account.sole_owner",
+      "status": 409,
+      "type": "https://larynth.com/problems/account.sole_owner",
+      "title": "Transfer ownership before closing this account"
+    },
+    {
+      "code": "agent_setup.expired",
+      "status": 410,
+      "type": "https://larynth.com/problems/agent_setup.expired",
+      "title": "Agent setup expired"
+    },
+    {
+      "code": "agent_setup.limit_reached",
+      "status": 429,
+      "type": "https://larynth.com/problems/agent_setup.limit_reached",
+      "title": "Agent setup limit reached"
+    },
+    {
+      "code": "agent_setup.not_ready",
+      "status": 409,
+      "type": "https://larynth.com/problems/agent_setup.not_ready",
+      "title": "Agent setup is not ready"
+    },
+    {
+      "code": "agent_setup.website_unreachable",
+      "status": 422,
+      "type": "https://larynth.com/problems/agent_setup.website_unreachable",
+      "title": "Website could not be read"
+    },
+    {
+      "code": "assistant.archived",
+      "status": 409,
+      "type": "https://larynth.com/problems/assistant.archived",
+      "title": "Assistant is archived"
+    },
+    {
+      "code": "assistant.attestation_mismatch",
+      "status": 422,
+      "type": "https://larynth.com/problems/assistant.attestation_mismatch",
+      "title": "Attestation statements do not match the current text"
+    },
+    {
+      "code": "assistant.attestation_required",
+      "status": 422,
+      "type": "https://larynth.com/problems/assistant.attestation_required",
+      "title": "An owner attestation is needed to switch the AI disclosure off"
+    },
+    {
+      "code": "assistant.draft_conflict",
+      "status": 409,
+      "type": "https://larynth.com/problems/assistant.draft_conflict",
+      "title": "Someone else changed this draft"
+    },
+    {
+      "code": "assistant.no_draft",
+      "status": 404,
+      "type": "https://larynth.com/problems/assistant.no_draft",
+      "title": "Assistant has no open draft"
+    },
+    {
+      "code": "assistant.not_live",
+      "status": 409,
+      "type": "https://larynth.com/problems/assistant.not_live",
+      "title": "Assistant is not live"
+    },
     {
       "code": "assistant.not_published",
       "status": 409,
@@ -10375,10 +14980,40 @@
       "title": "Assistant version is published and immutable"
     },
     {
+      "code": "auth.account_disabled",
+      "status": 403,
+      "type": "https://larynth.com/problems/auth.account_disabled",
+      "title": "Account disabled"
+    },
+    {
       "code": "auth.api_key_not_allowed",
       "status": 403,
       "type": "https://larynth.com/problems/auth.api_key_not_allowed",
       "title": "Operation requires a dashboard session"
+    },
+    {
+      "code": "auth.code_expired",
+      "status": 410,
+      "type": "https://larynth.com/problems/auth.code_expired",
+      "title": "Code has expired"
+    },
+    {
+      "code": "auth.code_invalid",
+      "status": 400,
+      "type": "https://larynth.com/problems/auth.code_invalid",
+      "title": "Code is not valid"
+    },
+    {
+      "code": "auth.email_taken",
+      "status": 409,
+      "type": "https://larynth.com/problems/auth.email_taken",
+      "title": "An account with this email exists"
+    },
+    {
+      "code": "auth.flow_expired",
+      "status": 410,
+      "type": "https://larynth.com/problems/auth.flow_expired",
+      "title": "Sign-in step expired"
     },
     {
       "code": "auth.forbidden",
@@ -10393,16 +15028,70 @@
       "title": "Login failed"
     },
     {
+      "code": "auth.mfa_required",
+      "status": 403,
+      "type": "https://larynth.com/problems/auth.mfa_required",
+      "title": "Two-step verification required"
+    },
+    {
       "code": "auth.origin_mismatch",
       "status": 403,
       "type": "https://larynth.com/problems/auth.origin_mismatch",
       "title": "Origin not allowed"
     },
     {
+      "code": "auth.password_invalid",
+      "status": 401,
+      "type": "https://larynth.com/problems/auth.password_invalid",
+      "title": "Email or password is not valid"
+    },
+    {
+      "code": "auth.password_paused",
+      "status": 429,
+      "type": "https://larynth.com/problems/auth.password_paused",
+      "title": "Password sign-in is paused"
+    },
+    {
+      "code": "auth.password_weak",
+      "status": 422,
+      "type": "https://larynth.com/problems/auth.password_weak",
+      "title": "Password does not meet the policy"
+    },
+    {
+      "code": "auth.provider_failed",
+      "status": 502,
+      "type": "https://larynth.com/problems/auth.provider_failed",
+      "title": "Sign-in provider failed"
+    },
+    {
+      "code": "auth.reauth_required",
+      "status": 403,
+      "type": "https://larynth.com/problems/auth.reauth_required",
+      "title": "Confirm it's you to continue"
+    },
+    {
+      "code": "auth.region_unavailable",
+      "status": 409,
+      "type": "https://larynth.com/problems/auth.region_unavailable",
+      "title": "Region not available"
+    },
+    {
       "code": "auth.scope_missing",
       "status": 403,
       "type": "https://larynth.com/problems/auth.scope_missing",
       "title": "API key lacks the required scope"
+    },
+    {
+      "code": "auth.too_many_attempts",
+      "status": 429,
+      "type": "https://larynth.com/problems/auth.too_many_attempts",
+      "title": "Too many attempts"
+    },
+    {
+      "code": "auth.turnstile_failed",
+      "status": 400,
+      "type": "https://larynth.com/problems/auth.turnstile_failed",
+      "title": "Human check failed"
     },
     {
       "code": "auth.unauthenticated",
@@ -10453,6 +15142,48 @@
       "title": "Top-up amount below minimum"
     },
     {
+      "code": "business_listing.not_found",
+      "status": 404,
+      "type": "https://larynth.com/problems/business_listing.not_found",
+      "title": "Business listing not found"
+    },
+    {
+      "code": "call_view.built_in",
+      "status": 409,
+      "type": "https://larynth.com/problems/call_view.built_in",
+      "title": "Built-in views cannot be changed"
+    },
+    {
+      "code": "call_view.limit_reached",
+      "status": 409,
+      "type": "https://larynth.com/problems/call_view.limit_reached",
+      "title": "Saved view limit reached"
+    },
+    {
+      "code": "call_view.name_taken",
+      "status": 409,
+      "type": "https://larynth.com/problems/call_view.name_taken",
+      "title": "A saved view with this name exists"
+    },
+    {
+      "code": "caller_block.exists",
+      "status": 409,
+      "type": "https://larynth.com/problems/caller_block.exists",
+      "title": "This caller is already blocked"
+    },
+    {
+      "code": "caller_block.no_number",
+      "status": 422,
+      "type": "https://larynth.com/problems/caller_block.no_number",
+      "title": "The call has no caller number to block"
+    },
+    {
+      "code": "calls.export_limit",
+      "status": 429,
+      "type": "https://larynth.com/problems/calls.export_limit",
+      "title": "Export limit reached"
+    },
+    {
       "code": "calls.no_engine_capacity",
       "status": 503,
       "type": "https://larynth.com/problems/calls.no_engine_capacity",
@@ -10465,10 +15196,22 @@
       "title": "Call is not active"
     },
     {
+      "code": "calls.sort_window",
+      "status": 422,
+      "type": "https://larynth.com/problems/calls.sort_window",
+      "title": "Sorting by duration or price needs a window of 90 days or less"
+    },
+    {
       "code": "campaign.invalid_transition",
       "status": 409,
       "type": "https://larynth.com/problems/campaign.invalid_transition",
       "title": "Campaign state does not allow this transition"
+    },
+    {
+      "code": "data_request.open_exists",
+      "status": 409,
+      "type": "https://larynth.com/problems/data_request.open_exists",
+      "title": "A request of this kind is already open"
     },
     {
       "code": "dial.caller_id.not_allowed",
@@ -10513,10 +15256,46 @@
       "title": "Idempotency-Key reused with a different request"
     },
     {
+      "code": "inbox.forward_target_invalid",
+      "status": 422,
+      "type": "https://larynth.com/problems/inbox.forward_target_invalid",
+      "title": "Forward target is not a member of this workspace"
+    },
+    {
+      "code": "inbox.item_closed",
+      "status": 409,
+      "type": "https://larynth.com/problems/inbox.item_closed",
+      "title": "Inbox item is already done"
+    },
+    {
       "code": "internal",
       "status": 500,
       "type": "https://larynth.com/problems/internal",
       "title": "Internal error"
+    },
+    {
+      "code": "invitation.already_member",
+      "status": 409,
+      "type": "https://larynth.com/problems/invitation.already_member",
+      "title": "Already a member of this workspace"
+    },
+    {
+      "code": "invitation.expired",
+      "status": 410,
+      "type": "https://larynth.com/problems/invitation.expired",
+      "title": "Invitation expired"
+    },
+    {
+      "code": "invitation.revoked",
+      "status": 410,
+      "type": "https://larynth.com/problems/invitation.revoked",
+      "title": "Invitation revoked"
+    },
+    {
+      "code": "invitation.wrong_account",
+      "status": 409,
+      "type": "https://larynth.com/problems/invitation.wrong_account",
+      "title": "Invitation is for a different account"
     },
     {
       "code": "knowledge.file_invalid",
@@ -10529,6 +15308,24 @@
       "status": 422,
       "type": "https://larynth.com/problems/knowledge.url_not_allowed",
       "title": "Knowledge source address not allowed"
+    },
+    {
+      "code": "member.last_owner",
+      "status": 409,
+      "type": "https://larynth.com/problems/member.last_owner",
+      "title": "A workspace must keep at least one owner"
+    },
+    {
+      "code": "member.role_ceiling",
+      "status": 403,
+      "type": "https://larynth.com/problems/member.role_ceiling",
+      "title": "Role change exceeds your own role"
+    },
+    {
+      "code": "mfa.required",
+      "status": 409,
+      "type": "https://larynth.com/problems/mfa.required",
+      "title": "Two-step verification is required"
     },
     {
       "code": "not_implemented",
@@ -10547,6 +15344,24 @@
       "status": 429,
       "type": "https://larynth.com/problems/rate_limited",
       "title": "Rate limit exceeded"
+    },
+    {
+      "code": "recording.deleted",
+      "status": 410,
+      "type": "https://larynth.com/problems/recording.deleted",
+      "title": "Recording deleted"
+    },
+    {
+      "code": "recording.not_ready",
+      "status": 409,
+      "type": "https://larynth.com/problems/recording.not_ready",
+      "title": "Recording is not ready"
+    },
+    {
+      "code": "recording.range_not_satisfiable",
+      "status": 416,
+      "type": "https://larynth.com/problems/recording.range_not_satisfiable",
+      "title": "Requested range not satisfiable"
     },
     {
       "code": "request.body_too_large",
@@ -10573,6 +15388,12 @@
       "title": "Not acceptable"
     },
     {
+      "code": "request.precondition_required",
+      "status": 428,
+      "type": "https://larynth.com/problems/request.precondition_required",
+      "title": "If-Match header required"
+    },
+    {
       "code": "request.unsupported_media_type",
       "status": 415,
       "type": "https://larynth.com/problems/request.unsupported_media_type",
@@ -10595,6 +15416,18 @@
       "status": 404,
       "type": "https://larynth.com/problems/resource.not_found",
       "title": "Not found"
+    },
+    {
+      "code": "spending.approval_required",
+      "status": 403,
+      "type": "https://larynth.com/problems/spending.approval_required",
+      "title": "An Owner or Admin must approve this"
+    },
+    {
+      "code": "spending.request_not_pending",
+      "status": 409,
+      "type": "https://larynth.com/problems/spending.request_not_pending",
+      "title": "Spending request is no longer pending"
     },
     {
       "code": "stripe.signature_invalid",
@@ -10631,6 +15464,18 @@
       "status": 422,
       "type": "https://larynth.com/problems/webhook.url_not_allowed",
       "title": "Webhook URL not allowed"
+    },
+    {
+      "code": "workspace.limit_reached",
+      "status": 409,
+      "type": "https://larynth.com/problems/workspace.limit_reached",
+      "title": "Workspace limit reached"
+    },
+    {
+      "code": "workspace.other_region",
+      "status": 409,
+      "type": "https://larynth.com/problems/workspace.other_region",
+      "title": "Workspace is served from another region"
     }
   ]
 }
