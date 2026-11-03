@@ -24,7 +24,7 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
 export const listAssistants = <ThrowOnError extends boolean = false>(options?: Options<ListAssistantsData, ThrowOnError>): RequestResult<ListAssistantsResponses, ListAssistantsErrors, ThrowOnError> => (options?.client ?? client).get<ListAssistantsResponses, ListAssistantsErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/assistants',
@@ -37,7 +37,7 @@ export const listAssistants = <ThrowOnError extends boolean = false>(options?: O
 export const createAssistant = <ThrowOnError extends boolean = false>(options: Options<CreateAssistantData, ThrowOnError>): RequestResult<CreateAssistantResponses, CreateAssistantErrors, ThrowOnError> => (options.client ?? client).post<CreateAssistantResponses, CreateAssistantErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/assistants',
@@ -54,7 +54,7 @@ export const createAssistant = <ThrowOnError extends boolean = false>(options: O
 export const createWebCall = <ThrowOnError extends boolean = false>(options: Options<CreateWebCallData, ThrowOnError>): RequestResult<CreateWebCallResponses, CreateWebCallErrors, ThrowOnError> => (options.client ?? client).post<CreateWebCallResponses, CreateWebCallErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/assistants/{assistant_id}/web-calls',
@@ -71,7 +71,7 @@ export const createWebCall = <ThrowOnError extends boolean = false>(options: Opt
 export const deleteAssistant = <ThrowOnError extends boolean = false>(options: Options<DeleteAssistantData, ThrowOnError>): RequestResult<DeleteAssistantResponses, DeleteAssistantErrors, ThrowOnError> => (options.client ?? client).delete<DeleteAssistantResponses, DeleteAssistantErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/assistants/{id}',
@@ -84,7 +84,7 @@ export const deleteAssistant = <ThrowOnError extends boolean = false>(options: O
 export const getAssistant = <ThrowOnError extends boolean = false>(options: Options<GetAssistantData, ThrowOnError>): RequestResult<GetAssistantResponses, GetAssistantErrors, ThrowOnError> => (options.client ?? client).get<GetAssistantResponses, GetAssistantErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/assistants/{id}',
@@ -97,7 +97,7 @@ export const getAssistant = <ThrowOnError extends boolean = false>(options: Opti
 export const updateAssistant = <ThrowOnError extends boolean = false>(options: Options<UpdateAssistantData, ThrowOnError>): RequestResult<UpdateAssistantResponses, UpdateAssistantErrors, ThrowOnError> => (options.client ?? client).patch<UpdateAssistantResponses, UpdateAssistantErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/assistants/{id}',
@@ -114,7 +114,7 @@ export const updateAssistant = <ThrowOnError extends boolean = false>(options: O
 export const listAssistantVersions = <ThrowOnError extends boolean = false>(options: Options<ListAssistantVersionsData, ThrowOnError>): RequestResult<ListAssistantVersionsResponses, ListAssistantVersionsErrors, ThrowOnError> => (options.client ?? client).get<ListAssistantVersionsResponses, ListAssistantVersionsErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/assistants/{id}/versions',
@@ -127,7 +127,7 @@ export const listAssistantVersions = <ThrowOnError extends boolean = false>(opti
 export const createAssistantVersion = <ThrowOnError extends boolean = false>(options: Options<CreateAssistantVersionData, ThrowOnError>): RequestResult<CreateAssistantVersionResponses, CreateAssistantVersionErrors, ThrowOnError> => (options.client ?? client).post<CreateAssistantVersionResponses, CreateAssistantVersionErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/assistants/{id}/versions',
@@ -144,7 +144,7 @@ export const createAssistantVersion = <ThrowOnError extends boolean = false>(opt
 export const getAssistantVersion = <ThrowOnError extends boolean = false>(options: Options<GetAssistantVersionData, ThrowOnError>): RequestResult<GetAssistantVersionResponses, GetAssistantVersionErrors, ThrowOnError> => (options.client ?? client).get<GetAssistantVersionResponses, GetAssistantVersionErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/assistants/{id}/versions/{v}',
@@ -157,7 +157,7 @@ export const getAssistantVersion = <ThrowOnError extends boolean = false>(option
 export const publishAssistantVersion = <ThrowOnError extends boolean = false>(options: Options<PublishAssistantVersionData, ThrowOnError>): RequestResult<PublishAssistantVersionResponses, PublishAssistantVersionErrors, ThrowOnError> => (options.client ?? client).post<PublishAssistantVersionResponses, PublishAssistantVersionErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/assistants/{id}/versions/{v}/publish',
@@ -170,7 +170,7 @@ export const publishAssistantVersion = <ThrowOnError extends boolean = false>(op
 export const getAutoTopUp = <ThrowOnError extends boolean = false>(options?: Options<GetAutoTopUpData, ThrowOnError>): RequestResult<GetAutoTopUpResponses, GetAutoTopUpErrors, ThrowOnError> => (options?.client ?? client).get<GetAutoTopUpResponses, GetAutoTopUpErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/billing/auto-top-up',
@@ -183,7 +183,7 @@ export const getAutoTopUp = <ThrowOnError extends boolean = false>(options?: Opt
 export const getBalance = <ThrowOnError extends boolean = false>(options?: Options<GetBalanceData, ThrowOnError>): RequestResult<GetBalanceResponses, GetBalanceErrors, ThrowOnError> => (options?.client ?? client).get<GetBalanceResponses, GetBalanceErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/billing/balance',
@@ -196,7 +196,7 @@ export const getBalance = <ThrowOnError extends boolean = false>(options?: Optio
 export const listLedger = <ThrowOnError extends boolean = false>(options?: Options<ListLedgerData, ThrowOnError>): RequestResult<ListLedgerResponses, ListLedgerErrors, ThrowOnError> => (options?.client ?? client).get<ListLedgerResponses, ListLedgerErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/billing/ledger',
@@ -209,7 +209,7 @@ export const listLedger = <ThrowOnError extends boolean = false>(options?: Optio
 export const listRates = <ThrowOnError extends boolean = false>(options?: Options<ListRatesData, ThrowOnError>): RequestResult<ListRatesResponses, ListRatesErrors, ThrowOnError> => (options?.client ?? client).get<ListRatesResponses, ListRatesErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/billing/rates',
@@ -222,7 +222,7 @@ export const listRates = <ThrowOnError extends boolean = false>(options?: Option
 export const listCalls = <ThrowOnError extends boolean = false>(options?: Options<ListCallsData, ThrowOnError>): RequestResult<ListCallsResponses, ListCallsErrors, ThrowOnError> => (options?.client ?? client).get<ListCallsResponses, ListCallsErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/calls',
@@ -235,7 +235,7 @@ export const listCalls = <ThrowOnError extends boolean = false>(options?: Option
 export const createCall = <ThrowOnError extends boolean = false>(options: Options<CreateCallData, ThrowOnError>): RequestResult<CreateCallResponses, CreateCallErrors, ThrowOnError> => (options.client ?? client).post<CreateCallResponses, CreateCallErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/calls',
@@ -252,7 +252,7 @@ export const createCall = <ThrowOnError extends boolean = false>(options: Option
 export const getCall = <ThrowOnError extends boolean = false>(options: Options<GetCallData, ThrowOnError>): RequestResult<GetCallResponses, GetCallErrors, ThrowOnError> => (options.client ?? client).get<GetCallResponses, GetCallErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/calls/{call_id}',
@@ -265,7 +265,7 @@ export const getCall = <ThrowOnError extends boolean = false>(options: Options<G
 export const getCallAnalysis = <ThrowOnError extends boolean = false>(options: Options<GetCallAnalysisData, ThrowOnError>): RequestResult<GetCallAnalysisResponses, GetCallAnalysisErrors, ThrowOnError> => (options.client ?? client).get<GetCallAnalysisResponses, GetCallAnalysisErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/calls/{call_id}/analysis',
@@ -278,7 +278,7 @@ export const getCallAnalysis = <ThrowOnError extends boolean = false>(options: O
 export const endCall = <ThrowOnError extends boolean = false>(options: Options<EndCallData, ThrowOnError>): RequestResult<EndCallResponses, EndCallErrors, ThrowOnError> => (options.client ?? client).post<EndCallResponses, EndCallErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/calls/{call_id}/end',
@@ -295,7 +295,7 @@ export const endCall = <ThrowOnError extends boolean = false>(options: Options<E
 export const listCallEvents = <ThrowOnError extends boolean = false>(options: Options<ListCallEventsData, ThrowOnError>): RequestResult<ListCallEventsResponses, ListCallEventsErrors, ThrowOnError> => (options.client ?? client).get<ListCallEventsResponses, ListCallEventsErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/calls/{call_id}/events',
@@ -308,7 +308,7 @@ export const listCallEvents = <ThrowOnError extends boolean = false>(options: Op
 export const listCallRecordings = <ThrowOnError extends boolean = false>(options: Options<ListCallRecordingsData, ThrowOnError>): RequestResult<ListCallRecordingsResponses, ListCallRecordingsErrors, ThrowOnError> => (options.client ?? client).get<ListCallRecordingsResponses, ListCallRecordingsErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/calls/{call_id}/recordings',
@@ -321,7 +321,7 @@ export const listCallRecordings = <ThrowOnError extends boolean = false>(options
 export const listCallTurns = <ThrowOnError extends boolean = false>(options: Options<ListCallTurnsData, ThrowOnError>): RequestResult<ListCallTurnsResponses, ListCallTurnsErrors, ThrowOnError> => (options.client ?? client).get<ListCallTurnsResponses, ListCallTurnsErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/calls/{call_id}/turns',
@@ -334,7 +334,7 @@ export const listCallTurns = <ThrowOnError extends boolean = false>(options: Opt
 export const listCampaigns = <ThrowOnError extends boolean = false>(options?: Options<ListCampaignsData, ThrowOnError>): RequestResult<ListCampaignsResponses, ListCampaignsErrors, ThrowOnError> => (options?.client ?? client).get<ListCampaignsResponses, ListCampaignsErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/campaigns',
@@ -347,7 +347,7 @@ export const listCampaigns = <ThrowOnError extends boolean = false>(options?: Op
 export const createCampaign = <ThrowOnError extends boolean = false>(options: Options<CreateCampaignData, ThrowOnError>): RequestResult<CreateCampaignResponses, CreateCampaignErrors, ThrowOnError> => (options.client ?? client).post<CreateCampaignResponses, CreateCampaignErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/campaigns',
@@ -364,7 +364,7 @@ export const createCampaign = <ThrowOnError extends boolean = false>(options: Op
 export const getCampaign = <ThrowOnError extends boolean = false>(options: Options<GetCampaignData, ThrowOnError>): RequestResult<GetCampaignResponses, GetCampaignErrors, ThrowOnError> => (options.client ?? client).get<GetCampaignResponses, GetCampaignErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/campaigns/{id}',
@@ -377,7 +377,7 @@ export const getCampaign = <ThrowOnError extends boolean = false>(options: Optio
 export const updateCampaign = <ThrowOnError extends boolean = false>(options: Options<UpdateCampaignData, ThrowOnError>): RequestResult<UpdateCampaignResponses, UpdateCampaignErrors, ThrowOnError> => (options.client ?? client).patch<UpdateCampaignResponses, UpdateCampaignErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/campaigns/{id}',
@@ -394,7 +394,7 @@ export const updateCampaign = <ThrowOnError extends boolean = false>(options: Op
 export const archiveCampaign = <ThrowOnError extends boolean = false>(options: Options<ArchiveCampaignData, ThrowOnError>): RequestResult<ArchiveCampaignResponses, ArchiveCampaignErrors, ThrowOnError> => (options.client ?? client).post<ArchiveCampaignResponses, ArchiveCampaignErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/campaigns/{id}/archive',
@@ -407,7 +407,7 @@ export const archiveCampaign = <ThrowOnError extends boolean = false>(options: O
 export const listCampaignContacts = <ThrowOnError extends boolean = false>(options: Options<ListCampaignContactsData, ThrowOnError>): RequestResult<ListCampaignContactsResponses, ListCampaignContactsErrors, ThrowOnError> => (options.client ?? client).get<ListCampaignContactsResponses, ListCampaignContactsErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/campaigns/{id}/contacts',
@@ -420,7 +420,7 @@ export const listCampaignContacts = <ThrowOnError extends boolean = false>(optio
 export const addCampaignContacts = <ThrowOnError extends boolean = false>(options: Options<AddCampaignContactsData, ThrowOnError>): RequestResult<AddCampaignContactsResponses, AddCampaignContactsErrors, ThrowOnError> => (options.client ?? client).post<AddCampaignContactsResponses, AddCampaignContactsErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/campaigns/{id}/contacts',
@@ -437,7 +437,7 @@ export const addCampaignContacts = <ThrowOnError extends boolean = false>(option
 export const pauseCampaign = <ThrowOnError extends boolean = false>(options: Options<PauseCampaignData, ThrowOnError>): RequestResult<PauseCampaignResponses, PauseCampaignErrors, ThrowOnError> => (options.client ?? client).post<PauseCampaignResponses, PauseCampaignErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/campaigns/{id}/pause',
@@ -450,7 +450,7 @@ export const pauseCampaign = <ThrowOnError extends boolean = false>(options: Opt
 export const resumeCampaign = <ThrowOnError extends boolean = false>(options: Options<ResumeCampaignData, ThrowOnError>): RequestResult<ResumeCampaignResponses, ResumeCampaignErrors, ThrowOnError> => (options.client ?? client).post<ResumeCampaignResponses, ResumeCampaignErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/campaigns/{id}/resume',
@@ -463,7 +463,7 @@ export const resumeCampaign = <ThrowOnError extends boolean = false>(options: Op
 export const startCampaign = <ThrowOnError extends boolean = false>(options: Options<StartCampaignData, ThrowOnError>): RequestResult<StartCampaignResponses, StartCampaignErrors, ThrowOnError> => (options.client ?? client).post<StartCampaignResponses, StartCampaignErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/campaigns/{id}/start',
@@ -476,7 +476,7 @@ export const startCampaign = <ThrowOnError extends boolean = false>(options: Opt
 export const getCampaignStats = <ThrowOnError extends boolean = false>(options: Options<GetCampaignStatsData, ThrowOnError>): RequestResult<GetCampaignStatsResponses, GetCampaignStatsErrors, ThrowOnError> => (options.client ?? client).get<GetCampaignStatsResponses, GetCampaignStatsErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/campaigns/{id}/stats',
@@ -489,7 +489,7 @@ export const getCampaignStats = <ThrowOnError extends boolean = false>(options: 
 export const listCatalogModels = <ThrowOnError extends boolean = false>(options?: Options<ListCatalogModelsData, ThrowOnError>): RequestResult<ListCatalogModelsResponses, ListCatalogModelsErrors, ThrowOnError> => (options?.client ?? client).get<ListCatalogModelsResponses, ListCatalogModelsErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/catalog/models',
@@ -502,7 +502,7 @@ export const listCatalogModels = <ThrowOnError extends boolean = false>(options?
 export const listCatalogVoices = <ThrowOnError extends boolean = false>(options?: Options<ListCatalogVoicesData, ThrowOnError>): RequestResult<ListCatalogVoicesResponses, ListCatalogVoicesErrors, ThrowOnError> => (options?.client ?? client).get<ListCatalogVoicesResponses, ListCatalogVoicesErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/catalog/voices',
@@ -515,7 +515,7 @@ export const listCatalogVoices = <ThrowOnError extends boolean = false>(options?
 export const listConsents = <ThrowOnError extends boolean = false>(options?: Options<ListConsentsData, ThrowOnError>): RequestResult<ListConsentsResponses, ListConsentsErrors, ThrowOnError> => (options?.client ?? client).get<ListConsentsResponses, ListConsentsErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/compliance/consents',
@@ -528,7 +528,7 @@ export const listConsents = <ThrowOnError extends boolean = false>(options?: Opt
 export const createConsent = <ThrowOnError extends boolean = false>(options: Options<CreateConsentData, ThrowOnError>): RequestResult<CreateConsentResponses, CreateConsentErrors, ThrowOnError> => (options.client ?? client).post<CreateConsentResponses, CreateConsentErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/compliance/consents',
@@ -545,7 +545,7 @@ export const createConsent = <ThrowOnError extends boolean = false>(options: Opt
 export const listComplianceDecisions = <ThrowOnError extends boolean = false>(options?: Options<ListComplianceDecisionsData, ThrowOnError>): RequestResult<ListComplianceDecisionsResponses, ListComplianceDecisionsErrors, ThrowOnError> => (options?.client ?? client).get<ListComplianceDecisionsResponses, ListComplianceDecisionsErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/compliance/decisions',
@@ -558,7 +558,7 @@ export const listComplianceDecisions = <ThrowOnError extends boolean = false>(op
 export const listDnc = <ThrowOnError extends boolean = false>(options?: Options<ListDncData, ThrowOnError>): RequestResult<ListDncResponses, ListDncErrors, ThrowOnError> => (options?.client ?? client).get<ListDncResponses, ListDncErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/compliance/dnc',
@@ -571,7 +571,7 @@ export const listDnc = <ThrowOnError extends boolean = false>(options?: Options<
 export const createDnc = <ThrowOnError extends boolean = false>(options: Options<CreateDncData, ThrowOnError>): RequestResult<CreateDncResponses, CreateDncErrors, ThrowOnError> => (options.client ?? client).post<CreateDncResponses, CreateDncErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/compliance/dnc',
@@ -588,7 +588,7 @@ export const createDnc = <ThrowOnError extends boolean = false>(options: Options
 export const createRevocation = <ThrowOnError extends boolean = false>(options: Options<CreateRevocationData, ThrowOnError>): RequestResult<CreateRevocationResponses, CreateRevocationErrors, ThrowOnError> => (options.client ?? client).post<CreateRevocationResponses, CreateRevocationErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/compliance/revocations',
@@ -605,7 +605,7 @@ export const createRevocation = <ThrowOnError extends boolean = false>(options: 
 export const listContacts = <ThrowOnError extends boolean = false>(options?: Options<ListContactsData, ThrowOnError>): RequestResult<ListContactsResponses, ListContactsErrors, ThrowOnError> => (options?.client ?? client).get<ListContactsResponses, ListContactsErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/contacts',
@@ -618,7 +618,7 @@ export const listContacts = <ThrowOnError extends boolean = false>(options?: Opt
 export const createContact = <ThrowOnError extends boolean = false>(options: Options<CreateContactData, ThrowOnError>): RequestResult<CreateContactResponses, CreateContactErrors, ThrowOnError> => (options.client ?? client).post<CreateContactResponses, CreateContactErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/contacts',
@@ -636,7 +636,7 @@ export const createContactImport = <ThrowOnError extends boolean = false>(option
     ...formDataBodySerializer,
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/contacts/imports',
@@ -653,7 +653,7 @@ export const createContactImport = <ThrowOnError extends boolean = false>(option
 export const getContactImport = <ThrowOnError extends boolean = false>(options: Options<GetContactImportData, ThrowOnError>): RequestResult<GetContactImportResponses, GetContactImportErrors, ThrowOnError> => (options.client ?? client).get<GetContactImportResponses, GetContactImportErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/contacts/imports/{id}',
@@ -666,7 +666,7 @@ export const getContactImport = <ThrowOnError extends boolean = false>(options: 
 export const deleteContact = <ThrowOnError extends boolean = false>(options: Options<DeleteContactData, ThrowOnError>): RequestResult<DeleteContactResponses, DeleteContactErrors, ThrowOnError> => (options.client ?? client).delete<DeleteContactResponses, DeleteContactErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/contacts/{id}',
@@ -679,7 +679,7 @@ export const deleteContact = <ThrowOnError extends boolean = false>(options: Opt
 export const getContact = <ThrowOnError extends boolean = false>(options: Options<GetContactData, ThrowOnError>): RequestResult<GetContactResponses, GetContactErrors, ThrowOnError> => (options.client ?? client).get<GetContactResponses, GetContactErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/contacts/{id}',
@@ -692,7 +692,7 @@ export const getContact = <ThrowOnError extends boolean = false>(options: Option
 export const updateContact = <ThrowOnError extends boolean = false>(options: Options<UpdateContactData, ThrowOnError>): RequestResult<UpdateContactResponses, UpdateContactErrors, ThrowOnError> => (options.client ?? client).patch<UpdateContactResponses, UpdateContactErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/contacts/{id}',
@@ -709,7 +709,7 @@ export const updateContact = <ThrowOnError extends boolean = false>(options: Opt
 export const listKnowledgeBases = <ThrowOnError extends boolean = false>(options?: Options<ListKnowledgeBasesData, ThrowOnError>): RequestResult<ListKnowledgeBasesResponses, ListKnowledgeBasesErrors, ThrowOnError> => (options?.client ?? client).get<ListKnowledgeBasesResponses, ListKnowledgeBasesErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/knowledge-bases',
@@ -722,7 +722,7 @@ export const listKnowledgeBases = <ThrowOnError extends boolean = false>(options
 export const createKnowledgeBase = <ThrowOnError extends boolean = false>(options: Options<CreateKnowledgeBaseData, ThrowOnError>): RequestResult<CreateKnowledgeBaseResponses, CreateKnowledgeBaseErrors, ThrowOnError> => (options.client ?? client).post<CreateKnowledgeBaseResponses, CreateKnowledgeBaseErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/knowledge-bases',
@@ -739,7 +739,7 @@ export const createKnowledgeBase = <ThrowOnError extends boolean = false>(option
 export const deleteKnowledgeBase = <ThrowOnError extends boolean = false>(options: Options<DeleteKnowledgeBaseData, ThrowOnError>): RequestResult<DeleteKnowledgeBaseResponses, DeleteKnowledgeBaseErrors, ThrowOnError> => (options.client ?? client).delete<DeleteKnowledgeBaseResponses, DeleteKnowledgeBaseErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/knowledge-bases/{id}',
@@ -752,7 +752,7 @@ export const deleteKnowledgeBase = <ThrowOnError extends boolean = false>(option
 export const getKnowledgeBase = <ThrowOnError extends boolean = false>(options: Options<GetKnowledgeBaseData, ThrowOnError>): RequestResult<GetKnowledgeBaseResponses, GetKnowledgeBaseErrors, ThrowOnError> => (options.client ?? client).get<GetKnowledgeBaseResponses, GetKnowledgeBaseErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/knowledge-bases/{id}',
@@ -765,7 +765,7 @@ export const getKnowledgeBase = <ThrowOnError extends boolean = false>(options: 
 export const updateKnowledgeBase = <ThrowOnError extends boolean = false>(options: Options<UpdateKnowledgeBaseData, ThrowOnError>): RequestResult<UpdateKnowledgeBaseResponses, UpdateKnowledgeBaseErrors, ThrowOnError> => (options.client ?? client).patch<UpdateKnowledgeBaseResponses, UpdateKnowledgeBaseErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/knowledge-bases/{id}',
@@ -782,7 +782,7 @@ export const updateKnowledgeBase = <ThrowOnError extends boolean = false>(option
 export const searchKnowledgeBase = <ThrowOnError extends boolean = false>(options: Options<SearchKnowledgeBaseData, ThrowOnError>): RequestResult<SearchKnowledgeBaseResponses, SearchKnowledgeBaseErrors, ThrowOnError> => (options.client ?? client).get<SearchKnowledgeBaseResponses, SearchKnowledgeBaseErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/knowledge-bases/{id}/search',
@@ -795,7 +795,7 @@ export const searchKnowledgeBase = <ThrowOnError extends boolean = false>(option
 export const listKnowledgeSources = <ThrowOnError extends boolean = false>(options: Options<ListKnowledgeSourcesData, ThrowOnError>): RequestResult<ListKnowledgeSourcesResponses, ListKnowledgeSourcesErrors, ThrowOnError> => (options.client ?? client).get<ListKnowledgeSourcesResponses, ListKnowledgeSourcesErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/knowledge-bases/{id}/sources',
@@ -809,7 +809,7 @@ export const createKnowledgeFileSource = <ThrowOnError extends boolean = false>(
     ...formDataBodySerializer,
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/knowledge-bases/{id}/sources/file',
@@ -826,7 +826,7 @@ export const createKnowledgeFileSource = <ThrowOnError extends boolean = false>(
 export const createKnowledgeWebsiteSource = <ThrowOnError extends boolean = false>(options: Options<CreateKnowledgeWebsiteSourceData, ThrowOnError>): RequestResult<CreateKnowledgeWebsiteSourceResponses, CreateKnowledgeWebsiteSourceErrors, ThrowOnError> => (options.client ?? client).post<CreateKnowledgeWebsiteSourceResponses, CreateKnowledgeWebsiteSourceErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/knowledge-bases/{id}/sources/website',
@@ -843,7 +843,7 @@ export const createKnowledgeWebsiteSource = <ThrowOnError extends boolean = fals
 export const deleteKnowledgeSource = <ThrowOnError extends boolean = false>(options: Options<DeleteKnowledgeSourceData, ThrowOnError>): RequestResult<DeleteKnowledgeSourceResponses, DeleteKnowledgeSourceErrors, ThrowOnError> => (options.client ?? client).delete<DeleteKnowledgeSourceResponses, DeleteKnowledgeSourceErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/knowledge-bases/{id}/sources/{source_id}',
@@ -856,7 +856,7 @@ export const deleteKnowledgeSource = <ThrowOnError extends boolean = false>(opti
 export const getKnowledgeSource = <ThrowOnError extends boolean = false>(options: Options<GetKnowledgeSourceData, ThrowOnError>): RequestResult<GetKnowledgeSourceResponses, GetKnowledgeSourceErrors, ThrowOnError> => (options.client ?? client).get<GetKnowledgeSourceResponses, GetKnowledgeSourceErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/knowledge-bases/{id}/sources/{source_id}',
@@ -869,7 +869,7 @@ export const getKnowledgeSource = <ThrowOnError extends boolean = false>(options
 export const syncKnowledgeSource = <ThrowOnError extends boolean = false>(options: Options<SyncKnowledgeSourceData, ThrowOnError>): RequestResult<SyncKnowledgeSourceResponses, SyncKnowledgeSourceErrors, ThrowOnError> => (options.client ?? client).post<SyncKnowledgeSourceResponses, SyncKnowledgeSourceErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/knowledge-bases/{id}/sources/{source_id}/sync',
@@ -882,7 +882,7 @@ export const syncKnowledgeSource = <ThrowOnError extends boolean = false>(option
 export const listNumbers = <ThrowOnError extends boolean = false>(options?: Options<ListNumbersData, ThrowOnError>): RequestResult<ListNumbersResponses, ListNumbersErrors, ThrowOnError> => (options?.client ?? client).get<ListNumbersResponses, ListNumbersErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/numbers',
@@ -895,7 +895,7 @@ export const listNumbers = <ThrowOnError extends boolean = false>(options?: Opti
 export const orderNumber = <ThrowOnError extends boolean = false>(options: Options<OrderNumberData, ThrowOnError>): RequestResult<OrderNumberResponses, OrderNumberErrors, ThrowOnError> => (options.client ?? client).post<OrderNumberResponses, OrderNumberErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/numbers',
@@ -912,7 +912,7 @@ export const orderNumber = <ThrowOnError extends boolean = false>(options: Optio
 export const searchAvailableNumbers = <ThrowOnError extends boolean = false>(options?: Options<SearchAvailableNumbersData, ThrowOnError>): RequestResult<SearchAvailableNumbersResponses, SearchAvailableNumbersErrors, ThrowOnError> => (options?.client ?? client).get<SearchAvailableNumbersResponses, SearchAvailableNumbersErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/numbers/available',
@@ -925,7 +925,7 @@ export const searchAvailableNumbers = <ThrowOnError extends boolean = false>(opt
 export const releaseNumber = <ThrowOnError extends boolean = false>(options: Options<ReleaseNumberData, ThrowOnError>): RequestResult<ReleaseNumberResponses, ReleaseNumberErrors, ThrowOnError> => (options.client ?? client).delete<ReleaseNumberResponses, ReleaseNumberErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/numbers/{id}',
@@ -938,7 +938,7 @@ export const releaseNumber = <ThrowOnError extends boolean = false>(options: Opt
 export const getNumber = <ThrowOnError extends boolean = false>(options: Options<GetNumberData, ThrowOnError>): RequestResult<GetNumberResponses, GetNumberErrors, ThrowOnError> => (options.client ?? client).get<GetNumberResponses, GetNumberErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/numbers/{id}',
@@ -951,7 +951,7 @@ export const getNumber = <ThrowOnError extends boolean = false>(options: Options
 export const updateNumber = <ThrowOnError extends boolean = false>(options: Options<UpdateNumberData, ThrowOnError>): RequestResult<UpdateNumberResponses, UpdateNumberErrors, ThrowOnError> => (options.client ?? client).patch<UpdateNumberResponses, UpdateNumberErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/numbers/{id}',
@@ -968,7 +968,7 @@ export const updateNumber = <ThrowOnError extends boolean = false>(options: Opti
 export const getRecordingAudio = <ThrowOnError extends boolean = false>(options: Options<GetRecordingAudioData, ThrowOnError>): RequestResult<GetRecordingAudioResponses, GetRecordingAudioErrors, ThrowOnError> => (options.client ?? client).get<GetRecordingAudioResponses, GetRecordingAudioErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/recordings/{id}/audio',
@@ -981,7 +981,7 @@ export const getRecordingAudio = <ThrowOnError extends boolean = false>(options:
 export const createIceServers = <ThrowOnError extends boolean = false>(options?: Options<CreateIceServersData, ThrowOnError>): RequestResult<CreateIceServersResponses, CreateIceServersErrors, ThrowOnError> => (options?.client ?? client).post<CreateIceServersResponses, CreateIceServersErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/web-calls/ice-servers',
@@ -994,7 +994,7 @@ export const createIceServers = <ThrowOnError extends boolean = false>(options?:
 export const listWebhooks = <ThrowOnError extends boolean = false>(options?: Options<ListWebhooksData, ThrowOnError>): RequestResult<ListWebhooksResponses, ListWebhooksErrors, ThrowOnError> => (options?.client ?? client).get<ListWebhooksResponses, ListWebhooksErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/webhooks',
@@ -1007,7 +1007,7 @@ export const listWebhooks = <ThrowOnError extends boolean = false>(options?: Opt
 export const createWebhook = <ThrowOnError extends boolean = false>(options: Options<CreateWebhookData, ThrowOnError>): RequestResult<CreateWebhookResponses, CreateWebhookErrors, ThrowOnError> => (options.client ?? client).post<CreateWebhookResponses, CreateWebhookErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/webhooks',
@@ -1024,7 +1024,7 @@ export const createWebhook = <ThrowOnError extends boolean = false>(options: Opt
 export const deleteWebhook = <ThrowOnError extends boolean = false>(options: Options<DeleteWebhookData, ThrowOnError>): RequestResult<DeleteWebhookResponses, DeleteWebhookErrors, ThrowOnError> => (options.client ?? client).delete<DeleteWebhookResponses, DeleteWebhookErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/webhooks/{id}',
@@ -1037,7 +1037,7 @@ export const deleteWebhook = <ThrowOnError extends boolean = false>(options: Opt
 export const getWebhook = <ThrowOnError extends boolean = false>(options: Options<GetWebhookData, ThrowOnError>): RequestResult<GetWebhookResponses, GetWebhookErrors, ThrowOnError> => (options.client ?? client).get<GetWebhookResponses, GetWebhookErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/webhooks/{id}',
@@ -1050,7 +1050,7 @@ export const getWebhook = <ThrowOnError extends boolean = false>(options: Option
 export const updateWebhook = <ThrowOnError extends boolean = false>(options: Options<UpdateWebhookData, ThrowOnError>): RequestResult<UpdateWebhookResponses, UpdateWebhookErrors, ThrowOnError> => (options.client ?? client).patch<UpdateWebhookResponses, UpdateWebhookErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/webhooks/{id}',
@@ -1067,7 +1067,7 @@ export const updateWebhook = <ThrowOnError extends boolean = false>(options: Opt
 export const listWebhookDeliveries = <ThrowOnError extends boolean = false>(options: Options<ListWebhookDeliveriesData, ThrowOnError>): RequestResult<ListWebhookDeliveriesResponses, ListWebhookDeliveriesErrors, ThrowOnError> => (options.client ?? client).get<ListWebhookDeliveriesResponses, ListWebhookDeliveriesErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/webhooks/{id}/deliveries',
@@ -1080,7 +1080,7 @@ export const listWebhookDeliveries = <ThrowOnError extends boolean = false>(opti
 export const rotateWebhookSecret = <ThrowOnError extends boolean = false>(options: Options<RotateWebhookSecretData, ThrowOnError>): RequestResult<RotateWebhookSecretResponses, RotateWebhookSecretErrors, ThrowOnError> => (options.client ?? client).post<RotateWebhookSecretResponses, RotateWebhookSecretErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/webhooks/{id}/rotate-secret',
@@ -1093,7 +1093,7 @@ export const rotateWebhookSecret = <ThrowOnError extends boolean = false>(option
 export const testWebhook = <ThrowOnError extends boolean = false>(options: Options<TestWebhookData, ThrowOnError>): RequestResult<TestWebhookResponses, TestWebhookErrors, ThrowOnError> => (options.client ?? client).post<TestWebhookResponses, TestWebhookErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/webhooks/{id}/test',
