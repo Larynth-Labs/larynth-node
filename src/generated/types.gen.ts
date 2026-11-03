@@ -23,15 +23,221 @@ export type AddCampaignContactsResult = {
     skipped: number;
 };
 
+export type AddSpamAllowRequest = {
+    e164: string;
+    note?: string;
+};
+
+export type AfterHoursTarget = {
+    assistant_id?: string;
+    forward_e164?: string;
+    /**
+     * take_message runs the open-hours agent with the closed-hours instruction and business_open = false
+     */
+    mode: 'same_agent' | 'assistant' | 'forward' | 'take_message';
+};
+
+export type AreaCode = {
+    cities: Array<string>;
+    /**
+     * Largest city served
+     */
+    city?: string;
+    npa: string;
+    overlay_of?: string;
+    state?: string;
+    timezones: Array<string>;
+};
+
 export type Assistant = {
     archived_at?: string;
+    /**
+     * Working hours derived from number routing; null until schedules ship
+     */
+    coverage?: AssistantCoverage;
     created_at: string;
+    /**
+     * The job line
+     */
+    description?: string;
+    draft?: AssistantDraftInfo;
+    has_unpublished_changes: boolean;
     id: string;
+    /**
+     * Main language of the current spec, then the languages it switches to
+     */
+    languages: Array<string>;
+    /**
+     * Reply-time target the call pages compare against
+     */
+    latency_target_ms: number;
     latest_version: number;
     name: string;
+    /**
+     * Numbers routed to this assistant
+     */
+    number_ids: Array<string>;
+    paused?: AssistantPause;
+    published?: AssistantPublished;
     published_version?: number;
+    source?: 'manual' | 'setup' | 'duplicate' | 'template' | 'import';
+    state: 'live' | 'paused' | 'draft' | 'archived';
     status: 'active' | 'archived';
+    /**
+     * Always single_prompt until flows ship
+     */
+    type: 'single_prompt' | 'flow';
     updated_at: string;
+};
+
+export type AssistantCoverage = {
+    bands: Array<AssistantCoverageBand>;
+    /**
+     * i18n key of the plain summary, for example around_the_clock
+     */
+    summary_key: string;
+};
+
+export type AssistantCoverageBand = {
+    /**
+     * mon to sun
+     */
+    days: Array<string>;
+    end_minute: number;
+    start_minute: number;
+};
+
+export type AssistantDraft = {
+    assistant_id: string;
+    call_handling?: CallHandling;
+    /**
+     * Set when phone menu navigation is on
+     */
+    call_limits?: CallLimits;
+    /**
+     * basics, instructions, voice, model, knowledge, tools, call_handling, disclosures, guardrails, post_call, advanced
+     */
+    changed_sections: Array<string>;
+    created_at: string;
+    created_by: string;
+    denoise?: boolean;
+    disclosure?: DisclosureSpec;
+    fillers?: Array<string>;
+    greeting_text: string;
+    /**
+     * Owner-added guardrails; the built-in rules from listGuardrailRules always apply and cannot be removed
+     */
+    guardrails?: GuardrailsSpec;
+    id: string;
+    interruption_profile?: InterruptionProfile;
+    /**
+     * Knowledge bases the assistant can search with the search_knowledge tool; each must be ready when the version is published
+     */
+    knowledge_base_ids?: Array<string>;
+    language: string;
+    /**
+     * Voice id per languages_extra entry, on the same tts model; unset uses the main voice when it speaks the language
+     */
+    language_voices?: {
+        [key: string]: string;
+    };
+    /**
+     * Languages the agent switches to when the caller speaks them; only languages the catalog marks switchable
+     */
+    languages_extra?: Array<string>;
+    latency?: LatencySettings;
+    llm_fallback_model_ids?: Array<string>;
+    /**
+     * Required for cascade
+     */
+    llm_model_id?: string;
+    llm_params?: {
+        [key: string]: unknown;
+    };
+    max_call_seconds?: number;
+    mode: 'cascade' | 's2s';
+    /**
+     * Post-call summary, data extraction and success evaluation
+     */
+    post_call?: PostCallSettings;
+    published_at?: string;
+    revision: number;
+    /**
+     * Required for s2s
+     */
+    s2s_model_id?: string;
+    s2s_params?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Required for cascade
+     */
+    stt_model_id?: string;
+    stt_params?: {
+        [key: string]: unknown;
+    };
+    system_prompt: string;
+    tools?: Array<AssistantTool>;
+    /**
+     * What happens when nobody picks up a transfer
+     */
+    transfer_fallback?: 'take_message' | 'next_target' | 'end';
+    /**
+     * Required for cascade
+     */
+    tts_model_id?: string;
+    tts_params?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Required for cascade
+     */
+    tts_voice_id?: string;
+    /**
+     * Turn-taking preset from listTurnPresets; custom means turn_profile and interruption_profile hold the advanced values. Unset is balanced
+     */
+    turn_preset?: 'patient' | 'balanced' | 'snappy' | 'custom';
+    turn_profile?: TurnProfile;
+    updated_at: string;
+    updated_by_name?: string;
+    version: number;
+    vocabulary?: Vocabulary;
+    warnings: Array<DraftWarning>;
+};
+
+export type AssistantDraftInfo = {
+    /**
+     * Editor sections that differ from the published version
+     */
+    changed_sections: Array<string>;
+    revision: number;
+    updated_at: string;
+    updated_by_name?: string;
+    version: number;
+};
+
+export type AssistantPause = {
+    at: string;
+    by_user_id?: string;
+    reason?: string;
+};
+
+export type AssistantPublish = {
+    at: string;
+    by_name?: string;
+    by_user_id?: string;
+    id?: string;
+    kind: 'publish' | 'rollback';
+    note?: string;
+    previous_version?: number;
+    version: number;
+};
+
+export type AssistantPublished = {
+    at: string;
+    by_name?: string;
+    by_user_id?: string;
+    version: number;
 };
 
 export type AssistantTool = {
@@ -55,11 +261,17 @@ export type AssistantTool = {
 
 export type AssistantVersion = {
     assistant_id: string;
+    call_handling?: CallHandling;
     created_at: string;
     created_by: string;
     denoise?: boolean;
+    disclosure?: DisclosureSpec;
     fillers?: Array<string>;
     greeting_text: string;
+    /**
+     * Owner-added guardrails; the built-in rules from listGuardrailRules always apply and cannot be removed
+     */
+    guardrails?: GuardrailsSpec;
     id: string;
     interruption_profile?: InterruptionProfile;
     /**
@@ -67,6 +279,16 @@ export type AssistantVersion = {
      */
     knowledge_base_ids?: Array<string>;
     language: string;
+    /**
+     * Voice id per languages_extra entry, on the same tts model; unset uses the main voice when it speaks the language
+     */
+    language_voices?: {
+        [key: string]: string;
+    };
+    /**
+     * Languages the agent switches to when the caller speaks them; only languages the catalog marks switchable
+     */
+    languages_extra?: Array<string>;
     latency?: LatencySettings;
     llm_fallback_model_ids?: Array<string>;
     /**
@@ -100,6 +322,10 @@ export type AssistantVersion = {
     system_prompt: string;
     tools?: Array<AssistantTool>;
     /**
+     * What happens when nobody picks up a transfer
+     */
+    transfer_fallback?: 'take_message' | 'next_target' | 'end';
+    /**
      * Required for cascade
      */
     tts_model_id?: string;
@@ -110,20 +336,41 @@ export type AssistantVersion = {
      * Required for cascade
      */
     tts_voice_id?: string;
+    /**
+     * Turn-taking preset from listTurnPresets; custom means turn_profile and interruption_profile hold the advanced values. Unset is balanced
+     */
+    turn_preset?: 'patient' | 'balanced' | 'snappy' | 'custom';
     turn_profile?: TurnProfile;
     version: number;
+    vocabulary?: Vocabulary;
 };
 
 export type AssistantVersionSpec = {
+    call_handling?: CallHandling;
     denoise?: boolean;
+    disclosure?: DisclosureSpec;
     fillers?: Array<string>;
     greeting_text: string;
+    /**
+     * Owner-added guardrails; the built-in rules from listGuardrailRules always apply and cannot be removed
+     */
+    guardrails?: GuardrailsSpec;
     interruption_profile?: InterruptionProfile;
     /**
      * Knowledge bases the assistant can search with the search_knowledge tool; each must be ready when the version is published
      */
     knowledge_base_ids?: Array<string>;
     language: string;
+    /**
+     * Voice id per languages_extra entry, on the same tts model; unset uses the main voice when it speaks the language
+     */
+    language_voices?: {
+        [key: string]: string;
+    };
+    /**
+     * Languages the agent switches to when the caller speaks them; only languages the catalog marks switchable
+     */
+    languages_extra?: Array<string>;
     latency?: LatencySettings;
     llm_fallback_model_ids?: Array<string>;
     /**
@@ -156,6 +403,10 @@ export type AssistantVersionSpec = {
     system_prompt: string;
     tools?: Array<AssistantTool>;
     /**
+     * What happens when nobody picks up a transfer
+     */
+    transfer_fallback?: 'take_message' | 'next_target' | 'end';
+    /**
      * Required for cascade
      */
     tts_model_id?: string;
@@ -166,7 +417,35 @@ export type AssistantVersionSpec = {
      * Required for cascade
      */
     tts_voice_id?: string;
+    /**
+     * Turn-taking preset from listTurnPresets; custom means turn_profile and interruption_profile hold the advanced values. Unset is balanced
+     */
+    turn_preset?: 'patient' | 'balanced' | 'snappy' | 'custom';
     turn_profile?: TurnProfile;
+    vocabulary?: Vocabulary;
+};
+
+export type AttestationStatement = {
+    key: string;
+    text: string;
+};
+
+export type Audience = {
+    contact_ids?: Array<string>;
+    import_id?: string;
+    kind: 'tags' | 'import' | 'contacts';
+    match?: 'any' | 'all';
+    tags?: Array<string>;
+};
+
+export type AudiencePreview = {
+    by_state: Array<StateAudience>;
+    by_timezone: Array<TimezoneShare>;
+    callable: number;
+    dnc: number;
+    no_consent: number;
+    sample_left_out: Array<LeftOutContact>;
+    total: number;
 };
 
 export type AutoTopUp = {
@@ -179,13 +458,17 @@ export type AutoTopUp = {
 };
 
 export type AvailableNumber = {
+    area_code?: string;
+    city?: string;
     country: string;
     e164: string;
+    kind?: 'local' | 'toll_free';
     /**
      * Rental price in micro-USD per month
      */
     monthly_price_micro: number;
     region?: string;
+    state?: string;
 };
 
 export type Balance = {
@@ -201,6 +484,40 @@ export type Balance = {
      */
     promo_credit_micro: number;
     updated_at: string;
+};
+
+export type BlockedCaller = {
+    /**
+     * Calls dropped since the block
+     */
+    blocked_calls: number;
+    created_at: string;
+    created_by?: string;
+    created_by_name?: string;
+    e164: string;
+    id: string;
+    last_blocked_at?: string;
+    reason?: string;
+    source_call_id?: string;
+};
+
+export type BulkResult = {
+    affected: number;
+    /**
+     * Set when the selection runs as a job; results arrive by notification
+     */
+    job_id?: string;
+    skipped: Array<SkippedCount>;
+};
+
+export type BulkUpdateContactsRequest = {
+    action: 'add_tag' | 'remove_tag' | 'mark_dnc' | 'add_to_campaign';
+    /**
+     * Draft or paused campaigns only
+     */
+    campaign_id?: string;
+    selection: ContactSelection;
+    tag?: string;
 };
 
 export type Call = {
@@ -242,38 +559,95 @@ export type Call = {
      */
     bridged_price_micro?: number;
     call_id: string;
+    /**
+     * Detail only: set when the caller's number is on the workspace block list
+     */
+    caller_blocked?: CallerBlockRef;
+    /**
+     * The contact name, else the name the caller gave
+     */
+    caller_name?: string;
     campaign_contact_id?: string;
     campaign_id?: string;
     cause?: string;
     codec?: 'G722' | 'PCMU' | 'PCMA' | 'opus';
+    contact_id?: string;
     created_at: string;
+    /**
+     * Opaque; pass as after or before to page from this call
+     */
+    cursor?: string;
     direction: 'inbound' | 'outbound' | 'web_test';
     disclosure_played_at?: string;
     ended_at?: string;
+    flagged?: CallFlag;
     from_e164?: string;
     hangup_by?: 'local' | 'remote' | 'system';
+    /**
+     * Detail only
+     */
+    latency?: CallLatency;
     mode: 'cascade' | 's2s';
+    not_billed_reason?: 'short_call' | 'spam' | 'blocked' | 'agent_paused';
     number_id?: string;
     opted_out: boolean;
-    outcome?: string;
+    /**
+     * Fixed platform list; null while live and until analysis finishes
+     */
+    outcome?: 'booked_appointment' | 'rescheduled' | 'answered_question' | 'message_taken' | 'transferred_to_staff' | 'no_resolution' | 'carrier_error' | 'voicemail_left' | 'caller_hung_up' | 'no_answer' | 'line_busy' | 'spam_blocked' | 'caller_blocked';
+    outcome_group?: 'handled' | 'needs_look' | 'not_connected';
+    /**
+     * machine: a machine answered and no message was left; phone_menu: the agent could not get through a phone menu
+     */
+    outcome_label?: 'machine' | 'phone_menu';
     /**
      * Settled price in micro-USD
      */
     price_micro?: number;
+    /**
+     * Detail only
+     */
+    quality?: CallQuality;
+    /**
+     * Automatic call quality check score
+     */
+    quality_score?: number;
+    /**
+     * Detail only
+     */
+    receipt?: CallReceipt;
+    /**
+     * Detail only
+     */
+    recording?: CallRecordingInfo;
     recording_allowed: boolean;
     recording_notice_played_at?: string;
+    /**
+     * Caller sentiment from the post-call analysis, on every call
+     */
+    sentiment?: 'positive' | 'neutral' | 'negative';
     sip_code?: number;
+    spam_flagged: boolean;
     status: 'queued' | 'dialing' | 'ringing' | 'in_progress' | 'completed' | 'no_answer' | 'busy' | 'failed' | 'canceled' | 'rejected';
+    successful?: boolean;
     /**
      * Short post-call summary, present on list items once analysed
      */
     summary?: string;
+    tags: Array<string>;
     to_e164?: string;
+    transfer?: CallTransfer;
     updated_at: string;
 };
 
 export type CallAnalysis = {
     call_id: string;
+    /**
+     * As the caller said it, for example "before 10"
+     */
+    callback_by?: string;
+    callback_requested: boolean;
+    caller_name?: string;
     /**
      * Analysis cost in micro-USD
      */
@@ -282,11 +656,19 @@ export type CallAnalysis = {
     data: {
         [key: string]: unknown;
     };
+    key_moment?: InboxSnippet;
     model_id?: string;
+    outcome?: 'booked_appointment' | 'rescheduled' | 'answered_question' | 'message_taken' | 'transferred_to_staff' | 'no_resolution' | 'carrier_error' | 'voicemail_left' | 'caller_hung_up' | 'no_answer' | 'line_busy' | 'spam_blocked' | 'caller_blocked';
+    /**
+     * Automatic call quality checks, included in every plan
+     */
+    quality?: CallQuality;
     reason?: string;
+    sentiment?: 'positive' | 'neutral' | 'negative';
     successful?: boolean;
     summary: string;
     tokens: number;
+    unanswered_question?: string;
 };
 
 export type CallEvent = {
@@ -300,6 +682,160 @@ export type CallEvent = {
         [key: string]: unknown;
     };
     seq: number;
+};
+
+export type CallFlag = {
+    at: string;
+    by_user_id?: string;
+};
+
+export type CallHandling = {
+    /**
+     * Low background sound the caller hears; never recorded. Unset is off
+     */
+    ambient_sound?: 'office' | 'cafe' | 'call_center';
+    /**
+     * Key that ends a keypad entry. Unset is #
+     */
+    dtmf_end_key?: '#' | '*' | 'none';
+    /**
+     * Keypad entries reach the agent as caller input; digits are masked in transcripts. Unset is on. On outbound calls a lone 9 always opts the caller out
+     */
+    dtmf_input?: boolean;
+    /**
+     * An entry also ends at this many digits; 0 is no limit
+     */
+    dtmf_max_digits?: number;
+    /**
+     * An entry also ends this long after the last key. Unset is 3000
+     */
+    dtmf_wait_ms?: number;
+    end_on_goodbye?: boolean;
+    /**
+     * Ask once whether the caller is still there before the silence hang-up. Unset is on
+     */
+    idle_reminder?: boolean;
+    /**
+     * What the agent tries to reach in a phone menu, for example billing
+     */
+    ivr_goal?: string;
+    /**
+     * Navigate phone menus on outbound calls, with at most 2 minutes in menus and 3 minutes on hold; the call ends as no_resolution with label phone_menu when the menu cannot be passed. Unset is off
+     */
+    ivr_navigation?: boolean;
+    max_reply?: 'short' | 'normal' | 'long';
+    /**
+     * Record calls of this agent. Unset is on; off still keeps transcripts and the caller hears that the call may be transcribed
+     */
+    recording?: boolean;
+    /**
+     * End the call after this much caller silence. Unset is 30
+     */
+    silence_end_s?: 15 | 30 | 60;
+    /**
+     * What the agent does on voicemail. Unset follows the platform suggestion: hang_up until number reputation is cleared, then leave_message
+     */
+    voicemail_action?: 'leave_message' | 'hang_up';
+    /**
+     * Detect voicemail and phone menus on outbound calls. Unset is on; a campaign or createCall amd_mode overrides it
+     */
+    voicemail_detection?: boolean;
+    /**
+     * The purpose part of the voicemail; the business name, AI disclosure, callback number and any required opt-out line are added in a fixed template
+     */
+    voicemail_message?: string;
+};
+
+export type CallLatency = {
+    avg_ms: number;
+    /**
+     * Agent turns slower than the target
+     */
+    over_target: number;
+    p95_ms: number;
+    target_ms: number;
+};
+
+export type CallLimits = {
+    /**
+     * Most time spent on hold after a phone menu on one call
+     */
+    hold_max_s: number;
+    /**
+     * Most a call can spend in menus and on hold at this agent's per-minute price, in micro-units of the account currency
+     */
+    max_menu_cost_micro: number;
+    micro_per_minute: number;
+    /**
+     * Most time spent in phone menus on one call
+     */
+    phone_menu_max_s: number;
+};
+
+export type CallPage = {
+    data: Array<Call>;
+    /**
+     * Cursor for the older page; null on the last page
+     */
+    next_cursor: string | null;
+    /**
+     * Cursor for the newer page; null on the first page
+     */
+    prev_cursor: string | null;
+};
+
+export type CallQuality = {
+    checked_at: string;
+    checks: Array<CallQualityCheck>;
+    score: number;
+};
+
+export type CallQualityCheck = {
+    /**
+     * Offset of the moment the check refers to
+     */
+    at_ms?: number;
+    key: 'greeting' | 'understood_caller' | 'stayed_on_task' | 'followed_guardrails' | 'accurate_answers' | 'handled_next_step' | 'reply_speed' | 'ended_cleanly';
+    note?: string;
+    passed: boolean;
+};
+
+export type CallReceipt = {
+    free_under_ms: number;
+    ledger_transaction_id?: string;
+    lines: Array<CallReceiptLine>;
+    not_billed_reason?: 'short_call' | 'spam' | 'blocked' | 'agent_paused';
+    rounding: 'started_minute';
+    settled_at?: string;
+    total_micro: number;
+};
+
+export type CallReceiptLine = {
+    amount_micro: number;
+    billed_minutes: number;
+    kind: 'agent_minutes' | 'bridged_minutes' | 'premium_voice' | 'premium_model';
+    quantity_ms: number;
+    unit_price_micro: number;
+};
+
+export type CallRecordingInfo = {
+    deleted_at?: string;
+    deleted_by_name?: string;
+    deleted_reason?: 'retention' | 'user' | 'data_request' | 'key_destroyed';
+    id: string;
+    retention_until: string;
+    state: 'pending' | 'uploaded' | 'verified' | 'failed' | 'purged';
+};
+
+export type CallTransfer = {
+    answered: boolean;
+    attempts: number;
+    destination_name: string;
+    leg_call_id?: string;
+    mode: 'warm' | 'cold';
+    ring_ms: number;
+    started_at?: string;
+    talk_ms: number;
 };
 
 export type CallTurn = {
@@ -328,28 +864,104 @@ export type CallTurn = {
     user_text?: string;
 };
 
+export type CallerBlockRef = {
+    created_at: string;
+    id: string;
+};
+
+export type CallingRule = {
+    ca_preamble: boolean;
+    counsel_reviewed: boolean;
+    freq_cap_24h: number;
+    holidays_next_90d: Array<HolidayCalendarDate>;
+    registration_required: boolean;
+    state: string;
+    sunday: 'allowed' | 'banned' | 'limited';
+    windows: Array<RuleWindow>;
+};
+
+export type CallsNotBilled = {
+    agent_paused: number;
+    blocked: number;
+    short_call: number;
+    spam: number;
+};
+
+export type CallsSummary = {
+    avg_billed_ms: number;
+    billed_ms: number;
+    by_outcome: {
+        [key: string]: number;
+    };
+    calls: number;
+    connected: number;
+    groups?: Array<CallsSummaryGroup>;
+    not_billed: CallsNotBilled;
+    not_connected: number;
+    rate_micro_per_min: number;
+    spend_micro: number;
+};
+
+export type CallsSummaryGroup = {
+    billed_ms: number;
+    booked: number;
+    calls: number;
+    connected: number;
+    /**
+     * Assistant id, outcome, local date (YYYY-MM-DD) or number id
+     */
+    key: string;
+    /**
+     * Calls flagged as spam (not billed)
+     */
+    spam_blocked: number;
+    spend_micro: number;
+};
+
 export type Campaign = {
-    amd_mode: 'off' | 'hangup_on_machine' | 'voicemail';
+    abandonment_rate_30d?: number;
+    agent_name?: string;
+    amd_mode: 'agent' | 'off' | 'hangup_on_machine' | 'voicemail';
     amd_profile_id?: string;
+    answer_rate?: number;
     archived_at?: string;
     assistant_id: string;
+    audience?: Audience;
+    /**
+     * Stop checks only, for list rows
+     */
+    blockers?: Array<PreflightCheck>;
     cps: number;
     created_at: string;
     created_by: string;
+    display_status?: 'draft' | 'scheduled' | 'running' | 'paused' | 'safeguard_review' | 'blocked' | 'completed' | 'archived';
+    duplicated_from?: string;
     end_at?: string;
     id: string;
     informational_category?: string;
+    launch?: CampaignLaunch;
     max_attempts: number;
+    max_calls_per_day?: number;
     max_concurrent: number;
     name: string;
+    next_window_at?: string;
     number_ids: Array<string>;
+    optout_rate?: number;
     paused_reason?: 'user' | 'credits_exhausted' | 'window_closed' | 'no_caller_id' | 'compliance' | 'operator';
+    progress?: CampaignProgress;
     purpose: 'informational' | 'telemarketing';
     retry_policy: RetryPolicy;
+    /**
+     * Send back as If-Match on updateCampaign
+     */
+    revision?: number;
     ring_timeout_s: number;
+    safeguard?: CampaignSafeguard;
+    spend_micro: number;
     start_at?: string;
     status: 'draft' | 'running' | 'paused' | 'completed' | 'archived';
     updated_at: string;
+    voicemail?: CampaignVoicemail;
     voicemail_message?: string;
     windows: Array<CampaignWindow>;
 };
@@ -363,9 +975,14 @@ export type CampaignContact = {
     last_call_id?: string;
     last_outcome?: string;
     /**
+     * Plain result key for the Contacts tab
+     */
+    last_result?: string;
+    /**
      * Rule id of the last compliance denial
      */
     last_rule?: string;
+    name?: string;
     next_attempt_at: string;
     state: 'pending' | 'dialing' | 'in_call' | 'retry' | 'completed' | 'failed' | 'skipped' | 'opted_out' | 'exhausted';
     updated_at: string;
@@ -381,7 +998,103 @@ export type CampaignContactEnrolment = {
     };
 };
 
+export type CampaignCounts = {
+    by_display_status: {
+        [key: string]: number;
+    };
+};
+
+export type CampaignEstimate = {
+    available_micro: number;
+    /**
+     * Where the answer rate and minutes came from
+     */
+    basis: 'tenant_history' | 'platform_default';
+    /**
+     * Started minutes
+     */
+    billed_minutes_per_answered: number;
+    callable: number;
+    covers_ratio: number;
+    daily_spend_cap_micro?: number;
+    days_to_finish?: number;
+    estimate_micro: number;
+    expected_answer_rate: number;
+    expected_answered: number;
+    high_micro: number;
+    low_micro: number;
+    premium_micro_per_min: number;
+    rate_micro_per_min: number;
+};
+
+export type CampaignEvent = {
+    at: string;
+    /**
+     * Events of this kind rolled into the hour
+     */
+    count: number;
+    id: string;
+    kind: 'preflight_passed' | 'held_until_window' | 'skipped_frequency' | 'skipped_holiday_sunday' | 'opted_out' | 'dnc_removed_at_dial' | 'ca_preamble_declined' | 'safeguard_paused' | 'review_requested' | 'review_decided' | 'started' | 'paused' | 'resumed' | 'credits_exhausted' | 'completed';
+    params?: {
+        [key: string]: unknown;
+    };
+    tone: 'ok' | 'neutral' | 'warn' | 'stop';
+};
+
+export type CampaignLaunch = {
+    at: string;
+    attest_text_version: string;
+    by_name: string;
+    by_user_id: string;
+};
+
+export type CampaignOutcome = {
+    count: number;
+    label?: 'machine' | 'phone_menu';
+    outcome: string;
+};
+
+export type CampaignPage = {
+    counts: CampaignCounts;
+    data: Array<Campaign>;
+    next_cursor: string | null;
+};
+
+export type CampaignProgress = {
+    by_state: {
+        [key: string]: number;
+    };
+    contacts_total: number;
+    reached: number;
+};
+
+export type CampaignRef = {
+    id: string;
+    name: string;
+    status: 'draft' | 'running' | 'paused' | 'completed' | 'archived';
+};
+
+export type CampaignSafeguard = {
+    decided_at?: string;
+    metric: {
+        [key: string]: unknown;
+    };
+    /**
+     * Larynth reviewer's note
+     */
+    note?: string;
+    paused_at: string;
+    reason: 'optout_rate' | 'complaints' | 'abandonment' | 'short_calls' | 'carrier_blocking' | 'script_flag';
+    requested_at?: string;
+    state: 'in_review' | 'review_requested' | 'cleared' | 'rejected';
+    threshold: {
+        [key: string]: unknown;
+    };
+};
+
 export type CampaignStats = {
+    abandonment_rate_30d?: number;
+    answer_rate?: number;
     answered: number;
     as_of: string;
     by_state: {
@@ -394,7 +1107,20 @@ export type CampaignStats = {
     human: number;
     machine: number;
     opted_out: number;
+    optout_rate?: number;
+    outcomes?: Array<CampaignOutcome>;
     spent_micro: number;
+};
+
+export type CampaignVoicemail = {
+    /**
+     * Fixed text with variables, played inside the locked compliance template
+     */
+    message?: string;
+    /**
+     * hangup plays the required short message for marketing; message needs the opt-out line for marketing; agent uses the agent's setting
+     */
+    mode: 'off' | 'hangup' | 'message' | 'agent';
 };
 
 export type CampaignWindow = {
@@ -406,10 +1132,22 @@ export type CampaignWindow = {
     start_minute: number;
 };
 
+export type CatalogLanguage = {
+    /**
+     * Language code, for example en
+     */
+    code: string;
+    name: string;
+};
+
 export type CatalogModel = {
     defaults: {
         [key: string]: unknown;
     };
+    /**
+     * Plain description written by Larynth
+     */
+    description?: string;
     display_name: string;
     id: string;
     is_default: boolean;
@@ -420,9 +1158,25 @@ export type CatalogModel = {
     params_schema: {
         [key: string]: unknown;
     };
+    /**
+     * Added to the call-minute rate; 0 when no premium rate row exists. Equals what billing charges
+     */
+    premium_micro_per_min: number;
     provider_key: string;
     provider_name: string;
+    /**
+     * The recommended model of its tier
+     */
+    recommended: boolean;
     status: 'enabled' | 'deprecated';
+    /**
+     * Quality tier the editor shows by default; unset for models listed only under Advanced
+     */
+    tier?: 'fast' | 'balanced' | 'best';
+    /**
+     * Typical time this model adds to a reply, measured on our cells
+     */
+    typical_reply_ms?: number;
     wire_rates: Array<number>;
 };
 
@@ -430,14 +1184,67 @@ export type CatalogVoice = {
     attributes: {
         [key: string]: unknown;
     };
+    /**
+     * Plain description written by Larynth
+     */
+    description?: string;
     id: string;
     language: string;
+    /**
+     * Languages the voice speaks well; the first is its main language
+     */
+    languages: Array<string>;
     model_id?: string;
     name: string;
+    /**
+     * Added to the call-minute rate; 0 when no premium rate row exists. Equals what billing charges
+     */
+    premium_micro_per_min: number;
     preview_url?: string;
     provider_key: string;
     status: 'enabled' | 'deprecated';
+    tags: Array<string>;
     voice_key: string;
+};
+
+export type CheckFix = {
+    kind: 'link' | 'step';
+    /**
+     * Dashboard route or wizard step
+     */
+    target: string;
+};
+
+export type CompareChange = {
+    after?: unknown;
+    before?: unknown;
+    /**
+     * Spec path
+     */
+    path: string;
+};
+
+export type ComparePrice = {
+    after_micro_per_min: number;
+    before_micro_per_min: number;
+};
+
+export type CompareResult = {
+    from_version: number;
+    instructions_diff: InstructionsDiff;
+    numbers_affected: Array<NumberRef>;
+    price: ComparePrice;
+    sections: Array<CompareSection>;
+    /**
+     * Reserved; null until simulations ship
+     */
+    simulations: SimulationsSummary;
+    to_version: number;
+};
+
+export type CompareSection = {
+    changes: Array<CompareChange>;
+    key: 'basics' | 'instructions' | 'voice' | 'model' | 'knowledge' | 'tools' | 'call_handling' | 'disclosures' | 'guardrails' | 'post_call' | 'advanced';
 };
 
 export type ComplianceDecision = {
@@ -457,9 +1264,36 @@ export type ComplianceDecision = {
     rules_version: string;
 };
 
+export type ComplianceTextView = {
+    active: boolean;
+    body: string;
+    counsel_reviewed: boolean;
+    id: string;
+    kind: 'disclosure_inbound' | 'disclosure_outbound' | 'optout_instruction' | 'recording_notice' | 'optout_ack' | 'voicemail_intro' | 'voicemail_optout' | 'screener_line' | 'unavailable' | 'goodbye' | 'inbound_ai_attestation' | 'voicemail_callback' | 'transcript_notice' | 'ca_preamble' | 'ca_preamble_decline_ack' | 'after_hours_message_mode' | 'optout_line_greeting' | 'optout_line_ack' | 'callback_check_code' | 'biometric_consent' | 'campaign_launch_attestation' | 'consent_attestation';
+    language: string;
+    /**
+     * inbound_ai_attestation only: the statements the owner confirms one by one
+     */
+    statements?: Array<AttestationStatement>;
+    version: number;
+};
+
+export type Concurrency = {
+    in_use: number;
+    limit: number;
+};
+
 export type Consent = {
+    /**
+     * User or API key that attested the evidence
+     */
+    attested_by?: string;
     captured_ip?: string;
     contact_id?: string;
+    /**
+     * informational, marketing
+     */
+    covers?: Array<string>;
     created_at: string;
     created_by: string;
     e164: string;
@@ -470,24 +1304,98 @@ export type Consent = {
     id: string;
     import_id?: string;
     kind: 'express' | 'express_written';
+    /**
+     * Latest opt-out recorded after this consent
+     */
+    revoked_at?: string;
     scope_id?: string;
     scope_type: 'tenant' | 'campaign';
-    source: 'import' | 'api' | 'web_form' | 'verbal_recorded' | 'other';
+    source: 'import' | 'api' | 'web_form' | 'paper_form' | 'verbal_recorded' | 'customer_agreement' | 'other';
+};
+
+export type ConsentInput = {
+    /**
+     * Must be true: the user attests the evidence is genuine
+     */
+    attest: boolean;
+    /**
+     * express_written only
+     */
+    covers_marketing?: boolean;
+    evidence_ref?: string;
+    evidence_text: string;
+    /**
+     * Defaults to now
+     */
+    granted_at?: string;
+    kind: 'express' | 'express_written';
+    source: 'web_form' | 'paper_form' | 'verbal_recorded' | 'customer_agreement' | 'other';
 };
 
 export type Contact = {
     attributes: {
         [key: string]: unknown;
     };
+    callable?: ContactCallable;
+    consent_summary?: 'written' | 'express' | 'none' | 'opted_out';
     country?: string;
     created_at: string;
+    /**
+     * On createContact this is the check made at creation
+     */
+    dnc?: ContactDnc;
     e164: string;
     first_name?: string;
     id: string;
+    import_id?: string;
+    last_contact?: ContactLastCall;
     last_name?: string;
+    /**
+     * First and last name joined; empty when unknown
+     */
+    name?: string;
     region?: string;
+    region_resolved?: string;
+    /**
+     * existing means an established relationship (California preamble rule)
+     */
+    relationship?: 'existing' | 'none';
+    source?: 'manual' | 'import' | 'api' | 'inbound_call';
+    tags?: Array<string>;
     timezone?: string;
+    /**
+     * Contact time zone, else the area code's single zone; empty means the contact is not dialed
+     */
+    timezone_resolved?: string;
     updated_at: string;
+};
+
+export type ContactCallable = {
+    informational: boolean;
+    marketing: boolean;
+};
+
+export type ContactCounts = {
+    all: number;
+    callable: number;
+    dnc: number;
+    needs_consent: number;
+};
+
+export type ContactDnc = {
+    listed: boolean;
+    /**
+     * tenant, opt_out, platform, national; national only from this workspace's own registry data
+     */
+    sources: Array<string>;
+};
+
+export type ContactFilter = {
+    import_id?: string;
+    purpose?: 'informational' | 'telemarketing';
+    q?: string;
+    tags?: Array<string>;
+    view?: 'all' | 'callable' | 'needs_consent' | 'dnc';
 };
 
 export type ContactImport = {
@@ -495,22 +1403,125 @@ export type ContactImport = {
     attested_by: string;
     campaign_id?: string;
     consent_kind?: 'express' | 'express_written';
-    consent_source?: 'import' | 'web_form' | 'verbal_recorded' | 'other';
+    consent_source?: 'import' | 'web_form' | 'paper_form' | 'verbal_recorded' | 'customer_agreement' | 'other';
+    covers_marketing: boolean;
     created_at: string;
     error?: string;
+    evidence_text?: string;
+    /**
+     * A validated import can be committed until then
+     */
+    expires_at?: string;
     finished_at?: string;
     id: string;
+    mapping?: Array<ImportColumnMapping>;
+    mode?: 'validate' | 'commit';
+    phase?: 'validating' | 'validated' | 'importing' | 'done' | 'failed';
+    preview?: ImportPreview;
+    progress: number;
+    rejects_ready: boolean;
     rows_ok: number;
     rows_rejected: number;
     rows_total: number;
     status: 'uploaded' | 'processing' | 'done' | 'failed';
+    tag?: string;
+};
+
+export type ContactLastCall = {
+    at: string;
+    call_id: string;
+    direction: 'inbound' | 'outbound' | 'web_test';
+};
+
+export type ContactPage = {
+    /**
+     * Exact up to max_contacts; cached 30 s per filter
+     */
+    counts: ContactCounts;
+    data: Array<Contact>;
+    next_cursor: string | null;
+    prev_cursor: string | null;
+};
+
+export type ContactSelection = {
+    /**
+     * Instead of ids
+     */
+    filter?: ContactFilter;
+    ids?: Array<string>;
+};
+
+export type Conversation = {
+    answered_at?: string;
+    call_id: string;
+    duration_ms: number;
+    items: Array<ConversationItem>;
+    latency_target_ms: number;
+    live: boolean;
+    next_cursor: string | null;
+};
+
+export type ConversationItem = {
+    /**
+     * Offset from answered_at
+     */
+    at_ms: number;
+    barged_in?: boolean;
+    end_ms?: number;
+    kind: 'turn' | 'tool' | 'transfer' | 'marker';
+    latency?: TurnLatency;
+    marker?: ConversationMarker;
+    speaker?: 'caller' | 'agent' | 'staff' | 'system';
+    text?: string;
+    tool?: ConversationTool;
+    transfer?: CallTransfer;
+    /**
+     * Realtime only: text over 4 KB was cut; fetch the conversation
+     */
+    truncated?: boolean;
+    turn_index?: number;
+};
+
+export type ConversationMarker = {
+    /**
+     * Keypad digits are always masked
+     */
+    digits_masked?: string;
+    kind: 'disclosure' | 'recording_notice' | 'dtmf' | 'opt_out' | 'voicemail';
+};
+
+export type ConversationTool = {
+    args?: {
+        [key: string]: unknown;
+    };
+    duration_ms: number;
+    name: string;
+    result?: {
+        [key: string]: unknown;
+    };
+    status: 'ok' | 'error' | 'timeout';
 };
 
 export type CreateAssistantRequest = {
     name: string;
 };
 
+export type CreateBlockedCallerRequest = {
+    /**
+     * Block the caller of this call
+     */
+    call_id?: string;
+    /**
+     * Set e164 or call_id
+     */
+    e164?: string;
+    reason?: string;
+};
+
 export type CreateCallRequest = {
+    /**
+     * Overrides the agent voicemail setting; unset uses the agent call_handling
+     */
     amd_mode?: 'off' | 'hangup_on_machine' | 'voicemail';
     amd_profile_id?: string;
     /**
@@ -528,12 +1539,23 @@ export type CreateCallRequest = {
     variables?: {
         [key: string]: string;
     };
+    /**
+     * Overrides the agent voicemail message
+     */
+    voicemail_message?: string;
 };
 
 export type CreateCampaignRequest = {
-    amd_mode?: 'off' | 'hangup_on_machine' | 'voicemail';
+    /**
+     * agent uses the agent call_handling voicemail setting; unset on create is agent
+     */
+    amd_mode?: 'agent' | 'off' | 'hangup_on_machine' | 'voicemail';
     amd_profile_id?: string;
     assistant_id: string;
+    /**
+     * Snapshotted into the campaign's contacts at launch
+     */
+    audience?: Audience;
     cps?: number;
     end_at?: string;
     /**
@@ -541,16 +1563,24 @@ export type CreateCampaignRequest = {
      */
     informational_category?: string;
     max_attempts?: number;
+    /**
+     * Per person per rolling 24 h; marketing is always 1
+     */
+    max_calls_per_day?: number;
     max_concurrent?: number;
     name: string;
     /**
-     * Caller-ID pool
+     * Caller-ID pool; every number must have usage.can_call_out
      */
     number_ids?: Array<string>;
     purpose: 'informational' | 'telemarketing';
     retry_policy?: RetryPolicy;
     ring_timeout_s?: number;
     start_at?: string;
+    /**
+     * Maps onto amd_mode and voicemail_message; takes precedence when both are sent
+     */
+    voicemail?: CampaignVoicemail;
     voicemail_message?: string;
     /**
      * Further restricts the legal calling windows
@@ -559,8 +1589,16 @@ export type CreateCampaignRequest = {
 };
 
 export type CreateConsentRequest = {
+    /**
+     * Dashboard callers must attest the evidence is genuine; the server stores who, when, IP and user agent
+     */
+    attest?: boolean;
     captured_ip?: string;
     contact_id?: string;
+    /**
+     * express_written only
+     */
+    covers_marketing?: boolean;
     e164: string;
     /**
      * One of evidence_ref or evidence_text is required
@@ -574,18 +1612,27 @@ export type CreateConsentRequest = {
      */
     scope_id?: string;
     scope_type: 'tenant' | 'campaign';
-    source: 'api' | 'web_form' | 'verbal_recorded' | 'other';
+    source: 'api' | 'web_form' | 'paper_form' | 'verbal_recorded' | 'customer_agreement' | 'other';
 };
 
 export type CreateContactRequest = {
     attributes?: {
         [key: string]: unknown;
     };
+    /**
+     * Saved with the contact; without it the contact has no consent
+     */
+    consent?: ConsentInput;
     country?: string;
     e164: string;
     first_name?: string;
     last_name?: string;
     region?: string;
+    relationship?: 'existing' | 'none';
+    /**
+     * Lower case, at most 24 characters each
+     */
+    tags?: Array<string>;
     timezone?: string;
 };
 
@@ -608,6 +1655,14 @@ export type CreateRevocationRequest = {
      * Opt-out scope: telemarketing covers all marketing calls, another value one informational category; empty covers every call
      */
     category?: string;
+    /**
+     * How the person asked; any reasonable method counts and applies the same day across the workspace
+     */
+    channel?: 'dashboard' | 'email' | 'web_form' | 'phone_request' | 'other';
+    /**
+     * The person complained; counts toward the campaign safety check
+     */
+    complaint?: boolean;
     e164: string;
     excerpt?: string;
     /**
@@ -622,7 +1677,7 @@ export type CreateWebCallRequest = {
      */
     sdp_offer: string;
     /**
-     * Use the latest version instead of the published one
+     * Use the open draft (else the latest version) instead of the published one
      */
     use_draft?: boolean;
     variables?: {
@@ -632,7 +1687,7 @@ export type CreateWebCallRequest = {
 
 export type CreateWebhookRequest = {
     description?: string;
-    event_types: Array<'call.started' | 'call.answered' | 'call.ended' | 'call.analyzed' | 'call.recording.ready' | 'call.transferred' | 'campaign.started' | 'campaign.paused' | 'campaign.completed' | 'campaign.contact.completed' | 'compliance.opt_out' | 'billing.balance.low' | 'billing.top_up.succeeded' | 'billing.auto_top_up.failed' | 'number.provisioned' | 'number.released'>;
+    event_types: Array<'call.started' | 'call.answered' | 'call.ended' | 'call.analyzed' | 'call.recording.ready' | 'call.transferred' | 'campaign.started' | 'campaign.paused' | 'campaign.completed' | 'campaign.contact.completed' | 'compliance.opt_out' | 'billing.balance.low' | 'billing.top_up.succeeded' | 'billing.auto_top_up.failed' | 'number.provisioned' | 'number.released' | 'notification.call.summary' | 'notification.campaign.completed' | 'notification.campaign.paused' | 'notification.billing.balance_low' | 'notification.billing.top_up_succeeded' | 'notification.billing.auto_top_up_failed' | 'notification.spending_request.created' | 'notification.number.provisioned' | 'notification.number.released' | 'notification.compliance.optout_alert' | 'notification.inbox.callback_waiting' | 'notification.alert.missed_calls_spike' | 'notification.alert.transfers_failing' | 'notification.alert.tool_failing' | 'notification.agent.paused' | 'inbox.item.created' | 'inbox.item.cleared' | 'agent.published' | 'agent.paused' | 'agent.resumed' | 'call.flagged' | 'recording.deleted' | 'caller.blocked' | 'number.routing_changed' | 'notification.campaign.safeguard_paused' | 'notification.campaign.review_decided' | 'notification.verification.updated'>;
     url: string;
 };
 
@@ -660,9 +1715,75 @@ export type DncEntry = {
     e164: string;
     id: string;
     reason?: string;
+    /**
+     * Only entries the business added by hand, CSV or API can be removed
+     */
+    removable: boolean;
     removed_at?: string;
+    removed_by?: string;
+    removed_reason?: string;
     scope: 'tenant' | 'platform';
     source: 'internal' | 'in_call_opt_out' | 'revocation' | 'api' | 'import' | 'operator';
+};
+
+export type DiffLine = {
+    /**
+     * Line number in the older text
+     */
+    a?: number;
+    /**
+     * Line number in the newer text
+     */
+    b?: number;
+    op: 'equal' | 'add' | 'del' | 'elided';
+    text: string;
+};
+
+export type DisclosureSpec = {
+    /**
+     * The inbound AI disclosure; publishing off needs an active owner attestation. Unset is on
+     */
+    inbound_ai?: 'on' | 'off';
+};
+
+export type DncCheck = {
+    at: string;
+    campaign_id?: string;
+    list: 'tenant' | 'opt_out' | 'platform' | 'national';
+    reason_code: string;
+    result: 'clear' | 'listed' | 'not_configured';
+};
+
+export type DncImport = {
+    created_at: string;
+    finished_at?: string;
+    id: string;
+    rows_added: number;
+    rows_rejected: number;
+    rows_total: number;
+    status: 'queued' | 'running' | 'done' | 'failed';
+};
+
+export type DraftWarning = {
+    code: 'unknown_variable' | 'knowledge_not_ready' | 'voice_language_mismatch' | 'language_not_switchable' | 'language_unavailable' | 'language_voice_missing' | 'keypad_nine_reserved' | 'ivr_needs_voicemail_detection' | 'keyterms_unsupported';
+    /**
+     * Spec path, for example system_prompt
+     */
+    field: string;
+    params?: {
+        [key: string]: string;
+    };
+};
+
+export type DuplicateAssistantRequest = {
+    /**
+     * Unset is the original name with a copy suffix
+     */
+    name?: string;
+};
+
+export type DuplicateCampaignRequest = {
+    name?: string;
 };
 
 export type EndCallRequest = {
@@ -684,6 +1805,14 @@ export type ErrorDetail = {
     value?: unknown;
 };
 
+export type EstimateCampaignRequest = {
+    campaign_id?: string;
+    /**
+     * Instead of campaign_id
+     */
+    draft?: CreateCampaignRequest;
+};
+
 export type ExtractionField = {
     description?: string;
     /**
@@ -696,6 +1825,84 @@ export type ExtractionField = {
      */
     required?: boolean;
     type: 'string' | 'number' | 'boolean' | 'enum' | 'date';
+};
+
+export type ForwardSource = {
+    calls: number;
+    e164: string;
+    first_seen_at: string;
+    last_seen_at: string;
+};
+
+export type GuardrailBuiltIn = {
+    category: 'safety' | 'privacy' | 'honesty' | 'compliance' | 'scope';
+    description: string;
+    key: string;
+    title: string;
+    version: number;
+};
+
+export type GuardrailCustomRule = {
+    /**
+     * A rule in plain words, applied on top of the built-in rules
+     */
+    text: string;
+};
+
+export type GuardrailTopic = {
+    /**
+     * What the agent says instead; unset uses the built-in polite refusal
+     */
+    response?: string;
+    /**
+     * A topic the agent must not discuss
+     */
+    topic: string;
+};
+
+export type GuardrailsSpec = {
+    blocked_topics?: Array<GuardrailTopic>;
+    custom_rules?: Array<GuardrailCustomRule>;
+};
+
+export type HolidayCalendar = {
+    dates: Array<HolidayCalendarDate>;
+    key: 'us_federal';
+    name: string;
+};
+
+export type HolidayCalendarDate = {
+    date: string;
+    name: string;
+};
+
+export type HolidayDate = {
+    closed: boolean;
+    date: string;
+    name: string;
+};
+
+export type HolidaySettings = {
+    /**
+     * Preset calendar; empty for none
+     */
+    calendar?: 'us_federal';
+    /**
+     * Own dates within the next 24 months
+     */
+    dates: Array<HolidayDate>;
+};
+
+export type HoursBand = {
+    /**
+     * 1 = Monday … 7 = Sunday
+     */
+    days: Array<number>;
+    /**
+     * Greater than start_minute; split overnight hours into two bands
+     */
+    end_minute: number;
+    start_minute: number;
 };
 
 export type IceServer = {
@@ -713,6 +1920,54 @@ export type IceServers = {
      * Pass as RTCConfiguration.iceServers
      */
     ice_servers: Array<IceServer>;
+};
+
+export type ImportColumnMapping = {
+    column: string;
+    /**
+     * Variable name for attr
+     */
+    key?: string;
+    target: 'phone' | 'first_name' | 'last_name' | 'timezone' | 'tag' | 'attr' | 'consent_evidence' | 'relationship' | 'skip';
+};
+
+export type ImportPreview = {
+    /**
+     * Saved but not called
+     */
+    dnc: number;
+    duplicate_in_file: number;
+    /**
+     * Existing contacts keep their details and gain this import's consent record
+     */
+    existing_updated: number;
+    invalid: number;
+    non_us: number;
+    problems: Array<ImportProblem>;
+    ready: number;
+    rows_total: number;
+};
+
+export type ImportProblem = {
+    kind: 'invalid' | 'non_us' | 'dnc' | 'duplicate' | 'existing';
+    reason_code: string;
+    row: number;
+    value_masked: string;
+};
+
+export type InboxSnippet = {
+    at_ms: number;
+    speaker: 'caller' | 'agent' | 'staff';
+    text: string;
+};
+
+export type InstructionsDiff = {
+    adds: number;
+    dels: number;
+    /**
+     * Equal runs longer than 3 lines are elided
+     */
+    lines: Array<DiffLine>;
 };
 
 export type InterruptionProfile = {
@@ -810,6 +2065,14 @@ export type LatencySettings = {
     speculative_tts_min_prob?: number;
 };
 
+export type LaunchAttestation = {
+    /**
+     * Must be true
+     */
+    accepted: boolean;
+    text_version: string;
+};
+
 export type LedgerEntry = {
     account: 'available' | 'held';
     /**
@@ -825,20 +2088,147 @@ export type LedgerEntry = {
     transaction_id: string;
 };
 
+export type LeftOutContact = {
+    contact_id: string;
+    name?: string;
+    reason: 'dnc' | 'no_consent' | 'no_timezone' | 'not_us';
+};
+
+export type ListAreaCode = {
+    data: Array<AreaCode>;
+};
+
+export type ListCallingRule = {
+    data: Array<CallingRule>;
+};
+
+export type ListCatalogLanguage = {
+    data: Array<CatalogLanguage>;
+};
+
+export type ListComplianceTextView = {
+    data: Array<ComplianceTextView>;
+};
+
+export type ListGuardrailBuiltIn = {
+    data: Array<GuardrailBuiltIn>;
+};
+
+export type ListHolidayCalendar = {
+    data: Array<HolidayCalendar>;
+};
+
+export type ListSpamAllow = {
+    data: Array<SpamAllow>;
+};
+
+export type ListTagCount = {
+    data: Array<TagCount>;
+};
+
+export type ListTurnPreset = {
+    data: Array<TurnPreset>;
+};
+
+export type LiveCall = {
+    answered_at?: string;
+    assistant_id: string;
+    assistant_version: number;
+    call_id: string;
+    caller_e164?: string;
+    caller_name?: string;
+    campaign_id?: string;
+    direction: 'inbound' | 'outbound' | 'web_test';
+    flags: Array<LiveCallFlag>;
+    last_line?: LiveCallLine;
+    number_id?: string;
+    started_at: string;
+    status: 'queued' | 'dialing' | 'ringing' | 'in_progress';
+};
+
+export type LiveCallFlag = {
+    kind: 'human_requested' | 'long_silence' | 'tool_failing' | 'opt_out' | 'transfer_in_progress';
+    since: string;
+};
+
+export type LiveCallLine = {
+    at: string;
+    speaker: 'caller' | 'agent' | 'staff';
+    text: string;
+};
+
+export type LiveCalls = {
+    concurrency: Concurrency;
+    data: Array<LiveCall>;
+};
+
 export type Number = {
     assistant_id?: string;
+    /**
+     * Branded calling enrolment where the number's carrier supports it
+     */
+    branded?: NumberBranded;
+    /**
+     * Caller name registered for outbound calls (verified business name)
+     */
+    cnam?: NumberCnam;
     country: string;
     created_at: string;
     e164: string;
+    /**
+     * Lines seen forwarding to this number (Diversion/History-Info)
+     */
+    forward_sources?: Array<ForwardSource>;
     forward_to_e164?: string;
     id: string;
+    kind?: 'local' | 'toll_free';
+    label?: string;
     monthly_price_micro: number;
+    next_renewal_at?: string;
     purchased_at?: string;
     region?: string;
     released_at?: string;
+    /**
+     * Routing revision; send it back as If-Match on updateNumberRouting
+     */
+    revision?: number;
     route_type: 'assistant' | 'forward' | 'none';
-    status: 'ordering' | 'active' | 'suspended' | 'releasing' | 'released' | 'failed';
+    /**
+     * Detail only (getNumber, updateNumberRouting)
+     */
+    routing?: RoutingPlan;
+    /**
+     * List only
+     */
+    schedule_summary?: ScheduleSummary;
+    sip_trunk_id?: string;
+    /**
+     * byo_sip numbers answer inbound only and never act as caller ID
+     */
+    source?: 'larynth' | 'byo_sip';
+    spam_screening?: boolean;
+    status: 'ordering' | 'verifying' | 'active' | 'suspended' | 'releasing' | 'released' | 'failed';
     updated_at: string;
+    usage?: NumberUsage;
+    /**
+     * Ownership check of an imported number
+     */
+    verification?: NumberVerification;
+};
+
+export type NumberBranded = {
+    status: 'none' | 'pending' | 'active' | 'failed' | 'unsupported';
+};
+
+export type NumberCnam = {
+    name?: string;
+    status: 'none' | 'pending' | 'registered' | 'failed' | 'unsupported';
+};
+
+export type NumberRef = {
+    e164: string;
+    id: string;
+    label?: string;
 };
 
 export type NumberRouting = {
@@ -847,10 +2237,36 @@ export type NumberRouting = {
      */
     assistant_id?: string;
     /**
-     * Required when route_type is forward
+     * Required when route_type is forward. With route_type assistant it is the forward line callers reach while the agent is paused
      */
     forward_to_e164?: string;
+    /**
+     * Name shown in the Line column; empty clears it
+     */
+    label?: string;
     route_type?: 'assistant' | 'forward' | 'none';
+    /**
+     * Screen inbound calls for spam; flagged calls are not billed
+     */
+    spam_screening?: boolean;
+};
+
+export type NumberUsage = {
+    campaigns: Array<CampaignRef>;
+    /**
+     * An active Larynth-owned number; imported numbers never qualify
+     */
+    can_call_out: boolean;
+    optout_line: boolean;
+};
+
+export type NumberVerification = {
+    /**
+     * Key this code in a test call made through your trunk
+     */
+    code?: string;
+    expires_at?: string;
+    status: 'verifying' | 'verified' | 'failed' | 'expired';
 };
 
 export type OrderNumberRequest = {
@@ -860,14 +2276,55 @@ export type OrderNumberRequest = {
     assistant_id?: string;
     e164: string;
     /**
-     * Required when route_type is forward
+     * Required when route_type is forward. With route_type assistant it is the forward line callers reach while the agent is paused
      */
     forward_to_e164?: string;
+    /**
+     * Name shown in the Line column; empty clears it
+     */
+    label?: string;
     route_type?: 'assistant' | 'forward' | 'none';
+    /**
+     * Applied once provisioning completes; takes precedence over the flat route fields
+     */
+    routing?: RoutingPlan;
+    /**
+     * Screen inbound calls for spam; flagged calls are not billed
+     */
+    spam_screening?: boolean;
+};
+
+export type OrderNumbersItem = {
+    e164: string;
+};
+
+export type OrderNumbersRequest = {
+    items: Array<OrderNumbersItem>;
+    kind: 'local' | 'toll_free';
+    label?: string;
+    routing?: RoutingPlan;
+    spam_screening?: boolean;
+};
+
+export type OrderNumbersResult = {
+    /**
+     * First month of every number, charged from the paid balance as each provisions
+     */
+    due_now_micro: number;
+    monthly_micro: number;
+    numbers: Array<Number>;
 };
 
 export type PageAssistant = {
     data: Array<Assistant>;
+    /**
+     * Cursor for the next page; null on the last page
+     */
+    next_cursor: string | null;
+};
+
+export type PageAssistantPublish = {
+    data: Array<AssistantPublish>;
     /**
      * Cursor for the next page; null on the last page
      */
@@ -890,8 +2347,8 @@ export type PageAvailableNumber = {
     next_cursor: string | null;
 };
 
-export type PageCall = {
-    data: Array<Call>;
+export type PageBlockedCaller = {
+    data: Array<BlockedCaller>;
     /**
      * Cursor for the next page; null on the last page
      */
@@ -914,16 +2371,16 @@ export type PageCallTurn = {
     next_cursor: string | null;
 };
 
-export type PageCampaign = {
-    data: Array<Campaign>;
+export type PageCampaignContact = {
+    data: Array<CampaignContact>;
     /**
      * Cursor for the next page; null on the last page
      */
     next_cursor: string | null;
 };
 
-export type PageCampaignContact = {
-    data: Array<CampaignContact>;
+export type PageCampaignEvent = {
+    data: Array<CampaignEvent>;
     /**
      * Cursor for the next page; null on the last page
      */
@@ -962,8 +2419,8 @@ export type PageConsent = {
     next_cursor: string | null;
 };
 
-export type PageContact = {
-    data: Array<Contact>;
+export type PageContactImport = {
+    data: Array<ContactImport>;
     /**
      * Cursor for the next page; null on the last page
      */
@@ -972,6 +2429,14 @@ export type PageContact = {
 
 export type PageDncEntry = {
     data: Array<DncEntry>;
+    /**
+     * Cursor for the next page; null on the last page
+     */
+    next_cursor: string | null;
+};
+
+export type PageDncCheck = {
+    data: Array<DncCheck>;
     /**
      * Cursor for the next page; null on the last page
      */
@@ -1026,6 +2491,14 @@ export type PageRecording = {
     next_cursor: string | null;
 };
 
+export type PageRevocation = {
+    data: Array<Revocation>;
+    /**
+     * Cursor for the next page; null on the last page
+     */
+    next_cursor: string | null;
+};
+
 export type PageWebhookDelivery = {
     data: Array<WebhookDelivery>;
     /**
@@ -1040,6 +2513,10 @@ export type PageWebhookEndpoint = {
      * Cursor for the next page; null on the last page
      */
     next_cursor: string | null;
+};
+
+export type PauseAssistantRequest = {
+    reason?: string;
 };
 
 export type PostCallSettings = {
@@ -1058,25 +2535,96 @@ export type PostCallSettings = {
     summary_prompt?: string;
 };
 
+export type PreflightCheck = {
+    code: 'platform_outbound_open' | 'verification' | 'telemarketing_approved' | 'paid_top_up' | 'outbound_terms' | 'script_check' | 'agent_published' | 'caller_id' | 'audience' | 'consent_coverage' | 'dnc_internal' | 'dnc_national' | 'calling_hours' | 'frequency_cap' | 'holidays_sundays' | 'ca_preamble' | 'state_registrations' | 'voicemail_optout_line' | 'balance' | 'daily_spend_cap' | 'recheck_due';
+    fix?: CheckFix;
+    params?: {
+        [key: string]: unknown;
+    };
+    state: 'ok' | 'warn' | 'stop' | 'info';
+};
+
+export type PreflightResult = {
+    can_launch: boolean;
+    checks: Array<PreflightCheck>;
+};
+
+export type PreviewCampaignAudienceRequest = {
+    audience: Audience;
+    informational_category?: string;
+    purpose: 'informational' | 'telemarketing';
+};
+
 export type Problem = {
+    /**
+     * API base URL of the workspace's home region (workspace.other_region)
+     */
+    api_base?: string;
+    /**
+     * Code attempts left in this sign-in step
+     */
+    attempts_left?: number;
+    /**
+     * Campaigns that use the number (numbers.in_use)
+     */
+    campaign_ids?: Array<string>;
+    /**
+     * Failed launch checks (campaign.preflight_failed)
+     */
+    checks?: Array<PreflightCheck>;
     /**
      * Stable machine-readable error code; compliance denials carry the dial.* rule id
      */
     code: string;
+    /**
+     * Existing contact (contacts.exists)
+     */
+    contact_id?: string;
     detail?: string;
     errors?: Array<ErrorDetail>;
     instance?: string;
     /**
+     * The number is the opt-out line (numbers.in_use)
+     */
+    optout_line?: boolean;
+    /**
+     * Ways to re-authenticate, in preference order (auth.reauth_required)
+     */
+    reauth_methods?: Array<string>;
+    /**
+     * Spending request kind to file instead (spending.approval_required)
+     */
+    request_kind?: 'number_purchase' | 'campaign_launch';
+    /**
      * Next moment the request may succeed (calling windows)
      */
     retry_at?: string;
+    /**
+     * Current revision (numbers.routing_conflict, campaign.revision_conflict)
+     */
+    revision?: number;
     status: number;
     title: string;
     /**
      * Stable URI identifying the error code
      */
     type: string;
+    updated_by_name?: string;
     [key: string]: unknown;
+};
+
+export type Pronunciation = {
+    say_as: string;
+    word: string;
+};
+
+export type PublishAssistantVersionRequest = {
+    note?: string;
+};
+
+export type PublishResult = {
+    assistant: Assistant;
+    publish: AssistantPublish;
 };
 
 export type Rate = {
@@ -1097,6 +2645,9 @@ export type Recording = {
     bytes?: number;
     call_id: string;
     created_at: string;
+    deleted_at?: string;
+    deleted_by_name?: string;
+    deleted_reason?: 'retention' | 'user' | 'data_request' | 'key_destroyed';
     dropped?: number;
     format: string;
     frames?: number;
@@ -1107,6 +2658,14 @@ export type Recording = {
     source: string;
     state: 'pending' | 'uploaded' | 'verified' | 'failed' | 'purged';
     verified_at?: string;
+};
+
+export type RecordingPeaks = {
+    duration_ms: number;
+    /**
+     * Normalised 0 to 1
+     */
+    points: Array<number>;
 };
 
 export type RetryPolicy = {
@@ -1125,7 +2684,8 @@ export type Revocation = {
      * Opt-out scope; empty covers every call
      */
     category?: string;
-    channel: 'in_call' | 'inbound_call' | 'api' | 'dashboard' | 'import' | 'operator' | 'other';
+    channel: 'in_call' | 'inbound_call' | 'api' | 'dashboard' | 'email' | 'web_form' | 'phone_request' | 'import' | 'operator' | 'optout_line' | 'other';
+    complaint: boolean;
     created_at: string;
     e164: string;
     excerpt?: string;
@@ -1134,8 +2694,173 @@ export type Revocation = {
     revoked_at: string;
 };
 
+export type RoutingHours = {
+    /**
+     * At most 2 bands per day, no overlaps
+     */
+    bands: Array<HoursBand>;
+    holidays: HolidaySettings;
+    /**
+     * IANA zone; defaults to the workspace time zone
+     */
+    timezone: string;
+};
+
+export type RoutingPlan = {
+    /**
+     * Required when hours is set
+     */
+    after_hours?: AfterHoursTarget;
+    /**
+     * Transfer to a person when the agent can't pick up: paused agent, agent start failure, and carrier failover when no engine answers (not billed). Engine-bridged minutes bill at transfer_minute
+     */
+    fallback_e164?: string;
+    /**
+     * Absent: around the clock
+     */
+    hours?: RoutingHours;
+    open: RoutingTarget;
+    readonly revision?: number;
+};
+
+export type RoutingTarget = {
+    /**
+     * Required for assistant; the agent must be live or paused
+     */
+    assistant_id?: string;
+    /**
+     * Required for forward; a US number that is not 911/933, premium or another workspace's Larynth number
+     */
+    forward_e164?: string;
+    mode: 'assistant' | 'forward';
+};
+
+export type RuleWindow = {
+    /**
+     * 1 = Monday … 7 = Sunday
+     */
+    days: Array<number>;
+    end_minute: number;
+    start_minute: number;
+};
+
+export type SameCallerCalls = {
+    caller_e164?: string;
+    data: Array<Call>;
+    /**
+     * All calls from this caller; the calls list filtered by caller_e164 shows them
+     */
+    total: number;
+};
+
+export type SaveAssistantDraftRequest = {
+    spec: AssistantVersionSpec;
+};
+
+export type ScheduleSummary = {
+    bands: Array<HoursBand>;
+    key: 'around_the_clock' | 'weekly';
+    timezone?: string;
+};
+
+export type ScriptCheck = {
+    assistant_id: string;
+    checked_at?: string;
+    reasons: Array<ScriptCheckReason>;
+    reviewed_at?: string;
+    /**
+     * flagged waits for a Larynth review within 1 business day; inbound keeps working
+     */
+    status: 'pending' | 'passed' | 'flagged' | 'blocked' | 'approved' | 'rejected';
+    version: number;
+};
+
+export type ScriptCheckReason = {
+    code: string;
+    excerpt?: string;
+};
+
+export type SimulationsSummary = {
+    passed: number;
+    total: number;
+};
+
+export type SkippedCount = {
+    count: number;
+    reason_code: 'no_consent' | 'dnc' | 'already_enrolled' | 'not_found' | 'not_us';
+};
+
+export type SpamAllow = {
+    created_at: string;
+    e164: string;
+    id: string;
+    note?: string;
+};
+
+export type StartCampaignRequest = {
+    attest: LaunchAttestation;
+};
+
+export type StateAudience = {
+    count: number;
+    rule_notes: Array<string>;
+    state: string;
+};
+
+export type TagCount = {
+    count: number;
+    tag: string;
+};
+
 export type TestWebhookRequest = {
-    event_type?: 'call.started' | 'call.answered' | 'call.ended' | 'call.analyzed' | 'call.recording.ready' | 'call.transferred' | 'campaign.started' | 'campaign.paused' | 'campaign.completed' | 'campaign.contact.completed' | 'compliance.opt_out' | 'billing.balance.low' | 'billing.top_up.succeeded' | 'billing.auto_top_up.failed' | 'number.provisioned' | 'number.released';
+    event_type?: 'call.started' | 'call.answered' | 'call.ended' | 'call.analyzed' | 'call.recording.ready' | 'call.transferred' | 'campaign.started' | 'campaign.paused' | 'campaign.completed' | 'campaign.contact.completed' | 'compliance.opt_out' | 'billing.balance.low' | 'billing.top_up.succeeded' | 'billing.auto_top_up.failed' | 'number.provisioned' | 'number.released' | 'notification.call.summary' | 'notification.campaign.completed' | 'notification.campaign.paused' | 'notification.billing.balance_low' | 'notification.billing.top_up_succeeded' | 'notification.billing.auto_top_up_failed' | 'notification.spending_request.created' | 'notification.number.provisioned' | 'notification.number.released' | 'notification.compliance.optout_alert';
+};
+
+export type TimelineCall = {
+    assistant_name?: string;
+    call_id: string;
+    campaign_id?: string;
+    direction: 'inbound' | 'outbound' | 'web_test';
+    duration_ms: number;
+    outcome?: string;
+    price_micro?: number;
+    /**
+     * Follows transcript retention
+     */
+    summary?: string;
+};
+
+export type TimelineCampaign = {
+    id: string;
+    name: string;
+};
+
+export type TimelineConsent = {
+    covers: Array<string>;
+    id: string;
+    kind: 'express' | 'express_written';
+};
+
+export type TimelineItem = {
+    at: string;
+    call?: TimelineCall;
+    campaign?: TimelineCampaign;
+    consent?: TimelineConsent;
+    id: string;
+    kind: 'call' | 'campaign_enrolled' | 'campaign_attempt' | 'consent_granted' | 'consent_revoked' | 'dnc_added' | 'dnc_removed' | 'contact_created' | 'imported';
+    params?: {
+        [key: string]: unknown;
+    };
+};
+
+export type TimelinePage = {
+    items: Array<TimelineItem>;
+    next_cursor: string | null;
+};
+
+export type TimezoneShare = {
+    share: number;
+    tz: string;
 };
 
 export type TransferDestination = {
@@ -1169,6 +2894,38 @@ export type TransferDestination = {
     whisper?: string;
 };
 
+export type TurnLatency = {
+    /**
+     * Caller finished
+     */
+    eot_ms: number;
+    /**
+     * Thought
+     */
+    llm_ms: number;
+    over_target: boolean;
+    /**
+     * Heard
+     */
+    stt_ms: number;
+    /**
+     * Caller finished to agent heard
+     */
+    total_ms: number;
+    /**
+     * Voice
+     */
+    tts_ms: number;
+};
+
+export type TurnPreset = {
+    interruption_profile: InterruptionProfile;
+    key: 'patient' | 'balanced' | 'snappy';
+    position: number;
+    recommended: boolean;
+    turn_profile: TurnProfile;
+};
+
 export type TurnProfile = {
     commit_prob?: number;
     /**
@@ -1191,25 +2948,58 @@ export type TurnProfile = {
 };
 
 export type UpdateAssistantRequest = {
+    description?: string;
+    latency_target_ms?: number;
     name?: string;
 };
 
+export type UpdateCallRequest = {
+    flagged?: boolean;
+    /**
+     * Each 1 to 24 characters, lower case; replaces the call's tags
+     */
+    tags?: Array<string>;
+};
+
 export type UpdateCampaignRequest = {
-    amd_mode?: 'off' | 'hangup_on_machine' | 'voicemail';
+    /**
+     * agent uses the agent call_handling voicemail setting; unset on create is agent
+     */
+    amd_mode?: 'agent' | 'off' | 'hangup_on_machine' | 'voicemail';
     amd_profile_id?: string;
     assistant_id?: string;
+    /**
+     * Snapshotted into the campaign's contacts at launch
+     */
+    audience?: Audience;
     cps?: number;
     end_at?: string;
+    /**
+     * Draft informational campaigns only; empty clears it
+     */
+    informational_category?: string;
     max_attempts?: number;
+    /**
+     * Per person per rolling 24 h; marketing is always 1
+     */
+    max_calls_per_day?: number;
     max_concurrent?: number;
     name?: string;
     /**
-     * Caller-ID pool
+     * Caller-ID pool; every number must have usage.can_call_out
      */
     number_ids?: Array<string>;
+    /**
+     * Draft campaigns only; 409 campaign.locked otherwise. Switching to telemarketing clears informational_category
+     */
+    purpose?: 'informational' | 'telemarketing';
     retry_policy?: RetryPolicy;
     ring_timeout_s?: number;
     start_at?: string;
+    /**
+     * Maps onto amd_mode and voicemail_message; takes precedence when both are sent
+     */
+    voicemail?: CampaignVoicemail;
     voicemail_message?: string;
     /**
      * Further restricts the legal calling windows
@@ -1225,6 +3015,11 @@ export type UpdateContactRequest = {
     first_name?: string;
     last_name?: string;
     region?: string;
+    relationship?: 'existing' | 'none';
+    /**
+     * Replaces the tags when present
+     */
+    tags?: Array<string>;
     timezone?: string;
 };
 
@@ -1235,18 +3030,42 @@ export type UpdateKnowledgeBaseRequest = {
 
 export type UpdateWebhookRequest = {
     description?: string;
-    event_types?: Array<'call.started' | 'call.answered' | 'call.ended' | 'call.analyzed' | 'call.recording.ready' | 'call.transferred' | 'campaign.started' | 'campaign.paused' | 'campaign.completed' | 'campaign.contact.completed' | 'compliance.opt_out' | 'billing.balance.low' | 'billing.top_up.succeeded' | 'billing.auto_top_up.failed' | 'number.provisioned' | 'number.released'>;
+    event_types?: Array<'call.started' | 'call.answered' | 'call.ended' | 'call.analyzed' | 'call.recording.ready' | 'call.transferred' | 'campaign.started' | 'campaign.paused' | 'campaign.completed' | 'campaign.contact.completed' | 'compliance.opt_out' | 'billing.balance.low' | 'billing.top_up.succeeded' | 'billing.auto_top_up.failed' | 'number.provisioned' | 'number.released' | 'notification.call.summary' | 'notification.campaign.completed' | 'notification.campaign.paused' | 'notification.billing.balance_low' | 'notification.billing.top_up_succeeded' | 'notification.billing.auto_top_up_failed' | 'notification.spending_request.created' | 'notification.number.provisioned' | 'notification.number.released' | 'notification.compliance.optout_alert' | 'notification.inbox.callback_waiting' | 'notification.alert.missed_calls_spike' | 'notification.alert.transfers_failing' | 'notification.alert.tool_failing' | 'notification.agent.paused' | 'inbox.item.created' | 'inbox.item.cleared' | 'agent.published' | 'agent.paused' | 'agent.resumed' | 'call.flagged' | 'recording.deleted' | 'caller.blocked' | 'number.routing_changed' | 'notification.campaign.safeguard_paused' | 'notification.campaign.review_decided' | 'notification.verification.updated'>;
     status?: 'active' | 'disabled';
     url?: string;
+};
+
+export type Vocabulary = {
+    /**
+     * Words to recognise, sent to the speech recognizer when its catalog row supports them
+     */
+    keyterms?: Array<string>;
+    /**
+     * How to say words in generated speech; transcripts keep the written word
+     */
+    pronunciations?: Array<Pronunciation>;
 };
 
 export type WebCall = {
     call_id: string;
     /**
+     * Calls shorter than this are not billed
+     */
+    free_under_ms?: number;
+    /**
      * The engine ends the call after this many seconds
      */
     max_duration_s: number;
+    /**
+     * Applied per-minute rate including premiums
+     */
+    rate_micro_per_min?: number;
+    rounding?: 'started_minute';
     sdp_answer: string;
+    /**
+     * Assistant version the call runs
+     */
+    version?: number;
 };
 
 export type WebhookDelivery = {
@@ -1296,6 +3115,177 @@ export type WebhookTestResult = {
     event_id: string;
 };
 
+export type NumberWritable = {
+    assistant_id?: string;
+    /**
+     * Branded calling enrolment where the number's carrier supports it
+     */
+    branded?: NumberBranded;
+    /**
+     * Caller name registered for outbound calls (verified business name)
+     */
+    cnam?: NumberCnam;
+    country: string;
+    created_at: string;
+    e164: string;
+    /**
+     * Lines seen forwarding to this number (Diversion/History-Info)
+     */
+    forward_sources?: Array<ForwardSource>;
+    forward_to_e164?: string;
+    id: string;
+    kind?: 'local' | 'toll_free';
+    label?: string;
+    monthly_price_micro: number;
+    next_renewal_at?: string;
+    purchased_at?: string;
+    region?: string;
+    released_at?: string;
+    /**
+     * Routing revision; send it back as If-Match on updateNumberRouting
+     */
+    revision?: number;
+    route_type: 'assistant' | 'forward' | 'none';
+    /**
+     * Detail only (getNumber, updateNumberRouting)
+     */
+    routing?: RoutingPlanWritable;
+    /**
+     * List only
+     */
+    schedule_summary?: ScheduleSummary;
+    sip_trunk_id?: string;
+    /**
+     * byo_sip numbers answer inbound only and never act as caller ID
+     */
+    source?: 'larynth' | 'byo_sip';
+    spam_screening?: boolean;
+    status: 'ordering' | 'verifying' | 'active' | 'suspended' | 'releasing' | 'released' | 'failed';
+    updated_at: string;
+    usage?: NumberUsage;
+    /**
+     * Ownership check of an imported number
+     */
+    verification?: NumberVerification;
+};
+
+export type OrderNumberRequestWritable = {
+    /**
+     * Required when route_type is assistant
+     */
+    assistant_id?: string;
+    e164: string;
+    /**
+     * Required when route_type is forward. With route_type assistant it is the forward line callers reach while the agent is paused
+     */
+    forward_to_e164?: string;
+    /**
+     * Name shown in the Line column; empty clears it
+     */
+    label?: string;
+    route_type?: 'assistant' | 'forward' | 'none';
+    /**
+     * Applied once provisioning completes; takes precedence over the flat route fields
+     */
+    routing?: RoutingPlanWritable;
+    /**
+     * Screen inbound calls for spam; flagged calls are not billed
+     */
+    spam_screening?: boolean;
+};
+
+export type OrderNumbersRequestWritable = {
+    items: Array<OrderNumbersItem>;
+    kind: 'local' | 'toll_free';
+    label?: string;
+    routing?: RoutingPlanWritable;
+    spam_screening?: boolean;
+};
+
+export type OrderNumbersResultWritable = {
+    /**
+     * First month of every number, charged from the paid balance as each provisions
+     */
+    due_now_micro: number;
+    monthly_micro: number;
+    numbers: Array<NumberWritable>;
+};
+
+export type PageNumberWritable = {
+    data: Array<NumberWritable>;
+    /**
+     * Cursor for the next page; null on the last page
+     */
+    next_cursor: string | null;
+};
+
+export type RoutingPlanWritable = {
+    /**
+     * Required when hours is set
+     */
+    after_hours?: AfterHoursTarget;
+    /**
+     * Transfer to a person when the agent can't pick up: paused agent, agent start failure, and carrier failover when no engine answers (not billed). Engine-bridged minutes bill at transfer_minute
+     */
+    fallback_e164?: string;
+    /**
+     * Absent: around the clock
+     */
+    hours?: RoutingHours;
+    open: RoutingTarget;
+};
+
+export type ListAreaCodesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * City prefix or area code prefix
+         */
+        q?: string;
+        state?: string;
+    };
+    url: '/v1/area-codes';
+};
+
+export type ListAreaCodesErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListAreaCodesError = ListAreaCodesErrors[keyof ListAreaCodesErrors];
+
+export type ListAreaCodesResponses = {
+    /**
+     * OK
+     */
+    200: ListAreaCode;
+};
+
+export type ListAreaCodesResponse = ListAreaCodesResponses[keyof ListAreaCodesResponses];
+
 export type ListAssistantsData = {
     body?: never;
     path?: never;
@@ -1309,6 +3299,7 @@ export type ListAssistantsData = {
          */
         after?: string;
         status?: 'active' | 'archived';
+        state?: 'live' | 'paused' | 'draft' | 'archived';
     };
     url: '/v1/assistants';
 };
@@ -1628,6 +3619,464 @@ export type UpdateAssistantResponses = {
 
 export type UpdateAssistantResponse = UpdateAssistantResponses[keyof UpdateAssistantResponses];
 
+export type DiscardAssistantDraftData = {
+    body?: never;
+    headers: {
+        'If-Match': string;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/assistants/{id}/draft';
+};
+
+export type DiscardAssistantDraftErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Precondition Required
+     */
+    428: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type DiscardAssistantDraftError = DiscardAssistantDraftErrors[keyof DiscardAssistantDraftErrors];
+
+export type DiscardAssistantDraftResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type DiscardAssistantDraftResponse = DiscardAssistantDraftResponses[keyof DiscardAssistantDraftResponses];
+
+export type GetAssistantDraftData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/assistants/{id}/draft';
+};
+
+export type GetAssistantDraftErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetAssistantDraftError = GetAssistantDraftErrors[keyof GetAssistantDraftErrors];
+
+export type GetAssistantDraftResponses = {
+    /**
+     * OK
+     */
+    200: AssistantDraft;
+};
+
+export type GetAssistantDraftResponse = GetAssistantDraftResponses[keyof GetAssistantDraftResponses];
+
+export type SaveAssistantDraftData = {
+    body: SaveAssistantDraftRequest;
+    headers?: {
+        /**
+         * Required once a draft exists
+         */
+        'If-Match'?: string;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/assistants/{id}/draft';
+};
+
+export type SaveAssistantDraftErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Precondition Required
+     */
+    428: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type SaveAssistantDraftError = SaveAssistantDraftErrors[keyof SaveAssistantDraftErrors];
+
+export type SaveAssistantDraftResponses = {
+    /**
+     * OK
+     */
+    200: AssistantDraft;
+};
+
+export type SaveAssistantDraftResponse = SaveAssistantDraftResponses[keyof SaveAssistantDraftResponses];
+
+export type DuplicateAssistantData = {
+    body?: DuplicateAssistantRequest;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/assistants/{id}/duplicate';
+};
+
+export type DuplicateAssistantErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type DuplicateAssistantError = DuplicateAssistantErrors[keyof DuplicateAssistantErrors];
+
+export type DuplicateAssistantResponses = {
+    /**
+     * Created
+     */
+    201: Assistant;
+};
+
+export type DuplicateAssistantResponse = DuplicateAssistantResponses[keyof DuplicateAssistantResponses];
+
+export type PauseAssistantData = {
+    body?: PauseAssistantRequest;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/assistants/{id}/pause';
+};
+
+export type PauseAssistantErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type PauseAssistantError = PauseAssistantErrors[keyof PauseAssistantErrors];
+
+export type PauseAssistantResponses = {
+    /**
+     * OK
+     */
+    200: Assistant;
+};
+
+export type PauseAssistantResponse = PauseAssistantResponses[keyof PauseAssistantResponses];
+
+export type ListAssistantPublishesData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        /**
+         * Page size
+         */
+        limit?: number;
+        /**
+         * Opaque cursor from next_cursor of the previous page
+         */
+        after?: string;
+    };
+    url: '/v1/assistants/{id}/publishes';
+};
+
+export type ListAssistantPublishesErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListAssistantPublishesError = ListAssistantPublishesErrors[keyof ListAssistantPublishesErrors];
+
+export type ListAssistantPublishesResponses = {
+    /**
+     * OK
+     */
+    200: PageAssistantPublish;
+};
+
+export type ListAssistantPublishesResponse = ListAssistantPublishesResponses[keyof ListAssistantPublishesResponses];
+
+export type RestoreAssistantData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/assistants/{id}/restore';
+};
+
+export type RestoreAssistantErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type RestoreAssistantError = RestoreAssistantErrors[keyof RestoreAssistantErrors];
+
+export type RestoreAssistantResponses = {
+    /**
+     * OK
+     */
+    200: Assistant;
+};
+
+export type RestoreAssistantResponse = RestoreAssistantResponses[keyof RestoreAssistantResponses];
+
+export type ResumeAssistantData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/assistants/{id}/resume';
+};
+
+export type ResumeAssistantErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ResumeAssistantError = ResumeAssistantErrors[keyof ResumeAssistantErrors];
+
+export type ResumeAssistantResponses = {
+    /**
+     * OK
+     */
+    200: Assistant;
+};
+
+export type ResumeAssistantResponse = ResumeAssistantResponses[keyof ResumeAssistantResponses];
+
 export type ListAssistantVersionsData = {
     body?: never;
     path: {
@@ -1795,8 +4244,71 @@ export type GetAssistantVersionResponses = {
 
 export type GetAssistantVersionResponse = GetAssistantVersionResponses[keyof GetAssistantVersionResponses];
 
-export type PublishAssistantVersionData = {
+export type CompareAssistantVersionsData = {
     body?: never;
+    path: {
+        id: string;
+        v: number;
+    };
+    query?: {
+        /**
+         * published, or a version number
+         */
+        against?: string;
+    };
+    url: '/v1/assistants/{id}/versions/{v}/compare';
+};
+
+export type CompareAssistantVersionsErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type CompareAssistantVersionsError = CompareAssistantVersionsErrors[keyof CompareAssistantVersionsErrors];
+
+export type CompareAssistantVersionsResponses = {
+    /**
+     * OK
+     */
+    200: CompareResult;
+};
+
+export type CompareAssistantVersionsResponse = CompareAssistantVersionsResponses[keyof CompareAssistantVersionsResponses];
+
+export type PublishAssistantVersionData = {
+    body?: PublishAssistantVersionRequest;
+    headers?: {
+        /**
+         * Draft revision from the draft ETag; required when v is the open draft
+         */
+        'If-Match'?: string;
+    };
     path: {
         id: string;
         v: number;
@@ -1831,6 +4343,10 @@ export type PublishAssistantVersionErrors = {
      */
     422: Problem;
     /**
+     * Precondition Required
+     */
+    428: Problem;
+    /**
      * Too Many Requests
      */
     429: Problem;
@@ -1846,10 +4362,62 @@ export type PublishAssistantVersionResponses = {
     /**
      * OK
      */
-    200: AssistantVersion;
+    200: PublishResult;
 };
 
 export type PublishAssistantVersionResponse = PublishAssistantVersionResponses[keyof PublishAssistantVersionResponses];
+
+export type GetScriptCheckData = {
+    body?: never;
+    path: {
+        id: string;
+        v: number;
+    };
+    query?: never;
+    url: '/v1/assistants/{id}/versions/{v}/script-check';
+};
+
+export type GetScriptCheckErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetScriptCheckError = GetScriptCheckErrors[keyof GetScriptCheckErrors];
+
+export type GetScriptCheckResponses = {
+    /**
+     * OK
+     */
+    200: ScriptCheck;
+};
+
+export type GetScriptCheckResponse = GetScriptCheckResponses[keyof GetScriptCheckResponses];
 
 export type GetAutoTopUpData = {
     body?: never;
@@ -2045,6 +4613,165 @@ export type ListRatesResponses = {
 
 export type ListRatesResponse = ListRatesResponses[keyof ListRatesResponses];
 
+export type ListBlockedCallersData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page size
+         */
+        limit?: number;
+        /**
+         * Opaque cursor from next_cursor of the previous page
+         */
+        after?: string;
+        e164?: string;
+    };
+    url: '/v1/blocked-callers';
+};
+
+export type ListBlockedCallersErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListBlockedCallersError = ListBlockedCallersErrors[keyof ListBlockedCallersErrors];
+
+export type ListBlockedCallersResponses = {
+    /**
+     * OK
+     */
+    200: PageBlockedCaller;
+};
+
+export type ListBlockedCallersResponse = ListBlockedCallersResponses[keyof ListBlockedCallersResponses];
+
+export type CreateBlockedCallerData = {
+    body: CreateBlockedCallerRequest;
+    path?: never;
+    query?: never;
+    url: '/v1/blocked-callers';
+};
+
+export type CreateBlockedCallerErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type CreateBlockedCallerError = CreateBlockedCallerErrors[keyof CreateBlockedCallerErrors];
+
+export type CreateBlockedCallerResponses = {
+    /**
+     * Created
+     */
+    201: BlockedCaller;
+};
+
+export type CreateBlockedCallerResponse = CreateBlockedCallerResponses[keyof CreateBlockedCallerResponses];
+
+export type DeleteBlockedCallerData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/blocked-callers/{id}';
+};
+
+export type DeleteBlockedCallerErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type DeleteBlockedCallerError = DeleteBlockedCallerErrors[keyof DeleteBlockedCallerErrors];
+
+export type DeleteBlockedCallerResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type DeleteBlockedCallerResponse = DeleteBlockedCallerResponses[keyof DeleteBlockedCallerResponses];
+
 export type ListCallsData = {
     body?: never;
     path?: never;
@@ -2057,11 +4784,45 @@ export type ListCallsData = {
          * Opaque cursor from next_cursor of the previous page
          */
         after?: string;
+        /**
+         * Opaque cursor from prev_cursor, or a call's cursor, for the newer page
+         */
+        before?: string;
+        /**
+         * duration and price need a window of at most 90 days
+         */
+        order?: 'started' | '-started' | 'duration' | '-duration' | 'price' | '-price';
         status?: 'queued' | 'dialing' | 'ringing' | 'in_progress' | 'completed' | 'no_answer' | 'busy' | 'failed' | 'canceled' | 'rejected';
         direction?: 'inbound' | 'outbound' | 'web_test';
         campaign_id?: string;
         since?: string;
         until?: string;
+        /**
+         * Repeat the key for several
+         */
+        assistant_id?: Array<string>;
+        number_id?: Array<string>;
+        /**
+         * The Web test line
+         */
+        web_tests?: 'include' | 'only' | 'exclude';
+        outcome?: Array<string>;
+        billed?: 'billed' | 'not_billed';
+        contact_id?: string;
+        /**
+         * Calls from or to this number
+         */
+        caller_e164?: string;
+        /**
+         * Caller name, number digits (3 or more), call id prefix and summary words
+         */
+        q?: string;
+        /**
+         * Only flagged calls
+         */
+        flagged?: boolean;
+        tag?: string;
+        sentiment?: 'positive' | 'neutral' | 'negative';
     };
     url: '/v1/calls';
 };
@@ -2099,7 +4860,7 @@ export type ListCallsResponses = {
     /**
      * OK
      */
-    200: PageCall;
+    200: CallPage;
 };
 
 export type ListCallsResponse = ListCallsResponses[keyof ListCallsResponses];
@@ -2167,6 +4928,84 @@ export type CreateCallResponses = {
 
 export type CreateCallResponse = CreateCallResponses[keyof CreateCallResponses];
 
+export type GetCallsSummaryData = {
+    body?: never;
+    path?: never;
+    query?: {
+        status?: 'queued' | 'dialing' | 'ringing' | 'in_progress' | 'completed' | 'no_answer' | 'busy' | 'failed' | 'canceled' | 'rejected';
+        direction?: 'inbound' | 'outbound' | 'web_test';
+        campaign_id?: string;
+        since?: string;
+        until?: string;
+        group_by?: 'none' | 'assistant' | 'outcome' | 'day' | 'number';
+        /**
+         * Repeat the key for several
+         */
+        assistant_id?: Array<string>;
+        number_id?: Array<string>;
+        /**
+         * The Web test line
+         */
+        web_tests?: 'include' | 'only' | 'exclude';
+        outcome?: Array<string>;
+        billed?: 'billed' | 'not_billed';
+        contact_id?: string;
+        /**
+         * Calls from or to this number
+         */
+        caller_e164?: string;
+        /**
+         * Caller name, number digits (3 or more), call id prefix and summary words
+         */
+        q?: string;
+        /**
+         * Only flagged calls
+         */
+        flagged?: boolean;
+        tag?: string;
+        sentiment?: 'positive' | 'neutral' | 'negative';
+    };
+    url: '/v1/calls/summary';
+};
+
+export type GetCallsSummaryErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetCallsSummaryError = GetCallsSummaryErrors[keyof GetCallsSummaryErrors];
+
+export type GetCallsSummaryResponses = {
+    /**
+     * OK
+     */
+    200: CallsSummary;
+};
+
+export type GetCallsSummaryResponse = GetCallsSummaryResponses[keyof GetCallsSummaryResponses];
+
 export type GetCallData = {
     body?: never;
     path: {
@@ -2221,6 +5060,64 @@ export type GetCallResponses = {
 
 export type GetCallResponse = GetCallResponses[keyof GetCallResponses];
 
+export type UpdateCallData = {
+    body: UpdateCallRequest;
+    path: {
+        /**
+         * <cell>_<ULID>
+         */
+        call_id: string;
+    };
+    query?: never;
+    url: '/v1/calls/{call_id}';
+};
+
+export type UpdateCallErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type UpdateCallError = UpdateCallErrors[keyof UpdateCallErrors];
+
+export type UpdateCallResponses = {
+    /**
+     * OK
+     */
+    200: Call;
+};
+
+export type UpdateCallResponse = UpdateCallResponses[keyof UpdateCallResponses];
+
 export type GetCallAnalysisData = {
     body?: never;
     path: {
@@ -2274,6 +5171,63 @@ export type GetCallAnalysisResponses = {
 };
 
 export type GetCallAnalysisResponse = GetCallAnalysisResponses[keyof GetCallAnalysisResponses];
+
+export type GetCallConversationData = {
+    body?: never;
+    path: {
+        /**
+         * <cell>_<ULID>
+         */
+        call_id: string;
+    };
+    query?: {
+        limit?: number;
+        after?: string;
+    };
+    url: '/v1/calls/{call_id}/conversation';
+};
+
+export type GetCallConversationErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetCallConversationError = GetCallConversationErrors[keyof GetCallConversationErrors];
+
+export type GetCallConversationResponses = {
+    /**
+     * OK
+     */
+    200: Conversation;
+};
+
+export type GetCallConversationResponse = GetCallConversationResponses[keyof GetCallConversationResponses];
 
 export type EndCallData = {
     body?: EndCallRequest;
@@ -2450,6 +5404,62 @@ export type ListCallRecordingsResponses = {
 
 export type ListCallRecordingsResponse = ListCallRecordingsResponses[keyof ListCallRecordingsResponses];
 
+export type ListSameCallerCallsData = {
+    body?: never;
+    path: {
+        /**
+         * <cell>_<ULID>
+         */
+        call_id: string;
+    };
+    query?: {
+        limit?: number;
+    };
+    url: '/v1/calls/{call_id}/same-caller';
+};
+
+export type ListSameCallerCallsErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListSameCallerCallsError = ListSameCallerCallsErrors[keyof ListSameCallerCallsErrors];
+
+export type ListSameCallerCallsResponses = {
+    /**
+     * OK
+     */
+    200: SameCallerCalls;
+};
+
+export type ListSameCallerCallsResponse = ListSameCallerCallsResponses[keyof ListSameCallerCallsResponses];
+
 export type ListCallTurnsData = {
     body?: never;
     path: {
@@ -2526,6 +5536,9 @@ export type ListCampaignsData = {
          */
         after?: string;
         status?: 'draft' | 'running' | 'paused' | 'completed' | 'archived';
+        display_status?: 'draft' | 'scheduled' | 'running' | 'paused' | 'safeguard_review' | 'blocked' | 'completed' | 'archived';
+        number_id?: string;
+        assistant_id?: string;
     };
     url: '/v1/campaigns';
 };
@@ -2563,7 +5576,7 @@ export type ListCampaignsResponses = {
     /**
      * OK
      */
-    200: PageCampaign;
+    200: CampaignPage;
 };
 
 export type ListCampaignsResponse = ListCampaignsResponses[keyof ListCampaignsResponses];
@@ -2616,6 +5629,153 @@ export type CreateCampaignResponses = {
 };
 
 export type CreateCampaignResponse = CreateCampaignResponses[keyof CreateCampaignResponses];
+
+export type PreviewCampaignAudienceData = {
+    body: PreviewCampaignAudienceRequest;
+    path?: never;
+    query?: never;
+    url: '/v1/campaigns/audience-preview';
+};
+
+export type PreviewCampaignAudienceErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type PreviewCampaignAudienceError = PreviewCampaignAudienceErrors[keyof PreviewCampaignAudienceErrors];
+
+export type PreviewCampaignAudienceResponses = {
+    /**
+     * OK
+     */
+    200: AudiencePreview;
+};
+
+export type PreviewCampaignAudienceResponse = PreviewCampaignAudienceResponses[keyof PreviewCampaignAudienceResponses];
+
+export type EstimateCampaignData = {
+    body: EstimateCampaignRequest;
+    path?: never;
+    query?: never;
+    url: '/v1/campaigns/estimate';
+};
+
+export type EstimateCampaignErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type EstimateCampaignError = EstimateCampaignErrors[keyof EstimateCampaignErrors];
+
+export type EstimateCampaignResponses = {
+    /**
+     * OK
+     */
+    200: CampaignEstimate;
+};
+
+export type EstimateCampaignResponse = EstimateCampaignResponses[keyof EstimateCampaignResponses];
+
+export type PreflightCampaignDraftData = {
+    body: CreateCampaignRequest;
+    path?: never;
+    query?: never;
+    url: '/v1/campaigns/preflight';
+};
+
+export type PreflightCampaignDraftErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type PreflightCampaignDraftError = PreflightCampaignDraftErrors[keyof PreflightCampaignDraftErrors];
+
+export type PreflightCampaignDraftResponses = {
+    /**
+     * OK
+     */
+    200: PreflightResult;
+};
+
+export type PreflightCampaignDraftResponse = PreflightCampaignDraftResponses[keyof PreflightCampaignDraftResponses];
 
 export type GetCampaignData = {
     body?: never;
@@ -2670,6 +5830,12 @@ export type GetCampaignResponse = GetCampaignResponses[keyof GetCampaignResponse
 
 export type UpdateCampaignData = {
     body: UpdateCampaignRequest;
+    headers?: {
+        /**
+         * Campaign revision; 409 campaign.revision_conflict when stale
+         */
+        'If-Match'?: string;
+    };
     path: {
         id: string;
     };
@@ -2894,6 +6060,121 @@ export type AddCampaignContactsResponses = {
 
 export type AddCampaignContactsResponse = AddCampaignContactsResponses[keyof AddCampaignContactsResponses];
 
+export type DuplicateCampaignData = {
+    body?: DuplicateCampaignRequest;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/campaigns/{id}/duplicate';
+};
+
+export type DuplicateCampaignErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type DuplicateCampaignError = DuplicateCampaignErrors[keyof DuplicateCampaignErrors];
+
+export type DuplicateCampaignResponses = {
+    /**
+     * Created
+     */
+    201: Campaign;
+};
+
+export type DuplicateCampaignResponse = DuplicateCampaignResponses[keyof DuplicateCampaignResponses];
+
+export type ListCampaignEventsData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        /**
+         * Page size
+         */
+        limit?: number;
+        /**
+         * Opaque cursor from next_cursor of the previous page
+         */
+        after?: string;
+    };
+    url: '/v1/campaigns/{id}/events';
+};
+
+export type ListCampaignEventsErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListCampaignEventsError = ListCampaignEventsErrors[keyof ListCampaignEventsErrors];
+
+export type ListCampaignEventsResponses = {
+    /**
+     * OK
+     */
+    200: PageCampaignEvent;
+};
+
+export type ListCampaignEventsResponse = ListCampaignEventsResponses[keyof ListCampaignEventsResponses];
+
 export type PauseCampaignData = {
     body?: never;
     path: {
@@ -2948,6 +6229,57 @@ export type PauseCampaignResponses = {
 };
 
 export type PauseCampaignResponse = PauseCampaignResponses[keyof PauseCampaignResponses];
+
+export type GetCampaignPreflightData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/campaigns/{id}/preflight';
+};
+
+export type GetCampaignPreflightErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetCampaignPreflightError = GetCampaignPreflightErrors[keyof GetCampaignPreflightErrors];
+
+export type GetCampaignPreflightResponses = {
+    /**
+     * OK
+     */
+    200: PreflightResult;
+};
+
+export type GetCampaignPreflightResponse = GetCampaignPreflightResponses[keyof GetCampaignPreflightResponses];
 
 export type ResumeCampaignData = {
     body?: never;
@@ -3013,7 +6345,10 @@ export type ResumeCampaignResponses = {
 export type ResumeCampaignResponse = ResumeCampaignResponses[keyof ResumeCampaignResponses];
 
 export type StartCampaignData = {
-    body?: never;
+    /**
+     * The launch attestation; dashboard sessions must send it
+     */
+    body?: StartCampaignRequest;
     headers: {
         /**
          * Replays within 24 h return the stored response; the same key with a different body returns 409
@@ -3132,6 +6467,98 @@ export type GetCampaignStatsResponses = {
 
 export type GetCampaignStatsResponse = GetCampaignStatsResponses[keyof GetCampaignStatsResponses];
 
+export type ListGuardrailRulesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        language?: string;
+    };
+    url: '/v1/catalog/guardrails';
+};
+
+export type ListGuardrailRulesErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListGuardrailRulesError = ListGuardrailRulesErrors[keyof ListGuardrailRulesErrors];
+
+export type ListGuardrailRulesResponses = {
+    /**
+     * OK
+     */
+    200: ListGuardrailBuiltIn;
+};
+
+export type ListGuardrailRulesResponse = ListGuardrailRulesResponses[keyof ListGuardrailRulesResponses];
+
+export type ListCatalogLanguagesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/catalog/languages';
+};
+
+export type ListCatalogLanguagesErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListCatalogLanguagesError = ListCatalogLanguagesErrors[keyof ListCatalogLanguagesErrors];
+
+export type ListCatalogLanguagesResponses = {
+    /**
+     * OK
+     */
+    200: ListCatalogLanguage;
+};
+
+export type ListCatalogLanguagesResponse = ListCatalogLanguagesResponses[keyof ListCatalogLanguagesResponses];
+
 export type ListCatalogModelsData = {
     body?: never;
     path?: never;
@@ -3187,6 +6614,51 @@ export type ListCatalogModelsResponses = {
 };
 
 export type ListCatalogModelsResponse = ListCatalogModelsResponses[keyof ListCatalogModelsResponses];
+
+export type ListTurnPresetsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/catalog/turn-presets';
+};
+
+export type ListTurnPresetsErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListTurnPresetsError = ListTurnPresetsErrors[keyof ListTurnPresetsErrors];
+
+export type ListTurnPresetsResponses = {
+    /**
+     * OK
+     */
+    200: ListTurnPreset;
+};
+
+export type ListTurnPresetsResponse = ListTurnPresetsResponses[keyof ListTurnPresetsResponses];
 
 export type ListCatalogVoicesData = {
     body?: never;
@@ -3244,6 +6716,53 @@ export type ListCatalogVoicesResponses = {
 
 export type ListCatalogVoicesResponse = ListCatalogVoicesResponses[keyof ListCatalogVoicesResponses];
 
+export type GetCallingRulesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        purpose?: 'informational' | 'telemarketing';
+    };
+    url: '/v1/compliance/calling-rules';
+};
+
+export type GetCallingRulesErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetCallingRulesError = GetCallingRulesErrors[keyof GetCallingRulesErrors];
+
+export type GetCallingRulesResponses = {
+    /**
+     * OK
+     */
+    200: ListCallingRule;
+};
+
+export type GetCallingRulesResponse = GetCallingRulesResponses[keyof GetCallingRulesResponses];
+
 export type ListConsentsData = {
     body?: never;
     path?: never;
@@ -3257,6 +6776,7 @@ export type ListConsentsData = {
          */
         after?: string;
         e164?: string;
+        contact_id?: string;
     };
     url: '/v1/compliance/consents';
 };
@@ -3366,6 +6886,7 @@ export type ListComplianceDecisionsData = {
         result?: 'allow' | 'deny';
         since?: string;
         until?: string;
+        rule?: string;
     };
     url: '/v1/compliance/decisions';
 };
@@ -3422,6 +6943,11 @@ export type ListDncData = {
         after?: string;
         e164?: string;
         include_removed?: boolean;
+        source?: 'internal' | 'in_call_opt_out' | 'revocation' | 'api' | 'import' | 'operator';
+        /**
+         * Number digits
+         */
+        q?: string;
     };
     url: '/v1/compliance/dnc';
 };
@@ -3513,6 +7039,173 @@ export type CreateDncResponses = {
 
 export type CreateDncResponse = CreateDncResponses[keyof CreateDncResponses];
 
+export type CreateDncImportData = {
+    body?: {
+        /**
+         * One number per row, optional reason column
+         */
+        file: Blob | File;
+        reason?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/v1/compliance/dnc/imports';
+};
+
+export type CreateDncImportErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Request Entity Too Large
+     */
+    413: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type CreateDncImportError = CreateDncImportErrors[keyof CreateDncImportErrors];
+
+export type CreateDncImportResponses = {
+    /**
+     * Accepted
+     */
+    202: DncImport;
+};
+
+export type CreateDncImportResponse = CreateDncImportResponses[keyof CreateDncImportResponses];
+
+export type GetDncImportData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/compliance/dnc/imports/{id}';
+};
+
+export type GetDncImportErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetDncImportError = GetDncImportErrors[keyof GetDncImportErrors];
+
+export type GetDncImportResponses = {
+    /**
+     * OK
+     */
+    200: DncImport;
+};
+
+export type GetDncImportResponse = GetDncImportResponses[keyof GetDncImportResponses];
+
+export type ListRevocationsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page size
+         */
+        limit?: number;
+        /**
+         * Opaque cursor from next_cursor of the previous page
+         */
+        after?: string;
+        e164?: string;
+        channel?: 'in_call' | 'inbound_call' | 'api' | 'dashboard' | 'email' | 'web_form' | 'phone_request' | 'import' | 'operator' | 'optout_line' | 'other';
+        since?: string;
+    };
+    url: '/v1/compliance/revocations';
+};
+
+export type ListRevocationsErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListRevocationsError = ListRevocationsErrors[keyof ListRevocationsErrors];
+
+export type ListRevocationsResponses = {
+    /**
+     * OK
+     */
+    200: PageRevocation;
+};
+
+export type ListRevocationsResponse = ListRevocationsResponses[keyof ListRevocationsResponses];
+
 export type CreateRevocationData = {
     body: CreateRevocationRequest;
     path?: never;
@@ -3562,6 +7255,54 @@ export type CreateRevocationResponses = {
 
 export type CreateRevocationResponse = CreateRevocationResponses[keyof CreateRevocationResponses];
 
+export type ListComplianceTextsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        kind?: 'disclosure_inbound' | 'disclosure_outbound' | 'optout_instruction' | 'recording_notice' | 'optout_ack' | 'voicemail_intro' | 'voicemail_optout' | 'screener_line' | 'unavailable' | 'goodbye' | 'inbound_ai_attestation' | 'voicemail_callback' | 'transcript_notice' | 'ca_preamble' | 'ca_preamble_decline_ack' | 'after_hours_message_mode' | 'optout_line_greeting' | 'optout_line_ack' | 'callback_check_code' | 'biometric_consent' | 'campaign_launch_attestation' | 'consent_attestation';
+        language?: string;
+    };
+    url: '/v1/compliance/texts';
+};
+
+export type ListComplianceTextsErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListComplianceTextsError = ListComplianceTextsErrors[keyof ListComplianceTextsErrors];
+
+export type ListComplianceTextsResponses = {
+    /**
+     * OK
+     */
+    200: ListComplianceTextView;
+};
+
+export type ListComplianceTextsResponse = ListComplianceTextsResponses[keyof ListComplianceTextsResponses];
+
 export type ListContactsData = {
     body?: never;
     path?: never;
@@ -3575,6 +7316,22 @@ export type ListContactsData = {
          */
         after?: string;
         e164?: string;
+        /**
+         * Name, at least 3 digits of the number, or a tag
+         */
+        q?: string;
+        view?: 'all' | 'callable' | 'needs_consent' | 'dnc';
+        /**
+         * Which callability view=callable uses
+         */
+        purpose?: 'informational' | 'telemarketing';
+        tag?: Array<string>;
+        import_id?: string;
+        order?: 'name' | '-last_contact' | '-created';
+        /**
+         * Opaque cursor from prev_cursor
+         */
+        before?: string;
     };
     url: '/v1/contacts';
 };
@@ -3612,7 +7369,7 @@ export type ListContactsResponses = {
     /**
      * OK
      */
-    200: PageContact;
+    200: ContactPage;
 };
 
 export type ListContactsResponse = ListContactsResponses[keyof ListContactsResponses];
@@ -3666,6 +7423,109 @@ export type CreateContactResponses = {
 
 export type CreateContactResponse = CreateContactResponses[keyof CreateContactResponses];
 
+export type BulkUpdateContactsData = {
+    body: BulkUpdateContactsRequest;
+    path?: never;
+    query?: never;
+    url: '/v1/contacts/bulk';
+};
+
+export type BulkUpdateContactsErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type BulkUpdateContactsError = BulkUpdateContactsErrors[keyof BulkUpdateContactsErrors];
+
+export type BulkUpdateContactsResponses = {
+    /**
+     * OK
+     */
+    200: BulkResult;
+};
+
+export type BulkUpdateContactsResponse = BulkUpdateContactsResponses[keyof BulkUpdateContactsResponses];
+
+export type ListContactImportsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page size
+         */
+        limit?: number;
+        /**
+         * Opaque cursor from next_cursor of the previous page
+         */
+        after?: string;
+    };
+    url: '/v1/contacts/imports';
+};
+
+export type ListContactImportsErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListContactImportsError = ListContactImportsErrors[keyof ListContactImportsErrors];
+
+export type ListContactImportsResponses = {
+    /**
+     * OK
+     */
+    200: PageContactImport;
+};
+
+export type ListContactImportsResponse = ListContactImportsResponses[keyof ListContactImportsResponses];
+
 export type CreateContactImportData = {
     body?: {
         /**
@@ -3677,11 +7537,35 @@ export type CreateContactImportData = {
          */
         campaign_id?: string;
         consent_kind?: 'express' | 'express_written';
-        consent_source?: 'import' | 'web_form' | 'verbal_recorded' | 'other';
+        consent_source?: 'import' | 'web_form' | 'paper_form' | 'verbal_recorded' | 'customer_agreement' | 'other';
         /**
-         * CSV with an e164 column; other columns become attributes
+         * express_written only
          */
-        file: Blob | File;
+        covers_marketing?: 'true' | 'false';
+        /**
+         * Consent wording or evidence shown to the contacts
+         */
+        evidence_text?: string;
+        /**
+         * CSV of at most 10,000 rows and 10 MB; required unless validated_import_id is given
+         */
+        file?: Blob | File;
+        /**
+         * JSON array of ImportColumnMapping; without it the fixed header names apply
+         */
+        mapping?: string;
+        /**
+         * validate returns the review counts without importing; default commit
+         */
+        mode?: 'validate' | 'commit';
+        /**
+         * Added to every imported contact
+         */
+        tag?: string;
+        /**
+         * Commit a validated import without sending the file again (24 h)
+         */
+        validated_import_id?: string;
     };
     headers: {
         /**
@@ -3711,6 +7595,14 @@ export type CreateContactImportErrors = {
      * Conflict
      */
     409: Problem;
+    /**
+     * Gone
+     */
+    410: Problem;
+    /**
+     * Request Entity Too Large
+     */
+    413: Problem;
     /**
      * Unprocessable Entity
      */
@@ -3786,6 +7678,51 @@ export type GetContactImportResponses = {
 };
 
 export type GetContactImportResponse = GetContactImportResponses[keyof GetContactImportResponses];
+
+export type ListContactTagsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/contacts/tags';
+};
+
+export type ListContactTagsErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListContactTagsError = ListContactTagsErrors[keyof ListContactTagsErrors];
+
+export type ListContactTagsResponses = {
+    /**
+     * OK
+     */
+    200: ListTagCount;
+};
+
+export type ListContactTagsResponse = ListContactTagsResponses[keyof ListContactTagsResponses];
 
 export type DeleteContactData = {
     body?: never;
@@ -3947,6 +7884,166 @@ export type UpdateContactResponses = {
 };
 
 export type UpdateContactResponse = UpdateContactResponses[keyof UpdateContactResponses];
+
+export type ListContactDncChecksData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        /**
+         * Page size
+         */
+        limit?: number;
+        /**
+         * Opaque cursor from next_cursor of the previous page
+         */
+        after?: string;
+    };
+    url: '/v1/contacts/{id}/dnc-checks';
+};
+
+export type ListContactDncChecksErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListContactDncChecksError = ListContactDncChecksErrors[keyof ListContactDncChecksErrors];
+
+export type ListContactDncChecksResponses = {
+    /**
+     * OK
+     */
+    200: PageDncCheck;
+};
+
+export type ListContactDncChecksResponse = ListContactDncChecksResponses[keyof ListContactDncChecksResponses];
+
+export type GetContactTimelineData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        filter?: 'all' | 'calls' | 'campaigns' | 'consent';
+        after?: string;
+        limit?: number;
+    };
+    url: '/v1/contacts/{id}/timeline';
+};
+
+export type GetContactTimelineErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetContactTimelineError = GetContactTimelineErrors[keyof GetContactTimelineErrors];
+
+export type GetContactTimelineResponses = {
+    /**
+     * OK
+     */
+    200: TimelinePage;
+};
+
+export type GetContactTimelineResponse = GetContactTimelineResponses[keyof GetContactTimelineResponses];
+
+export type ListHolidayCalendarsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/holiday-calendars';
+};
+
+export type ListHolidayCalendarsErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListHolidayCalendarsError = ListHolidayCalendarsErrors[keyof ListHolidayCalendarsErrors];
+
+export type ListHolidayCalendarsResponses = {
+    /**
+     * OK
+     */
+    200: ListHolidayCalendar;
+};
+
+export type ListHolidayCalendarsResponse = ListHolidayCalendarsResponses[keyof ListHolidayCalendarsResponses];
 
 export type ListKnowledgeBasesData = {
     body?: never;
@@ -4609,6 +8706,51 @@ export type SyncKnowledgeSourceResponses = {
 
 export type SyncKnowledgeSourceResponse = SyncKnowledgeSourceResponses[keyof SyncKnowledgeSourceResponses];
 
+export type ListLiveCallsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/live-calls';
+};
+
+export type ListLiveCallsErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListLiveCallsError = ListLiveCallsErrors[keyof ListLiveCallsErrors];
+
+export type ListLiveCallsResponses = {
+    /**
+     * OK
+     */
+    200: LiveCalls;
+};
+
+export type ListLiveCallsResponse = ListLiveCallsResponses[keyof ListLiveCallsResponses];
+
 export type ListNumbersData = {
     body?: never;
     path?: never;
@@ -4621,7 +8763,16 @@ export type ListNumbersData = {
          * Opaque cursor from next_cursor of the previous page
          */
         after?: string;
-        status?: 'ordering' | 'active' | 'suspended' | 'releasing' | 'released' | 'failed';
+        status?: 'ordering' | 'verifying' | 'active' | 'suspended' | 'releasing' | 'released' | 'failed';
+        kind?: 'local' | 'toll_free';
+        /**
+         * Only numbers that may (or may not) be a campaign caller ID
+         */
+        can_call_out?: 'true' | 'false';
+        /**
+         * Numbers whose routing uses this agent in open or after hours
+         */
+        assistant_id?: string;
     };
     url: '/v1/numbers';
 };
@@ -4665,7 +8816,7 @@ export type ListNumbersResponses = {
 export type ListNumbersResponse = ListNumbersResponses[keyof ListNumbersResponses];
 
 export type OrderNumberData = {
-    body: OrderNumberRequest;
+    body: OrderNumberRequestWritable;
     path?: never;
     query?: never;
     url: '/v1/numbers';
@@ -4680,6 +8831,10 @@ export type OrderNumberErrors = {
      * Unauthorized
      */
     401: Problem;
+    /**
+     * Payment Required
+     */
+    402: Problem;
     /**
      * Forbidden
      */
@@ -4700,6 +8855,10 @@ export type OrderNumberErrors = {
      * Internal Server Error
      */
     500: Problem;
+    /**
+     * Bad Gateway
+     */
+    502: Problem;
 };
 
 export type OrderNumberError = OrderNumberErrors[keyof OrderNumberErrors];
@@ -4719,6 +8878,12 @@ export type SearchAvailableNumbersData = {
     query?: {
         country?: string;
         area_code?: string;
+        /**
+         * Resolved to at most 3 area codes through listAreaCodes; results are merged
+         */
+        city?: string;
+        state?: string;
+        kind?: 'local' | 'toll_free';
         limit?: number;
     };
     url: '/v1/numbers/available';
@@ -4761,6 +8926,69 @@ export type SearchAvailableNumbersResponses = {
 };
 
 export type SearchAvailableNumbersResponse = SearchAvailableNumbersResponses[keyof SearchAvailableNumbersResponses];
+
+export type OrderNumbersData = {
+    body: OrderNumbersRequestWritable;
+    headers: {
+        /**
+         * Replays within 24 h return the stored response; the same key with a different body returns 409
+         */
+        'Idempotency-Key': string;
+    };
+    path?: never;
+    query?: never;
+    url: '/v1/numbers/orders';
+};
+
+export type OrderNumbersErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Payment Required
+     */
+    402: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+    /**
+     * Bad Gateway
+     */
+    502: Problem;
+};
+
+export type OrderNumbersError = OrderNumbersErrors[keyof OrderNumbersErrors];
+
+export type OrderNumbersResponses = {
+    /**
+     * Accepted
+     */
+    202: OrderNumbersResult;
+};
+
+export type OrderNumbersResponse = OrderNumbersResponses[keyof OrderNumbersResponses];
 
 export type ReleaseNumberData = {
     body?: never;
@@ -4923,8 +9151,79 @@ export type UpdateNumberResponses = {
 
 export type UpdateNumberResponse = UpdateNumberResponses[keyof UpdateNumberResponses];
 
+export type UpdateNumberRoutingData = {
+    body: RoutingPlanWritable;
+    headers: {
+        /**
+         * Routing revision from the number
+         */
+        'If-Match': string;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/numbers/{id}/routing';
+};
+
+export type UpdateNumberRoutingErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Precondition Required
+     */
+    428: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type UpdateNumberRoutingError = UpdateNumberRoutingErrors[keyof UpdateNumberRoutingErrors];
+
+export type UpdateNumberRoutingResponses = {
+    /**
+     * OK
+     */
+    200: Number;
+};
+
+export type UpdateNumberRoutingResponse = UpdateNumberRoutingResponses[keyof UpdateNumberRoutingResponses];
+
 export type GetRecordingAudioData = {
     body?: never;
+    headers?: {
+        /**
+         * bytes=<start>-[<end>]; recordings over 60 minutes answer 200 only
+         */
+        Range?: string;
+    };
     path: {
         id: string;
     };
@@ -4950,6 +9249,18 @@ export type GetRecordingAudioErrors = {
      */
     404: Problem;
     /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Gone
+     */
+    410: Problem;
+    /**
+     * Requested Range Not Satisfiable
+     */
+    416: Problem;
+    /**
      * Unprocessable Entity
      */
     422: Problem;
@@ -4970,9 +9281,217 @@ export type GetRecordingAudioResponses = {
      * Decrypted recording
      */
     200: Blob | File;
+    /**
+     * Requested byte range of the decrypted recording
+     */
+    206: Blob | File;
 };
 
 export type GetRecordingAudioResponse = GetRecordingAudioResponses[keyof GetRecordingAudioResponses];
+
+export type GetRecordingPeaksData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/recordings/{id}/peaks';
+};
+
+export type GetRecordingPeaksErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Gone
+     */
+    410: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetRecordingPeaksError = GetRecordingPeaksErrors[keyof GetRecordingPeaksErrors];
+
+export type GetRecordingPeaksResponses = {
+    /**
+     * OK
+     */
+    200: RecordingPeaks;
+};
+
+export type GetRecordingPeaksResponse = GetRecordingPeaksResponses[keyof GetRecordingPeaksResponses];
+
+export type ListSpamAllowListData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/spam-allow-list';
+};
+
+export type ListSpamAllowListErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListSpamAllowListError = ListSpamAllowListErrors[keyof ListSpamAllowListErrors];
+
+export type ListSpamAllowListResponses = {
+    /**
+     * OK
+     */
+    200: ListSpamAllow;
+};
+
+export type ListSpamAllowListResponse = ListSpamAllowListResponses[keyof ListSpamAllowListResponses];
+
+export type AddSpamAllowData = {
+    body: AddSpamAllowRequest;
+    path?: never;
+    query?: never;
+    url: '/v1/spam-allow-list';
+};
+
+export type AddSpamAllowErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type AddSpamAllowError = AddSpamAllowErrors[keyof AddSpamAllowErrors];
+
+export type AddSpamAllowResponses = {
+    /**
+     * Created
+     */
+    201: SpamAllow;
+};
+
+export type AddSpamAllowResponse = AddSpamAllowResponses[keyof AddSpamAllowResponses];
+
+export type DeleteSpamAllowData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/spam-allow-list/{id}';
+};
+
+export type DeleteSpamAllowErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type DeleteSpamAllowError = DeleteSpamAllowErrors[keyof DeleteSpamAllowErrors];
+
+export type DeleteSpamAllowResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type DeleteSpamAllowResponse = DeleteSpamAllowResponses[keyof DeleteSpamAllowResponses];
 
 export type CreateIceServersData = {
     body?: never;
