@@ -450,9 +450,17 @@ export type AudiencePreview = {
 
 export type AutoTopUp = {
     amount_micro: number;
+    /**
+     * False before the first paid top-up or bundle payment
+     */
+    available: boolean;
     enabled: boolean;
     has_payment_method: boolean;
     low_balance_threshold_micro: number;
+    /**
+     * Card auto top-up charges; the default card when empty
+     */
+    payment_method_id?: string;
     threshold_micro: number;
     updated_at: string;
 };
@@ -472,17 +480,40 @@ export type AvailableNumber = {
 };
 
 export type Balance = {
+    /**
+     * Paid credit available
+     */
     available_micro: number;
+    /**
+     * Unused bundle credit; pays per-minute call charges only
+     */
+    bundle_credit_micro: number;
+    /**
+     * Settled charges over the last 7 local days divided by 7; null below 3 active days
+     */
+    burn_micro_per_day_7d: number | null;
     currency: 'USD';
+    /**
+     * First settled, risk-checked top-up or bundle payment
+     */
+    first_paid_at?: string;
     /**
      * Reserved by calls in progress
      */
     held_micro: number;
     low_balance_threshold_micro: number;
     /**
-     * Free credit (signup and promotions), spent before available funds
+     * Free credit (signup and promotions), spent before available funds on browser test and inbound calls
      */
     promo_credit_micro: number;
+    /**
+     * Days the total credit lasts at the 7-day burn; Owners and Admins only
+     */
+    runway_days?: number;
+    /**
+     * available + promo + bundle credit
+     */
+    total_credit_micro: number;
     updated_at: string;
 };
 
@@ -518,6 +549,52 @@ export type BulkUpdateContactsRequest = {
     campaign_id?: string;
     selection: ContactSelection;
     tag?: string;
+};
+
+export type Bundle = {
+    credit_micro: number;
+    /**
+     * Discount in basis points of the credit
+     */
+    discount_bp: number;
+    key: string;
+    /**
+     * Credit divided by this workspace's current agent minute price, rounded down
+     */
+    minutes_estimate: number;
+    name_key: string;
+    price_micro: number;
+    sort: number;
+};
+
+export type BundleList = {
+    data: Array<Bundle>;
+};
+
+export type BundleLot = {
+    /**
+     * Unused credit becomes normal balance at the price paid
+     */
+    converts_at: string;
+    credit_micro: number;
+    id: string;
+    left_micro: number;
+    starts_at: string;
+};
+
+export type BundleSubscription = {
+    bundle?: Bundle;
+    credit_left_micro: number;
+    current_period_end?: string;
+    last_failure_code?: string;
+    lots: Array<BundleLot>;
+    /**
+     * Size from the next renewal
+     */
+    next_bundle_key?: string;
+    payment_method_id?: string;
+    renews_at?: string;
+    status: 'none' | 'pending' | 'active' | 'canceling' | 'past_due';
 };
 
 export type Call = {
@@ -813,7 +890,23 @@ export type CallReceipt = {
 export type CallReceiptLine = {
     amount_micro: number;
     billed_minutes: number;
+    /**
+     * Part of amount_micro paid from bundle credit
+     */
+    bundle_funded_micro?: number;
+    /**
+     * Catalog name of the premium voice or model; only on premium lines
+     */
+    display_name?: string;
     kind: 'agent_minutes' | 'bridged_minutes' | 'premium_voice' | 'premium_model';
+    /**
+     * The workspace's launch price applied to this line
+     */
+    launch_price?: boolean;
+    /**
+     * Per-minute list price the launch price replaced; only with launch_price
+     */
+    list_price_micro?: number;
     quantity_ms: number;
     unit_price_micro: number;
 };
@@ -1269,7 +1362,7 @@ export type ComplianceTextView = {
     body: string;
     counsel_reviewed: boolean;
     id: string;
-    kind: 'disclosure_inbound' | 'disclosure_outbound' | 'optout_instruction' | 'recording_notice' | 'optout_ack' | 'voicemail_intro' | 'voicemail_optout' | 'screener_line' | 'unavailable' | 'goodbye' | 'inbound_ai_attestation' | 'voicemail_callback' | 'transcript_notice' | 'ca_preamble' | 'ca_preamble_decline_ack' | 'after_hours_message_mode' | 'optout_line_greeting' | 'optout_line_ack' | 'callback_check_code' | 'biometric_consent' | 'campaign_launch_attestation' | 'consent_attestation';
+    kind: 'disclosure_inbound' | 'disclosure_outbound' | 'optout_instruction' | 'recording_notice' | 'optout_ack' | 'voicemail_intro' | 'voicemail_optout' | 'screener_line' | 'unavailable' | 'goodbye' | 'inbound_ai_attestation' | 'voicemail_callback' | 'transcript_notice' | 'ca_preamble' | 'ca_preamble_decline_ack' | 'after_hours_message_mode' | 'optout_line_greeting' | 'optout_line_ack' | 'callback_check_code' | 'biometric_consent' | 'campaign_launch_attestation' | 'consent_attestation' | 'callback_check_replay' | 'callback_check_goodbye' | 'callback_check_digits';
     language: string;
     /**
      * inbound_ai_attestation only: the statements the owner confirms one by one
@@ -1685,9 +1778,17 @@ export type CreateWebCallRequest = {
     };
 };
 
+export type CreateWebhookReplayRequest = {
+    /**
+     * At most 7 days ago
+     */
+    since: string;
+    status?: 'failed' | 'all';
+};
+
 export type CreateWebhookRequest = {
     description?: string;
-    event_types: Array<'call.started' | 'call.answered' | 'call.ended' | 'call.analyzed' | 'call.recording.ready' | 'call.transferred' | 'campaign.started' | 'campaign.paused' | 'campaign.completed' | 'campaign.contact.completed' | 'compliance.opt_out' | 'billing.balance.low' | 'billing.top_up.succeeded' | 'billing.auto_top_up.failed' | 'number.provisioned' | 'number.released' | 'notification.call.summary' | 'notification.campaign.completed' | 'notification.campaign.paused' | 'notification.billing.balance_low' | 'notification.billing.top_up_succeeded' | 'notification.billing.auto_top_up_failed' | 'notification.spending_request.created' | 'notification.number.provisioned' | 'notification.number.released' | 'notification.compliance.optout_alert' | 'notification.inbox.callback_waiting' | 'notification.alert.missed_calls_spike' | 'notification.alert.transfers_failing' | 'notification.alert.tool_failing' | 'notification.agent.paused' | 'inbox.item.created' | 'inbox.item.cleared' | 'agent.published' | 'agent.paused' | 'agent.resumed' | 'call.flagged' | 'recording.deleted' | 'caller.blocked' | 'number.routing_changed' | 'notification.campaign.safeguard_paused' | 'notification.campaign.review_decided' | 'notification.verification.updated'>;
+    event_types: Array<'call.started' | 'call.answered' | 'call.ended' | 'call.analyzed' | 'call.recording.ready' | 'call.transferred' | 'campaign.started' | 'campaign.paused' | 'campaign.completed' | 'campaign.contact.completed' | 'compliance.opt_out' | 'billing.balance.low' | 'billing.top_up.succeeded' | 'billing.auto_top_up.failed' | 'number.provisioned' | 'number.released' | 'notification.call.summary' | 'notification.campaign.completed' | 'notification.campaign.paused' | 'notification.billing.balance_low' | 'notification.billing.top_up_succeeded' | 'notification.billing.auto_top_up_failed' | 'notification.spending_request.created' | 'notification.number.provisioned' | 'notification.number.released' | 'notification.compliance.optout_alert' | 'notification.inbox.callback_waiting' | 'notification.alert.missed_calls_spike' | 'notification.alert.transfers_failing' | 'notification.alert.tool_failing' | 'notification.agent.paused' | 'inbox.item.created' | 'inbox.item.cleared' | 'agent.published' | 'agent.paused' | 'agent.resumed' | 'call.flagged' | 'recording.deleted' | 'caller.blocked' | 'number.routing_changed' | 'notification.campaign.safeguard_paused' | 'notification.campaign.review_decided' | 'notification.verification.updated' | 'billing.spend_limit.alert' | 'billing.bundle.renewed' | 'billing.bundle.renewal_failed' | 'billing.payment.refunded' | 'number.rental_failed' | 'notification.billing.spend_limit_alert' | 'notification.billing.bundle_renewed' | 'notification.billing.bundle_renewal_failed' | 'notification.billing.payment_refunded' | 'notification.number.rental_failed'>;
     url: string;
 };
 
@@ -1726,6 +1827,20 @@ export type DncEntry = {
     source: 'internal' | 'in_call_opt_out' | 'revocation' | 'api' | 'import' | 'operator';
 };
 
+export type DailySpendLimit = {
+    alert_at_pct: Array<number>;
+    cap_micro?: number;
+    enabled: boolean;
+    /**
+     * Next midnight in the workspace time zone
+     */
+    resets_at: string;
+    /**
+     * Settled charges of every kind plus open holds today
+     */
+    used_micro: number;
+};
+
 export type DiffLine = {
     /**
      * Line number in the older text
@@ -1762,6 +1877,11 @@ export type DncImport = {
     rows_rejected: number;
     rows_total: number;
     status: 'queued' | 'running' | 'done' | 'failed';
+};
+
+export type DownloadLink = {
+    download_url: string;
+    expires_at: string;
 };
 
 export type DraftWarning = {
@@ -1832,6 +1952,13 @@ export type ForwardSource = {
     e164: string;
     first_seen_at: string;
     last_seen_at: string;
+};
+
+export type FreeRule = {
+    key: string;
+    params?: {
+        [key: string]: unknown;
+    };
 };
 
 export type GuardrailBuiltIn = {
@@ -2073,16 +2200,31 @@ export type LaunchAttestation = {
     text_version: string;
 };
 
+export type LaunchPrice = {
+    applies_to: Array<'call_minute'>;
+    /**
+     * This workspace's own end date
+     */
+    ends_at: string;
+    list_price_micro: number;
+    price_micro: number;
+    starts_at: string;
+};
+
 export type LedgerEntry = {
-    account: 'available' | 'held';
+    account: 'available' | 'held' | 'promo_credit' | 'pending_review' | 'bundle_credit';
     /**
      * Signed
      */
     amount_micro: number;
+    /**
+     * Balance of the account after this entry
+     */
+    balance_after_micro?: number;
     call_id?: string;
     created_at: string;
     id: string;
-    kind: 'top_up' | 'auto_top_up' | 'promo' | 'hold' | 'settle' | 'number_rental' | 'refund' | 'adjustment';
+    kind: 'top_up' | 'auto_top_up' | 'promo' | 'hold' | 'settle' | 'number_rental' | 'refund' | 'adjustment' | 'review_release' | 'bundle_purchase' | 'bundle_conversion';
     memo?: string;
     payment_id?: string;
     transaction_id: string;
@@ -2160,6 +2302,31 @@ export type LiveCallLine = {
 export type LiveCalls = {
     concurrency: Concurrency;
     data: Array<LiveCall>;
+};
+
+export type MonthlySpendLimit = {
+    alert_at_pct: Array<number>;
+    budget_micro?: number;
+    enabled: boolean;
+    resets_at: string;
+    /**
+     * Settled charges of every kind plus open holds this month
+     */
+    used_micro: number;
+};
+
+export type MonthlyStatement = {
+    /**
+     * False for the current month (statement so far)
+     */
+    complete: boolean;
+    from: string;
+    month: string;
+    to: string;
+};
+
+export type MonthlyStatementList = {
+    data: Array<MonthlyStatement>;
 };
 
 export type Number = {
@@ -2475,6 +2642,14 @@ export type PageNumber = {
     next_cursor: string | null;
 };
 
+export type PagePayment = {
+    data: Array<Payment>;
+    /**
+     * Cursor for the next page; null on the last page
+     */
+    next_cursor: string | null;
+};
+
 export type PageRate = {
     data: Array<Rate>;
     /**
@@ -2515,8 +2690,76 @@ export type PageWebhookEndpoint = {
     next_cursor: string | null;
 };
 
+export type PageWebhookMessage = {
+    data: Array<WebhookMessage>;
+    /**
+     * Cursor for the next page; null on the last page
+     */
+    next_cursor: string | null;
+};
+
 export type PauseAssistantRequest = {
     reason?: string;
+};
+
+export type Payment = {
+    /**
+     * Credit bought
+     */
+    amount_micro: number;
+    bundle_key?: string;
+    card?: PaymentCard;
+    created_at: string;
+    credited_at?: string;
+    failure_reason_code?: string;
+    id: string;
+    kind: 'top_up' | 'auto_top_up' | 'bundle';
+    /**
+     * Charged before tax; equals amount_micro for top-ups
+     */
+    price_micro: number;
+    /**
+     * The payment provider's receipt
+     */
+    receipt_url?: string;
+    refunded_micro: number;
+    status: 'pending' | 'under_review' | 'succeeded' | 'failed' | 'canceled' | 'refunded' | 'disputed';
+    tax_micro?: number;
+    total_charged_micro?: number;
+};
+
+export type PaymentCard = {
+    brand: string;
+    last4: string;
+};
+
+export type PaymentMethod = {
+    brand: string;
+    created_at: string;
+    exp_month: number;
+    exp_year: number;
+    /**
+     * Payment provider id; opaque
+     */
+    id: string;
+    is_default: boolean;
+    last4: string;
+    used_by: Array<'auto_top_up' | 'bundle'>;
+};
+
+export type PaymentMethodList = {
+    data: Array<PaymentMethod>;
+};
+
+export type PlatformSpendCaps = {
+    /**
+     * Set by Larynth; shown when lower than the customer cap
+     */
+    operator_cap_micro?: number;
+    /**
+     * Verification tier cap; shown when lower than the customer cap
+     */
+    tier_cap_micro?: number;
 };
 
 export type PostCallSettings = {
@@ -2569,6 +2812,10 @@ export type Problem = {
      */
     campaign_ids?: Array<string>;
     /**
+     * Cap of that limit (billing.spend_limit_reached)
+     */
+    cap_micro?: number;
+    /**
      * Failed launch checks (campaign.preflight_failed)
      */
     checks?: Array<PreflightCheck>;
@@ -2584,9 +2831,21 @@ export type Problem = {
     errors?: Array<ErrorDetail>;
     instance?: string;
     /**
+     * Maximum top-up (billing.top_up_above_maximum)
+     */
+    max_micro?: number;
+    /**
+     * Minimum top-up (billing.top_up_below_minimum)
+     */
+    min_micro?: number;
+    /**
      * The number is the opt-out line (numbers.in_use)
      */
     optout_line?: boolean;
+    /**
+     * Limit that was reached (billing.spend_limit_reached)
+     */
+    period?: 'daily' | 'monthly';
     /**
      * Ways to re-authenticate, in preference order (auth.reauth_required)
      */
@@ -2610,6 +2869,14 @@ export type Problem = {
      */
     type: string;
     updated_by_name?: string;
+    /**
+     * What uses the card (billing.payment_method_in_use)
+     */
+    used_by?: Array<'auto_top_up' | 'bundle'>;
+    /**
+     * Spend counted against it (billing.spend_limit_reached)
+     */
+    used_micro?: number;
     [key: string]: unknown;
 };
 
@@ -2628,17 +2895,62 @@ export type PublishResult = {
 };
 
 export type Rate = {
+    /**
+     * premium_model only
+     */
+    ai_model_id?: string;
     currency: 'USD';
     direction?: 'inbound' | 'outbound' | 'web_test';
     effective_from: string;
     effective_to?: string;
     id: string;
-    kind: 'call_minute' | 'number_month' | 'transfer_minute';
+    kind: 'call_minute' | 'number_month' | 'number_month_toll_free' | 'transfer_minute' | 'forward_minute' | 'byo_sip_minute' | 'premium_model' | 'premium_voice' | 'branded_call' | 'branded_brand_month';
     mode?: 'cascade' | 's2s';
     /**
-     * Per minute for call_minute and transfer_minute, per month for number_month
+     * Per minute for the *_minute and premium kinds, per month for number_month*, branded_brand_month, per display for branded_call
      */
     price_micro: number;
+    /**
+     * premium_voice only
+     */
+    voice_id?: string;
+};
+
+export type RateCard = {
+    bundles_note_key: string;
+    free_rules: Array<FreeRule>;
+    groups: Array<RateCardGroup>;
+    /**
+     * Only while this workspace's launch window is open
+     */
+    launch_price?: LaunchPrice;
+    trial: TrialTerms;
+};
+
+export type RateCardGroup = {
+    key: 'calls' | 'numbers' | 'telephony' | 'free' | 'premium' | 'branded' | 'simulations';
+    lines: Array<RateCardLine>;
+};
+
+export type RateCardLine = {
+    key: string;
+    label_key: string;
+    /**
+     * Price before the launch price
+     */
+    list_price_micro?: number;
+    /**
+     * Premium lines only, from the catalog row
+     */
+    model_label?: string;
+    note_key?: string;
+    price_micro?: number;
+    /**
+     * Premium lines only, from the catalog row
+     */
+    provider_label?: string;
+    rounding: 'started_minute' | 'none';
+    unit: 'per_minute' | 'per_month' | 'per_display' | 'free' | 'at_cost';
 };
 
 export type Recording = {
@@ -2797,6 +3109,21 @@ export type SpamAllow = {
     note?: string;
 };
 
+export type SpendLimits = {
+    daily: DailySpendLimit;
+    monthly: MonthlySpendLimit;
+    platform: PlatformSpendCaps;
+    /**
+     * daily or monthly once that limit is reached, else null
+     */
+    reached: string | null;
+    revision: number;
+    /**
+     * Reaching a limit also stops answering inbound calls
+     */
+    stop_inbound: boolean;
+};
+
 export type StartCampaignRequest = {
     attest: LaunchAttestation;
 };
@@ -2807,13 +3134,61 @@ export type StateAudience = {
     state: string;
 };
 
+export type StatementLine = {
+    /**
+     * Signed
+     */
+    amount_micro: number;
+    /**
+     * Time of the line's last transaction
+     */
+    at: string;
+    /**
+     * Customer credit (available + held + promo + bundle) after this line
+     */
+    balance_after_micro: number;
+    id: string;
+    kind: 'free_credit' | 'top_up' | 'auto_top_up' | 'bundle_purchase' | 'bundle_conversion' | 'calls' | 'number_rental' | 'branded_fee' | 'refund' | 'dispute' | 'adjustment';
+    /**
+     * Day in the workspace time zone
+     */
+    local_date: string;
+    memo_key: string;
+    params: StatementLineParams;
+};
+
+export type StatementLinePage = {
+    /**
+     * Customer credit after the last line of the period
+     */
+    closing_balance_micro: number;
+    data: Array<StatementLine>;
+    /**
+     * Cursor for the next page; null on the last page
+     */
+    next_cursor: string | null;
+    /**
+     * Customer credit before the first line of the period
+     */
+    opening_balance_micro: number;
+};
+
+export type StatementLineParams = {
+    bundle_key?: string;
+    calls?: number;
+    e164?: string;
+    numbers?: number;
+    payment_id?: string;
+    reason?: string;
+};
+
 export type TagCount = {
     count: number;
     tag: string;
 };
 
 export type TestWebhookRequest = {
-    event_type?: 'call.started' | 'call.answered' | 'call.ended' | 'call.analyzed' | 'call.recording.ready' | 'call.transferred' | 'campaign.started' | 'campaign.paused' | 'campaign.completed' | 'campaign.contact.completed' | 'compliance.opt_out' | 'billing.balance.low' | 'billing.top_up.succeeded' | 'billing.auto_top_up.failed' | 'number.provisioned' | 'number.released' | 'notification.call.summary' | 'notification.campaign.completed' | 'notification.campaign.paused' | 'notification.billing.balance_low' | 'notification.billing.top_up_succeeded' | 'notification.billing.auto_top_up_failed' | 'notification.spending_request.created' | 'notification.number.provisioned' | 'notification.number.released' | 'notification.compliance.optout_alert';
+    event_type?: 'call.started' | 'call.answered' | 'call.ended' | 'call.analyzed' | 'call.recording.ready' | 'call.transferred' | 'campaign.started' | 'campaign.paused' | 'campaign.completed' | 'campaign.contact.completed' | 'compliance.opt_out' | 'billing.balance.low' | 'billing.top_up.succeeded' | 'billing.auto_top_up.failed' | 'number.provisioned' | 'number.released' | 'notification.call.summary' | 'notification.campaign.completed' | 'notification.campaign.paused' | 'notification.billing.balance_low' | 'notification.billing.top_up_succeeded' | 'notification.billing.auto_top_up_failed' | 'notification.spending_request.created' | 'notification.number.provisioned' | 'notification.number.released' | 'notification.compliance.optout_alert' | 'notification.inbox.callback_waiting' | 'notification.alert.missed_calls_spike' | 'notification.alert.transfers_failing' | 'notification.alert.tool_failing' | 'notification.agent.paused' | 'inbox.item.created' | 'inbox.item.cleared' | 'agent.published' | 'agent.paused' | 'agent.resumed' | 'call.flagged' | 'recording.deleted' | 'caller.blocked' | 'number.routing_changed' | 'notification.campaign.safeguard_paused' | 'notification.campaign.review_decided' | 'notification.verification.updated' | 'billing.spend_limit.alert' | 'billing.bundle.renewed' | 'billing.bundle.renewal_failed' | 'billing.payment.refunded' | 'number.rental_failed' | 'notification.billing.spend_limit_alert' | 'notification.billing.bundle_renewed' | 'notification.billing.bundle_renewal_failed' | 'notification.billing.payment_refunded' | 'notification.number.rental_failed';
 };
 
 export type TimelineCall = {
@@ -2892,6 +3267,17 @@ export type TransferDestination = {
      * Warm only: what the agent says to the human before bridging. Variables {{summary}} and {{destination}}
      */
     whisper?: string;
+};
+
+export type TrialTerms = {
+    /**
+     * Call kinds free credit pays for
+     */
+    covers: Array<'web_test' | 'inbound'>;
+    /**
+     * Free credit granted at signup; never refundable, never expires
+     */
+    credit_micro: number;
 };
 
 export type TurnLatency = {
@@ -3030,9 +3416,48 @@ export type UpdateKnowledgeBaseRequest = {
 
 export type UpdateWebhookRequest = {
     description?: string;
-    event_types?: Array<'call.started' | 'call.answered' | 'call.ended' | 'call.analyzed' | 'call.recording.ready' | 'call.transferred' | 'campaign.started' | 'campaign.paused' | 'campaign.completed' | 'campaign.contact.completed' | 'compliance.opt_out' | 'billing.balance.low' | 'billing.top_up.succeeded' | 'billing.auto_top_up.failed' | 'number.provisioned' | 'number.released' | 'notification.call.summary' | 'notification.campaign.completed' | 'notification.campaign.paused' | 'notification.billing.balance_low' | 'notification.billing.top_up_succeeded' | 'notification.billing.auto_top_up_failed' | 'notification.spending_request.created' | 'notification.number.provisioned' | 'notification.number.released' | 'notification.compliance.optout_alert' | 'notification.inbox.callback_waiting' | 'notification.alert.missed_calls_spike' | 'notification.alert.transfers_failing' | 'notification.alert.tool_failing' | 'notification.agent.paused' | 'inbox.item.created' | 'inbox.item.cleared' | 'agent.published' | 'agent.paused' | 'agent.resumed' | 'call.flagged' | 'recording.deleted' | 'caller.blocked' | 'number.routing_changed' | 'notification.campaign.safeguard_paused' | 'notification.campaign.review_decided' | 'notification.verification.updated'>;
+    event_types?: Array<'call.started' | 'call.answered' | 'call.ended' | 'call.analyzed' | 'call.recording.ready' | 'call.transferred' | 'campaign.started' | 'campaign.paused' | 'campaign.completed' | 'campaign.contact.completed' | 'compliance.opt_out' | 'billing.balance.low' | 'billing.top_up.succeeded' | 'billing.auto_top_up.failed' | 'number.provisioned' | 'number.released' | 'notification.call.summary' | 'notification.campaign.completed' | 'notification.campaign.paused' | 'notification.billing.balance_low' | 'notification.billing.top_up_succeeded' | 'notification.billing.auto_top_up_failed' | 'notification.spending_request.created' | 'notification.number.provisioned' | 'notification.number.released' | 'notification.compliance.optout_alert' | 'notification.inbox.callback_waiting' | 'notification.alert.missed_calls_spike' | 'notification.alert.transfers_failing' | 'notification.alert.tool_failing' | 'notification.agent.paused' | 'inbox.item.created' | 'inbox.item.cleared' | 'agent.published' | 'agent.paused' | 'agent.resumed' | 'call.flagged' | 'recording.deleted' | 'caller.blocked' | 'number.routing_changed' | 'notification.campaign.safeguard_paused' | 'notification.campaign.review_decided' | 'notification.verification.updated' | 'billing.spend_limit.alert' | 'billing.bundle.renewed' | 'billing.bundle.renewal_failed' | 'billing.payment.refunded' | 'number.rental_failed' | 'notification.billing.spend_limit_alert' | 'notification.billing.bundle_renewed' | 'notification.billing.bundle_renewal_failed' | 'notification.billing.payment_refunded' | 'notification.number.rental_failed'>;
     status?: 'active' | 'disabled';
     url?: string;
+};
+
+export type Usage = {
+    from: string;
+    group_by: 'category' | 'assistant' | 'day' | 'number';
+    /**
+     * Charges of the period read straight from the ledger; equals totals.amount_micro
+     */
+    ledger_check_micro: number;
+    rows: Array<UsageRow>;
+    timezone: string;
+    to: string;
+    totals: UsageRow;
+};
+
+export type UsageLines = {
+    agent_micro: number;
+    branded_micro: number;
+    bridged_micro: number;
+    byo_micro: number;
+    forward_micro: number;
+    number_micro: number;
+    premium_micro: number;
+    simulation_micro: number;
+};
+
+export type UsageRow = {
+    amount_micro: number;
+    billed_minutes: number;
+    calls: number;
+    /**
+     * Category, agent id, local date or number id
+     */
+    key: string;
+    /**
+     * Agent name (last name of deleted agents) or number
+     */
+    label?: string;
+    lines: UsageLines;
 };
 
 export type Vocabulary = {
@@ -3089,6 +3514,11 @@ export type WebhookEndpoint = {
     event_types: Array<string>;
     id: string;
     previous_secret_expires_at?: string;
+    /**
+     * Last 4 characters of the current signing secret
+     */
+    secret_hint?: string;
+    stats_24h: WebhookStats;
     status: 'active' | 'disabled';
     updated_at: string;
     url: string;
@@ -3106,13 +3536,78 @@ export type WebhookEndpointWithSecret = {
      * Standard Webhooks signing secret (whsec_<base64>); returned only once
      */
     secret: string;
+    /**
+     * Last 4 characters of the current signing secret
+     */
+    secret_hint?: string;
+    stats_24h: WebhookStats;
     status: 'active' | 'disabled';
     updated_at: string;
     url: string;
 };
 
-export type WebhookTestResult = {
+export type WebhookEventCatalogue = {
+    data: Array<WebhookEventType>;
+    retry_policy: WebhookRetryPolicy;
+};
+
+export type WebhookEventType = {
+    deprecated: boolean;
+    description_key: string;
+    group: 'calls' | 'agents' | 'campaigns' | 'compliance' | 'billing' | 'numbers' | 'inbox' | 'notifications';
+    label_key: string;
+    type: string;
+};
+
+export type WebhookMessage = {
+    attempts: number;
+    created_at: string;
+    /**
+     * Also the webhook-id header
+     */
     event_id: string;
+    event_type: string;
+    last_attempt_at?: string;
+    last_response_code?: number;
+    last_response_ms?: number;
+    next_attempt_at?: string;
+    redelivered_by_name?: string;
+    status: 'pending' | 'retrying' | 'delivered' | 'failed';
+    test: boolean;
+};
+
+export type WebhookReplay = {
+    count: number;
+    id: string;
+};
+
+export type WebhookRetryPolicy = {
+    disable_after_consecutive_failures: number;
+    max_attempts: number;
+    /**
+     * Delay before each retry
+     */
+    schedule_seconds: Array<number>;
+};
+
+export type WebhookStats = {
+    delivered: number;
+    failed: number;
+    retrying: number;
+};
+
+export type WebhookTestResult = {
+    /**
+     * The first attempt got a 2xx answer
+     */
+    delivered: boolean;
+    /**
+     * Why the first attempt failed without a response (timeout, connection, TLS)
+     */
+    error_code?: string;
+    event_id: string;
+    response_code?: number;
+    response_ms?: number;
 };
 
 export type NumberWritable = {
@@ -4509,6 +5004,96 @@ export type GetBalanceResponses = {
 
 export type GetBalanceResponse = GetBalanceResponses[keyof GetBalanceResponses];
 
+export type GetBundleSubscriptionData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/billing/bundle-subscription';
+};
+
+export type GetBundleSubscriptionErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetBundleSubscriptionError = GetBundleSubscriptionErrors[keyof GetBundleSubscriptionErrors];
+
+export type GetBundleSubscriptionResponses = {
+    /**
+     * OK
+     */
+    200: BundleSubscription;
+};
+
+export type GetBundleSubscriptionResponse = GetBundleSubscriptionResponses[keyof GetBundleSubscriptionResponses];
+
+export type ListBundlesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/billing/bundles';
+};
+
+export type ListBundlesErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListBundlesError = ListBundlesErrors[keyof ListBundlesErrors];
+
+export type ListBundlesResponses = {
+    /**
+     * OK
+     */
+    200: BundleList;
+};
+
+export type ListBundlesResponse = ListBundlesResponses[keyof ListBundlesResponses];
+
 export type ListLedgerData = {
     body?: never;
     path?: never;
@@ -4521,8 +5106,8 @@ export type ListLedgerData = {
          * Opaque cursor from next_cursor of the previous page
          */
         after?: string;
-        kind?: 'top_up' | 'auto_top_up' | 'promo' | 'hold' | 'settle' | 'number_rental' | 'refund' | 'adjustment';
-        account?: 'available' | 'held';
+        kind?: 'top_up' | 'auto_top_up' | 'promo' | 'hold' | 'settle' | 'number_rental' | 'refund' | 'adjustment' | 'review_release' | 'bundle_purchase' | 'bundle_conversion';
+        account?: 'available' | 'held' | 'promo_credit' | 'pending_review' | 'bundle_credit';
         call_id?: string;
         since?: string;
         until?: string;
@@ -4568,6 +5153,152 @@ export type ListLedgerResponses = {
 
 export type ListLedgerResponse = ListLedgerResponses[keyof ListLedgerResponses];
 
+export type ListPaymentMethodsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/billing/payment-methods';
+};
+
+export type ListPaymentMethodsErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListPaymentMethodsError = ListPaymentMethodsErrors[keyof ListPaymentMethodsErrors];
+
+export type ListPaymentMethodsResponses = {
+    /**
+     * OK
+     */
+    200: PaymentMethodList;
+};
+
+export type ListPaymentMethodsResponse = ListPaymentMethodsResponses[keyof ListPaymentMethodsResponses];
+
+export type ListPaymentsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page size
+         */
+        limit?: number;
+        /**
+         * Opaque cursor from next_cursor of the previous page
+         */
+        after?: string;
+        kind?: 'top_up' | 'auto_top_up' | 'bundle';
+        status?: 'pending' | 'under_review' | 'succeeded' | 'failed' | 'canceled' | 'refunded' | 'disputed';
+    };
+    url: '/v1/billing/payments';
+};
+
+export type ListPaymentsErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListPaymentsError = ListPaymentsErrors[keyof ListPaymentsErrors];
+
+export type ListPaymentsResponses = {
+    /**
+     * OK
+     */
+    200: PagePayment;
+};
+
+export type ListPaymentsResponse = ListPaymentsResponses[keyof ListPaymentsResponses];
+
+export type GetRateCardData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/billing/rate-card';
+};
+
+export type GetRateCardErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetRateCardError = GetRateCardErrors[keyof GetRateCardErrors];
+
+export type GetRateCardResponses = {
+    /**
+     * OK
+     */
+    200: RateCard;
+};
+
+export type GetRateCardResponse = GetRateCardResponses[keyof GetRateCardResponses];
+
 export type ListRatesData = {
     body?: never;
     path?: never;
@@ -4612,6 +5343,323 @@ export type ListRatesResponses = {
 };
 
 export type ListRatesResponse = ListRatesResponses[keyof ListRatesResponses];
+
+export type GetSpendLimitsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/billing/spend-limits';
+};
+
+export type GetSpendLimitsErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetSpendLimitsError = GetSpendLimitsErrors[keyof GetSpendLimitsErrors];
+
+export type GetSpendLimitsResponses = {
+    /**
+     * OK
+     */
+    200: SpendLimits;
+};
+
+export type GetSpendLimitsResponse = GetSpendLimitsResponses[keyof GetSpendLimitsResponses];
+
+export type ListStatementLinesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        group?: 'top_ups' | 'free_credit' | 'calls' | 'numbers' | 'bundles' | 'adjustments';
+        /**
+         * First local day
+         */
+        from?: string;
+        /**
+         * Last local day
+         */
+        to?: string;
+        /**
+         * Page size
+         */
+        limit?: number;
+        /**
+         * Opaque cursor from next_cursor of the previous page
+         */
+        after?: string;
+    };
+    url: '/v1/billing/statement-lines';
+};
+
+export type ListStatementLinesErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListStatementLinesError = ListStatementLinesErrors[keyof ListStatementLinesErrors];
+
+export type ListStatementLinesResponses = {
+    /**
+     * OK
+     */
+    200: StatementLinePage;
+};
+
+export type ListStatementLinesResponse = ListStatementLinesResponses[keyof ListStatementLinesResponses];
+
+export type ListMonthlyStatementsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/billing/statements';
+};
+
+export type ListMonthlyStatementsErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListMonthlyStatementsError = ListMonthlyStatementsErrors[keyof ListMonthlyStatementsErrors];
+
+export type ListMonthlyStatementsResponses = {
+    /**
+     * OK
+     */
+    200: MonthlyStatementList;
+};
+
+export type ListMonthlyStatementsResponse = ListMonthlyStatementsResponses[keyof ListMonthlyStatementsResponses];
+
+export type GetMonthlyStatementData = {
+    body?: never;
+    path: {
+        /**
+         * YYYY-MM
+         */
+        month: string;
+    };
+    query?: never;
+    url: '/v1/billing/statements/{month}';
+};
+
+export type GetMonthlyStatementErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetMonthlyStatementError = GetMonthlyStatementErrors[keyof GetMonthlyStatementErrors];
+
+export type GetMonthlyStatementResponses = {
+    /**
+     * OK
+     */
+    200: DownloadLink;
+};
+
+export type GetMonthlyStatementResponse = GetMonthlyStatementResponses[keyof GetMonthlyStatementResponses];
+
+export type GetTopUpData = {
+    body?: never;
+    path: {
+        payment_id: string;
+    };
+    query?: never;
+    url: '/v1/billing/top-ups/{payment_id}';
+};
+
+export type GetTopUpErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetTopUpError = GetTopUpErrors[keyof GetTopUpErrors];
+
+export type GetTopUpResponses = {
+    /**
+     * OK
+     */
+    200: Payment;
+};
+
+export type GetTopUpResponse = GetTopUpResponses[keyof GetTopUpResponses];
+
+export type GetBillingUsageData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * First local day; at most 366 days before to
+         */
+        from?: string;
+        /**
+         * Last local day
+         */
+        to?: string;
+        /**
+         * Instead of from and to: this_month, last_30_days or month:YYYY-MM
+         */
+        period?: string;
+        group_by?: 'category' | 'assistant' | 'day' | 'number';
+    };
+    url: '/v1/billing/usage';
+};
+
+export type GetBillingUsageErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetBillingUsageError = GetBillingUsageErrors[keyof GetBillingUsageErrors];
+
+export type GetBillingUsageResponses = {
+    /**
+     * OK
+     */
+    200: Usage;
+};
+
+export type GetBillingUsageResponse = GetBillingUsageResponses[keyof GetBillingUsageResponses];
 
 export type ListBlockedCallersData = {
     body?: never;
@@ -7259,7 +8307,7 @@ export type ListComplianceTextsData = {
     body?: never;
     path?: never;
     query?: {
-        kind?: 'disclosure_inbound' | 'disclosure_outbound' | 'optout_instruction' | 'recording_notice' | 'optout_ack' | 'voicemail_intro' | 'voicemail_optout' | 'screener_line' | 'unavailable' | 'goodbye' | 'inbound_ai_attestation' | 'voicemail_callback' | 'transcript_notice' | 'ca_preamble' | 'ca_preamble_decline_ack' | 'after_hours_message_mode' | 'optout_line_greeting' | 'optout_line_ack' | 'callback_check_code' | 'biometric_consent' | 'campaign_launch_attestation' | 'consent_attestation';
+        kind?: 'disclosure_inbound' | 'disclosure_outbound' | 'optout_instruction' | 'recording_notice' | 'optout_ack' | 'voicemail_intro' | 'voicemail_optout' | 'screener_line' | 'unavailable' | 'goodbye' | 'inbound_ai_attestation' | 'voicemail_callback' | 'transcript_notice' | 'ca_preamble' | 'ca_preamble_decline_ack' | 'after_hours_message_mode' | 'optout_line_greeting' | 'optout_line_ack' | 'callback_check_code' | 'biometric_consent' | 'campaign_launch_attestation' | 'consent_attestation' | 'callback_check_replay' | 'callback_check_goodbye' | 'callback_check_digits';
         language?: string;
     };
     url: '/v1/compliance/texts';
@@ -8817,6 +9865,12 @@ export type ListNumbersResponse = ListNumbersResponses[keyof ListNumbersResponse
 
 export type OrderNumberData = {
     body: OrderNumberRequestWritable;
+    headers: {
+        /**
+         * Replays within 24 h return the stored response; the same key with a different body returns 409
+         */
+        'Idempotency-Key': string;
+    };
     path?: never;
     query?: never;
     url: '/v1/numbers';
@@ -9645,6 +10699,51 @@ export type CreateWebhookResponses = {
 
 export type CreateWebhookResponse = CreateWebhookResponses[keyof CreateWebhookResponses];
 
+export type ListWebhookEventTypesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/webhooks/event-types';
+};
+
+export type ListWebhookEventTypesErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListWebhookEventTypesError = ListWebhookEventTypesErrors[keyof ListWebhookEventTypesErrors];
+
+export type ListWebhookEventTypesResponses = {
+    /**
+     * OK
+     */
+    200: WebhookEventCatalogue;
+};
+
+export type ListWebhookEventTypesResponse = ListWebhookEventTypesResponses[keyof ListWebhookEventTypesResponses];
+
 export type DeleteWebhookData = {
     body?: never;
     path: {
@@ -9821,6 +10920,10 @@ export type ListWebhookDeliveriesData = {
          */
         after?: string;
         status?: 'succeeded' | 'failed' | 'retrying';
+        /**
+         * Attempts of one message
+         */
+        event_id?: string;
     };
     url: '/v1/webhooks/{id}/deliveries';
 };
@@ -9866,6 +10969,179 @@ export type ListWebhookDeliveriesResponses = {
 };
 
 export type ListWebhookDeliveriesResponse = ListWebhookDeliveriesResponses[keyof ListWebhookDeliveriesResponses];
+
+export type ListWebhookMessagesData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        /**
+         * Page size
+         */
+        limit?: number;
+        /**
+         * Opaque cursor from next_cursor of the previous page
+         */
+        after?: string;
+        status?: 'pending' | 'retrying' | 'delivered' | 'failed';
+        event_type?: string;
+    };
+    url: '/v1/webhooks/{id}/messages';
+};
+
+export type ListWebhookMessagesErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListWebhookMessagesError = ListWebhookMessagesErrors[keyof ListWebhookMessagesErrors];
+
+export type ListWebhookMessagesResponses = {
+    /**
+     * OK
+     */
+    200: PageWebhookMessage;
+};
+
+export type ListWebhookMessagesResponse = ListWebhookMessagesResponses[keyof ListWebhookMessagesResponses];
+
+export type RedeliverWebhookMessageData = {
+    body?: never;
+    path: {
+        id: string;
+        event_id: string;
+    };
+    query?: never;
+    url: '/v1/webhooks/{id}/messages/{event_id}/redeliver';
+};
+
+export type RedeliverWebhookMessageErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type RedeliverWebhookMessageError = RedeliverWebhookMessageErrors[keyof RedeliverWebhookMessageErrors];
+
+export type RedeliverWebhookMessageResponses = {
+    /**
+     * Accepted
+     */
+    202: WebhookMessage;
+};
+
+export type RedeliverWebhookMessageResponse = RedeliverWebhookMessageResponses[keyof RedeliverWebhookMessageResponses];
+
+export type CreateWebhookReplayData = {
+    body: CreateWebhookReplayRequest;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/webhooks/{id}/replays';
+};
+
+export type CreateWebhookReplayErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type CreateWebhookReplayError = CreateWebhookReplayErrors[keyof CreateWebhookReplayErrors];
+
+export type CreateWebhookReplayResponses = {
+    /**
+     * Accepted
+     */
+    202: WebhookReplay;
+};
+
+export type CreateWebhookReplayResponse = CreateWebhookReplayResponses[keyof CreateWebhookReplayResponses];
 
 export type RotateWebhookSecretData = {
     body?: never;
