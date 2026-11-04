@@ -1269,7 +1269,7 @@ export type ComplianceTextView = {
     body: string;
     counsel_reviewed: boolean;
     id: string;
-    kind: 'disclosure_inbound' | 'disclosure_outbound' | 'optout_instruction' | 'recording_notice' | 'optout_ack' | 'voicemail_intro' | 'voicemail_optout' | 'screener_line' | 'unavailable' | 'goodbye' | 'inbound_ai_attestation' | 'voicemail_callback' | 'transcript_notice' | 'ca_preamble' | 'ca_preamble_decline_ack' | 'after_hours_message_mode' | 'optout_line_greeting' | 'optout_line_ack' | 'callback_check_code' | 'biometric_consent' | 'campaign_launch_attestation' | 'consent_attestation';
+    kind: 'disclosure_inbound' | 'disclosure_outbound' | 'optout_instruction' | 'recording_notice' | 'optout_ack' | 'voicemail_intro' | 'voicemail_optout' | 'screener_line' | 'unavailable' | 'goodbye' | 'inbound_ai_attestation' | 'voicemail_callback' | 'transcript_notice' | 'ca_preamble' | 'ca_preamble_decline_ack' | 'after_hours_message_mode' | 'optout_line_greeting' | 'optout_line_ack' | 'callback_check_code' | 'biometric_consent' | 'campaign_launch_attestation' | 'consent_attestation' | 'callback_check_replay' | 'callback_check_goodbye' | 'callback_check_digits';
     language: string;
     /**
      * inbound_ai_attestation only: the statements the owner confirms one by one
@@ -7259,7 +7259,7 @@ export type ListComplianceTextsData = {
     body?: never;
     path?: never;
     query?: {
-        kind?: 'disclosure_inbound' | 'disclosure_outbound' | 'optout_instruction' | 'recording_notice' | 'optout_ack' | 'voicemail_intro' | 'voicemail_optout' | 'screener_line' | 'unavailable' | 'goodbye' | 'inbound_ai_attestation' | 'voicemail_callback' | 'transcript_notice' | 'ca_preamble' | 'ca_preamble_decline_ack' | 'after_hours_message_mode' | 'optout_line_greeting' | 'optout_line_ack' | 'callback_check_code' | 'biometric_consent' | 'campaign_launch_attestation' | 'consent_attestation';
+        kind?: 'disclosure_inbound' | 'disclosure_outbound' | 'optout_instruction' | 'recording_notice' | 'optout_ack' | 'voicemail_intro' | 'voicemail_optout' | 'screener_line' | 'unavailable' | 'goodbye' | 'inbound_ai_attestation' | 'voicemail_callback' | 'transcript_notice' | 'ca_preamble' | 'ca_preamble_decline_ack' | 'after_hours_message_mode' | 'optout_line_greeting' | 'optout_line_ack' | 'callback_check_code' | 'biometric_consent' | 'campaign_launch_attestation' | 'consent_attestation' | 'callback_check_replay' | 'callback_check_goodbye' | 'callback_check_digits';
         language?: string;
     };
     url: '/v1/compliance/texts';
