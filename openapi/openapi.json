@@ -4034,7 +4034,10 @@
               "callback_check_code",
               "biometric_consent",
               "campaign_launch_attestation",
-              "consent_attestation"
+              "consent_attestation",
+              "callback_check_replay",
+              "callback_check_goodbye",
+              "callback_check_digits"
             ],
             "type": "string"
           },
@@ -15905,7 +15908,10 @@
                 "callback_check_code",
                 "biometric_consent",
                 "campaign_launch_attestation",
-                "consent_attestation"
+                "consent_attestation",
+                "callback_check_replay",
+                "callback_check_goodbye",
+                "callback_check_digits"
               ],
               "type": "string"
             }
@@ -20704,6 +20710,12 @@
       "status": 422,
       "type": "https://larynth.com/problems/verification.consent_required",
       "title": "Biometric consent is required"
+    },
+    {
+      "code": "verification.country_unsupported",
+      "status": 422,
+      "type": "https://larynth.com/problems/verification.country_unsupported",
+      "title": "Business checks are not available in your country yet"
     },
     {
       "code": "verification.industry_refused",
