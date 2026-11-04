@@ -2,7 +2,7 @@
 
 import { type Client, type ClientMeta, formDataBodySerializer, type Options as Options2, type RequestResult, type TDataShape } from './client';
 import { client } from './client.gen';
-import type { AddCampaignContactsData, AddCampaignContactsErrors, AddCampaignContactsResponses, ArchiveCampaignData, ArchiveCampaignErrors, ArchiveCampaignResponses, CreateAssistantData, CreateAssistantErrors, CreateAssistantResponses, CreateAssistantVersionData, CreateAssistantVersionErrors, CreateAssistantVersionResponses, CreateCallData, CreateCallErrors, CreateCallResponses, CreateCampaignData, CreateCampaignErrors, CreateCampaignResponses, CreateConsentData, CreateConsentErrors, CreateConsentResponses, CreateContactData, CreateContactErrors, CreateContactImportData, CreateContactImportErrors, CreateContactImportResponses, CreateContactResponses, CreateDncData, CreateDncErrors, CreateDncResponses, CreateIceServersData, CreateIceServersErrors, CreateIceServersResponses, CreateKnowledgeBaseData, CreateKnowledgeBaseErrors, CreateKnowledgeBaseResponses, CreateKnowledgeFileSourceData, CreateKnowledgeFileSourceErrors, CreateKnowledgeFileSourceResponses, CreateKnowledgeWebsiteSourceData, CreateKnowledgeWebsiteSourceErrors, CreateKnowledgeWebsiteSourceResponses, CreateRevocationData, CreateRevocationErrors, CreateRevocationResponses, CreateWebCallData, CreateWebCallErrors, CreateWebCallResponses, CreateWebhookData, CreateWebhookErrors, CreateWebhookResponses, DeleteAssistantData, DeleteAssistantErrors, DeleteAssistantResponses, DeleteContactData, DeleteContactErrors, DeleteContactResponses, DeleteKnowledgeBaseData, DeleteKnowledgeBaseErrors, DeleteKnowledgeBaseResponses, DeleteKnowledgeSourceData, DeleteKnowledgeSourceErrors, DeleteKnowledgeSourceResponses, DeleteWebhookData, DeleteWebhookErrors, DeleteWebhookResponses, EndCallData, EndCallErrors, EndCallResponses, GetAssistantData, GetAssistantErrors, GetAssistantResponses, GetAssistantVersionData, GetAssistantVersionErrors, GetAssistantVersionResponses, GetAutoTopUpData, GetAutoTopUpErrors, GetAutoTopUpResponses, GetBalanceData, GetBalanceErrors, GetBalanceResponses, GetCallAnalysisData, GetCallAnalysisErrors, GetCallAnalysisResponses, GetCallData, GetCallErrors, GetCallResponses, GetCampaignData, GetCampaignErrors, GetCampaignResponses, GetCampaignStatsData, GetCampaignStatsErrors, GetCampaignStatsResponses, GetContactData, GetContactErrors, GetContactImportData, GetContactImportErrors, GetContactImportResponses, GetContactResponses, GetKnowledgeBaseData, GetKnowledgeBaseErrors, GetKnowledgeBaseResponses, GetKnowledgeSourceData, GetKnowledgeSourceErrors, GetKnowledgeSourceResponses, GetNumberData, GetNumberErrors, GetNumberResponses, GetRecordingAudioData, GetRecordingAudioErrors, GetRecordingAudioResponses, GetWebhookData, GetWebhookErrors, GetWebhookResponses, ListAssistantsData, ListAssistantsErrors, ListAssistantsResponses, ListAssistantVersionsData, ListAssistantVersionsErrors, ListAssistantVersionsResponses, ListCallEventsData, ListCallEventsErrors, ListCallEventsResponses, ListCallRecordingsData, ListCallRecordingsErrors, ListCallRecordingsResponses, ListCallsData, ListCallsErrors, ListCallsResponses, ListCallTurnsData, ListCallTurnsErrors, ListCallTurnsResponses, ListCampaignContactsData, ListCampaignContactsErrors, ListCampaignContactsResponses, ListCampaignsData, ListCampaignsErrors, ListCampaignsResponses, ListCatalogModelsData, ListCatalogModelsErrors, ListCatalogModelsResponses, ListCatalogVoicesData, ListCatalogVoicesErrors, ListCatalogVoicesResponses, ListComplianceDecisionsData, ListComplianceDecisionsErrors, ListComplianceDecisionsResponses, ListConsentsData, ListConsentsErrors, ListConsentsResponses, ListContactsData, ListContactsErrors, ListContactsResponses, ListDncData, ListDncErrors, ListDncResponses, ListKnowledgeBasesData, ListKnowledgeBasesErrors, ListKnowledgeBasesResponses, ListKnowledgeSourcesData, ListKnowledgeSourcesErrors, ListKnowledgeSourcesResponses, ListLedgerData, ListLedgerErrors, ListLedgerResponses, ListNumbersData, ListNumbersErrors, ListNumbersResponses, ListRatesData, ListRatesErrors, ListRatesResponses, ListWebhookDeliveriesData, ListWebhookDeliveriesErrors, ListWebhookDeliveriesResponses, ListWebhooksData, ListWebhooksErrors, ListWebhooksResponses, OrderNumberData, OrderNumberErrors, OrderNumberResponses, PauseCampaignData, PauseCampaignErrors, PauseCampaignResponses, PublishAssistantVersionData, PublishAssistantVersionErrors, PublishAssistantVersionResponses, ReleaseNumberData, ReleaseNumberErrors, ReleaseNumberResponses, ResumeCampaignData, ResumeCampaignErrors, ResumeCampaignResponses, RotateWebhookSecretData, RotateWebhookSecretErrors, RotateWebhookSecretResponses, SearchAvailableNumbersData, SearchAvailableNumbersErrors, SearchAvailableNumbersResponses, SearchKnowledgeBaseData, SearchKnowledgeBaseErrors, SearchKnowledgeBaseResponses, StartCampaignData, StartCampaignErrors, StartCampaignResponses, SyncKnowledgeSourceData, SyncKnowledgeSourceErrors, SyncKnowledgeSourceResponses, TestWebhookData, TestWebhookErrors, TestWebhookResponses, UpdateAssistantData, UpdateAssistantErrors, UpdateAssistantResponses, UpdateCampaignData, UpdateCampaignErrors, UpdateCampaignResponses, UpdateContactData, UpdateContactErrors, UpdateContactResponses, UpdateKnowledgeBaseData, UpdateKnowledgeBaseErrors, UpdateKnowledgeBaseResponses, UpdateNumberData, UpdateNumberErrors, UpdateNumberResponses, UpdateWebhookData, UpdateWebhookErrors, UpdateWebhookResponses } from './types.gen';
+import type { AddCampaignContactsData, AddCampaignContactsErrors, AddCampaignContactsResponses, AddSpamAllowData, AddSpamAllowErrors, AddSpamAllowResponses, ArchiveCampaignData, ArchiveCampaignErrors, ArchiveCampaignResponses, BulkUpdateContactsData, BulkUpdateContactsErrors, BulkUpdateContactsResponses, CompareAssistantVersionsData, CompareAssistantVersionsErrors, CompareAssistantVersionsResponses, CreateAssistantData, CreateAssistantErrors, CreateAssistantResponses, CreateAssistantVersionData, CreateAssistantVersionErrors, CreateAssistantVersionResponses, CreateBlockedCallerData, CreateBlockedCallerErrors, CreateBlockedCallerResponses, CreateCallData, CreateCallErrors, CreateCallResponses, CreateCampaignData, CreateCampaignErrors, CreateCampaignResponses, CreateConsentData, CreateConsentErrors, CreateConsentResponses, CreateContactData, CreateContactErrors, CreateContactImportData, CreateContactImportErrors, CreateContactImportResponses, CreateContactResponses, CreateDncData, CreateDncErrors, CreateDncImportData, CreateDncImportErrors, CreateDncImportResponses, CreateDncResponses, CreateIceServersData, CreateIceServersErrors, CreateIceServersResponses, CreateKnowledgeBaseData, CreateKnowledgeBaseErrors, CreateKnowledgeBaseResponses, CreateKnowledgeFileSourceData, CreateKnowledgeFileSourceErrors, CreateKnowledgeFileSourceResponses, CreateKnowledgeWebsiteSourceData, CreateKnowledgeWebsiteSourceErrors, CreateKnowledgeWebsiteSourceResponses, CreateRevocationData, CreateRevocationErrors, CreateRevocationResponses, CreateWebCallData, CreateWebCallErrors, CreateWebCallResponses, CreateWebhookData, CreateWebhookErrors, CreateWebhookResponses, DeleteAssistantData, DeleteAssistantErrors, DeleteAssistantResponses, DeleteBlockedCallerData, DeleteBlockedCallerErrors, DeleteBlockedCallerResponses, DeleteContactData, DeleteContactErrors, DeleteContactResponses, DeleteKnowledgeBaseData, DeleteKnowledgeBaseErrors, DeleteKnowledgeBaseResponses, DeleteKnowledgeSourceData, DeleteKnowledgeSourceErrors, DeleteKnowledgeSourceResponses, DeleteSpamAllowData, DeleteSpamAllowErrors, DeleteSpamAllowResponses, DeleteWebhookData, DeleteWebhookErrors, DeleteWebhookResponses, DiscardAssistantDraftData, DiscardAssistantDraftErrors, DiscardAssistantDraftResponses, DuplicateAssistantData, DuplicateAssistantErrors, DuplicateAssistantResponses, DuplicateCampaignData, DuplicateCampaignErrors, DuplicateCampaignResponses, EndCallData, EndCallErrors, EndCallResponses, EstimateCampaignData, EstimateCampaignErrors, EstimateCampaignResponses, GetAssistantData, GetAssistantDraftData, GetAssistantDraftErrors, GetAssistantDraftResponses, GetAssistantErrors, GetAssistantResponses, GetAssistantVersionData, GetAssistantVersionErrors, GetAssistantVersionResponses, GetAutoTopUpData, GetAutoTopUpErrors, GetAutoTopUpResponses, GetBalanceData, GetBalanceErrors, GetBalanceResponses, GetCallAnalysisData, GetCallAnalysisErrors, GetCallAnalysisResponses, GetCallConversationData, GetCallConversationErrors, GetCallConversationResponses, GetCallData, GetCallErrors, GetCallingRulesData, GetCallingRulesErrors, GetCallingRulesResponses, GetCallResponses, GetCallsSummaryData, GetCallsSummaryErrors, GetCallsSummaryResponses, GetCampaignData, GetCampaignErrors, GetCampaignPreflightData, GetCampaignPreflightErrors, GetCampaignPreflightResponses, GetCampaignResponses, GetCampaignStatsData, GetCampaignStatsErrors, GetCampaignStatsResponses, GetContactData, GetContactErrors, GetContactImportData, GetContactImportErrors, GetContactImportResponses, GetContactResponses, GetContactTimelineData, GetContactTimelineErrors, GetContactTimelineResponses, GetDncImportData, GetDncImportErrors, GetDncImportResponses, GetKnowledgeBaseData, GetKnowledgeBaseErrors, GetKnowledgeBaseResponses, GetKnowledgeSourceData, GetKnowledgeSourceErrors, GetKnowledgeSourceResponses, GetNumberData, GetNumberErrors, GetNumberResponses, GetRecordingAudioData, GetRecordingAudioErrors, GetRecordingAudioResponses, GetRecordingPeaksData, GetRecordingPeaksErrors, GetRecordingPeaksResponses, GetScriptCheckData, GetScriptCheckErrors, GetScriptCheckResponses, GetWebhookData, GetWebhookErrors, GetWebhookResponses, ListAreaCodesData, ListAreaCodesErrors, ListAreaCodesResponses, ListAssistantPublishesData, ListAssistantPublishesErrors, ListAssistantPublishesResponses, ListAssistantsData, ListAssistantsErrors, ListAssistantsResponses, ListAssistantVersionsData, ListAssistantVersionsErrors, ListAssistantVersionsResponses, ListBlockedCallersData, ListBlockedCallersErrors, ListBlockedCallersResponses, ListCallEventsData, ListCallEventsErrors, ListCallEventsResponses, ListCallRecordingsData, ListCallRecordingsErrors, ListCallRecordingsResponses, ListCallsData, ListCallsErrors, ListCallsResponses, ListCallTurnsData, ListCallTurnsErrors, ListCallTurnsResponses, ListCampaignContactsData, ListCampaignContactsErrors, ListCampaignContactsResponses, ListCampaignEventsData, ListCampaignEventsErrors, ListCampaignEventsResponses, ListCampaignsData, ListCampaignsErrors, ListCampaignsResponses, ListCatalogLanguagesData, ListCatalogLanguagesErrors, ListCatalogLanguagesResponses, ListCatalogModelsData, ListCatalogModelsErrors, ListCatalogModelsResponses, ListCatalogVoicesData, ListCatalogVoicesErrors, ListCatalogVoicesResponses, ListComplianceDecisionsData, ListComplianceDecisionsErrors, ListComplianceDecisionsResponses, ListComplianceTextsData, ListComplianceTextsErrors, ListComplianceTextsResponses, ListConsentsData, ListConsentsErrors, ListConsentsResponses, ListContactDncChecksData, ListContactDncChecksErrors, ListContactDncChecksResponses, ListContactImportsData, ListContactImportsErrors, ListContactImportsResponses, ListContactsData, ListContactsErrors, ListContactsResponses, ListContactTagsData, ListContactTagsErrors, ListContactTagsResponses, ListDncData, ListDncErrors, ListDncResponses, ListGuardrailRulesData, ListGuardrailRulesErrors, ListGuardrailRulesResponses, ListHolidayCalendarsData, ListHolidayCalendarsErrors, ListHolidayCalendarsResponses, ListKnowledgeBasesData, ListKnowledgeBasesErrors, ListKnowledgeBasesResponses, ListKnowledgeSourcesData, ListKnowledgeSourcesErrors, ListKnowledgeSourcesResponses, ListLedgerData, ListLedgerErrors, ListLedgerResponses, ListLiveCallsData, ListLiveCallsErrors, ListLiveCallsResponses, ListNumbersData, ListNumbersErrors, ListNumbersResponses, ListRatesData, ListRatesErrors, ListRatesResponses, ListRevocationsData, ListRevocationsErrors, ListRevocationsResponses, ListSameCallerCallsData, ListSameCallerCallsErrors, ListSameCallerCallsResponses, ListSpamAllowListData, ListSpamAllowListErrors, ListSpamAllowListResponses, ListTurnPresetsData, ListTurnPresetsErrors, ListTurnPresetsResponses, ListWebhookDeliveriesData, ListWebhookDeliveriesErrors, ListWebhookDeliveriesResponses, ListWebhooksData, ListWebhooksErrors, ListWebhooksResponses, OrderNumberData, OrderNumberErrors, OrderNumberResponses, OrderNumbersData, OrderNumbersErrors, OrderNumbersResponses, PauseAssistantData, PauseAssistantErrors, PauseAssistantResponses, PauseCampaignData, PauseCampaignErrors, PauseCampaignResponses, PreflightCampaignDraftData, PreflightCampaignDraftErrors, PreflightCampaignDraftResponses, PreviewCampaignAudienceData, PreviewCampaignAudienceErrors, PreviewCampaignAudienceResponses, PublishAssistantVersionData, PublishAssistantVersionErrors, PublishAssistantVersionResponses, ReleaseNumberData, ReleaseNumberErrors, ReleaseNumberResponses, RestoreAssistantData, RestoreAssistantErrors, RestoreAssistantResponses, ResumeAssistantData, ResumeAssistantErrors, ResumeAssistantResponses, ResumeCampaignData, ResumeCampaignErrors, ResumeCampaignResponses, RotateWebhookSecretData, RotateWebhookSecretErrors, RotateWebhookSecretResponses, SaveAssistantDraftData, SaveAssistantDraftErrors, SaveAssistantDraftResponses, SearchAvailableNumbersData, SearchAvailableNumbersErrors, SearchAvailableNumbersResponses, SearchKnowledgeBaseData, SearchKnowledgeBaseErrors, SearchKnowledgeBaseResponses, StartCampaignData, StartCampaignErrors, StartCampaignResponses, SyncKnowledgeSourceData, SyncKnowledgeSourceErrors, SyncKnowledgeSourceResponses, TestWebhookData, TestWebhookErrors, TestWebhookResponses, UpdateAssistantData, UpdateAssistantErrors, UpdateAssistantResponses, UpdateCallData, UpdateCallErrors, UpdateCallResponses, UpdateCampaignData, UpdateCampaignErrors, UpdateCampaignResponses, UpdateContactData, UpdateContactErrors, UpdateContactResponses, UpdateKnowledgeBaseData, UpdateKnowledgeBaseErrors, UpdateKnowledgeBaseResponses, UpdateNumberData, UpdateNumberErrors, UpdateNumberResponses, UpdateNumberRoutingData, UpdateNumberRoutingErrors, UpdateNumberRoutingResponses, UpdateWebhookData, UpdateWebhookErrors, UpdateWebhookResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -19,12 +19,25 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
 };
 
 /**
+ * Look up US area codes by city or code prefix
+ */
+export const listAreaCodes = <ThrowOnError extends boolean = false>(options?: Options<ListAreaCodesData, ThrowOnError>): RequestResult<ListAreaCodesResponses, ListAreaCodesErrors, ThrowOnError> => (options?.client ?? client).get<ListAreaCodesResponses, ListAreaCodesErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/area-codes',
+    ...options
+});
+
+/**
  * List assistants
  */
 export const listAssistants = <ThrowOnError extends boolean = false>(options?: Options<ListAssistantsData, ThrowOnError>): RequestResult<ListAssistantsResponses, ListAssistantsErrors, ThrowOnError> => (options?.client ?? client).get<ListAssistantsResponses, ListAssistantsErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/assistants',
@@ -37,7 +50,7 @@ export const listAssistants = <ThrowOnError extends boolean = false>(options?: O
 export const createAssistant = <ThrowOnError extends boolean = false>(options: Options<CreateAssistantData, ThrowOnError>): RequestResult<CreateAssistantResponses, CreateAssistantErrors, ThrowOnError> => (options.client ?? client).post<CreateAssistantResponses, CreateAssistantErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/assistants',
@@ -54,7 +67,7 @@ export const createAssistant = <ThrowOnError extends boolean = false>(options: O
 export const createWebCall = <ThrowOnError extends boolean = false>(options: Options<CreateWebCallData, ThrowOnError>): RequestResult<CreateWebCallResponses, CreateWebCallErrors, ThrowOnError> => (options.client ?? client).post<CreateWebCallResponses, CreateWebCallErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/assistants/{assistant_id}/web-calls',
@@ -71,7 +84,7 @@ export const createWebCall = <ThrowOnError extends boolean = false>(options: Opt
 export const deleteAssistant = <ThrowOnError extends boolean = false>(options: Options<DeleteAssistantData, ThrowOnError>): RequestResult<DeleteAssistantResponses, DeleteAssistantErrors, ThrowOnError> => (options.client ?? client).delete<DeleteAssistantResponses, DeleteAssistantErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/assistants/{id}',
@@ -84,7 +97,7 @@ export const deleteAssistant = <ThrowOnError extends boolean = false>(options: O
 export const getAssistant = <ThrowOnError extends boolean = false>(options: Options<GetAssistantData, ThrowOnError>): RequestResult<GetAssistantResponses, GetAssistantErrors, ThrowOnError> => (options.client ?? client).get<GetAssistantResponses, GetAssistantErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/assistants/{id}',
@@ -92,12 +105,12 @@ export const getAssistant = <ThrowOnError extends boolean = false>(options: Opti
 });
 
 /**
- * Rename an assistant
+ * Rename an assistant or change its job line and reply-time target
  */
 export const updateAssistant = <ThrowOnError extends boolean = false>(options: Options<UpdateAssistantData, ThrowOnError>): RequestResult<UpdateAssistantResponses, UpdateAssistantErrors, ThrowOnError> => (options.client ?? client).patch<UpdateAssistantResponses, UpdateAssistantErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/assistants/{id}',
@@ -109,12 +122,128 @@ export const updateAssistant = <ThrowOnError extends boolean = false>(options: O
 });
 
 /**
+ * Discard the open draft; it is kept for audit and never shown again
+ */
+export const discardAssistantDraft = <ThrowOnError extends boolean = false>(options: Options<DiscardAssistantDraftData, ThrowOnError>): RequestResult<DiscardAssistantDraftResponses, DiscardAssistantDraftErrors, ThrowOnError> => (options.client ?? client).delete<DiscardAssistantDraftResponses, DiscardAssistantDraftErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/assistants/{id}/draft',
+    ...options
+});
+
+/**
+ * Get the open draft with its revision as ETag
+ */
+export const getAssistantDraft = <ThrowOnError extends boolean = false>(options: Options<GetAssistantDraftData, ThrowOnError>): RequestResult<GetAssistantDraftResponses, GetAssistantDraftErrors, ThrowOnError> => (options.client ?? client).get<GetAssistantDraftResponses, GetAssistantDraftErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/assistants/{id}/draft',
+    ...options
+});
+
+/**
+ * Create or autosave the open draft
+ */
+export const saveAssistantDraft = <ThrowOnError extends boolean = false>(options: Options<SaveAssistantDraftData, ThrowOnError>): RequestResult<SaveAssistantDraftResponses, SaveAssistantDraftErrors, ThrowOnError> => (options.client ?? client).put<SaveAssistantDraftResponses, SaveAssistantDraftErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/assistants/{id}/draft',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Copy the draft, else the live spec, into a new assistant with only a draft
+ */
+export const duplicateAssistant = <ThrowOnError extends boolean = false>(options: Options<DuplicateAssistantData, ThrowOnError>): RequestResult<DuplicateAssistantResponses, DuplicateAssistantErrors, ThrowOnError> => (options.client ?? client).post<DuplicateAssistantResponses, DuplicateAssistantErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/assistants/{id}/duplicate',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Stop answering new calls; calls in progress finish
+ */
+export const pauseAssistant = <ThrowOnError extends boolean = false>(options: Options<PauseAssistantData, ThrowOnError>): RequestResult<PauseAssistantResponses, PauseAssistantErrors, ThrowOnError> => (options.client ?? client).post<PauseAssistantResponses, PauseAssistantErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/assistants/{id}/pause',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Publish and rollback history, newest first
+ */
+export const listAssistantPublishes = <ThrowOnError extends boolean = false>(options: Options<ListAssistantPublishesData, ThrowOnError>): RequestResult<ListAssistantPublishesResponses, ListAssistantPublishesErrors, ThrowOnError> => (options.client ?? client).get<ListAssistantPublishesResponses, ListAssistantPublishesErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/assistants/{id}/publishes',
+    ...options
+});
+
+/**
+ * Undo an archive; numbers are not reattached
+ */
+export const restoreAssistant = <ThrowOnError extends boolean = false>(options: Options<RestoreAssistantData, ThrowOnError>): RequestResult<RestoreAssistantResponses, RestoreAssistantErrors, ThrowOnError> => (options.client ?? client).post<RestoreAssistantResponses, RestoreAssistantErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/assistants/{id}/restore',
+    ...options
+});
+
+/**
+ * Answer calls again; paused campaigns stay paused
+ */
+export const resumeAssistant = <ThrowOnError extends boolean = false>(options: Options<ResumeAssistantData, ThrowOnError>): RequestResult<ResumeAssistantResponses, ResumeAssistantErrors, ThrowOnError> => (options.client ?? client).post<ResumeAssistantResponses, ResumeAssistantErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/assistants/{id}/resume',
+    ...options
+});
+
+/**
  * List versions, newest first
  */
 export const listAssistantVersions = <ThrowOnError extends boolean = false>(options: Options<ListAssistantVersionsData, ThrowOnError>): RequestResult<ListAssistantVersionsResponses, ListAssistantVersionsErrors, ThrowOnError> => (options.client ?? client).get<ListAssistantVersionsResponses, ListAssistantVersionsErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/assistants/{id}/versions',
@@ -127,7 +256,7 @@ export const listAssistantVersions = <ThrowOnError extends boolean = false>(opti
 export const createAssistantVersion = <ThrowOnError extends boolean = false>(options: Options<CreateAssistantVersionData, ThrowOnError>): RequestResult<CreateAssistantVersionResponses, CreateAssistantVersionErrors, ThrowOnError> => (options.client ?? client).post<CreateAssistantVersionResponses, CreateAssistantVersionErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/assistants/{id}/versions',
@@ -144,7 +273,7 @@ export const createAssistantVersion = <ThrowOnError extends boolean = false>(opt
 export const getAssistantVersion = <ThrowOnError extends boolean = false>(options: Options<GetAssistantVersionData, ThrowOnError>): RequestResult<GetAssistantVersionResponses, GetAssistantVersionErrors, ThrowOnError> => (options.client ?? client).get<GetAssistantVersionResponses, GetAssistantVersionErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/assistants/{id}/versions/{v}',
@@ -152,15 +281,45 @@ export const getAssistantVersion = <ThrowOnError extends boolean = false>(option
 });
 
 /**
- * Publish a version; it becomes immutable
+ * Field and instruction differences between two versions, with price and numbers affected
+ */
+export const compareAssistantVersions = <ThrowOnError extends boolean = false>(options: Options<CompareAssistantVersionsData, ThrowOnError>): RequestResult<CompareAssistantVersionsResponses, CompareAssistantVersionsErrors, ThrowOnError> => (options.client ?? client).get<CompareAssistantVersionsResponses, CompareAssistantVersionsErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/assistants/{id}/versions/{v}/compare',
+    ...options
+});
+
+/**
+ * Publish a version; it becomes immutable. Publishing an older version is a rollback
  */
 export const publishAssistantVersion = <ThrowOnError extends boolean = false>(options: Options<PublishAssistantVersionData, ThrowOnError>): RequestResult<PublishAssistantVersionResponses, PublishAssistantVersionErrors, ThrowOnError> => (options.client ?? client).post<PublishAssistantVersionResponses, PublishAssistantVersionErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/assistants/{id}/versions/{v}/publish',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Outbound script check of a published version
+ */
+export const getScriptCheck = <ThrowOnError extends boolean = false>(options: Options<GetScriptCheckData, ThrowOnError>): RequestResult<GetScriptCheckResponses, GetScriptCheckErrors, ThrowOnError> => (options.client ?? client).get<GetScriptCheckResponses, GetScriptCheckErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/assistants/{id}/versions/{v}/script-check',
     ...options
 });
 
@@ -170,7 +329,7 @@ export const publishAssistantVersion = <ThrowOnError extends boolean = false>(op
 export const getAutoTopUp = <ThrowOnError extends boolean = false>(options?: Options<GetAutoTopUpData, ThrowOnError>): RequestResult<GetAutoTopUpResponses, GetAutoTopUpErrors, ThrowOnError> => (options?.client ?? client).get<GetAutoTopUpResponses, GetAutoTopUpErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/billing/auto-top-up',
@@ -183,7 +342,7 @@ export const getAutoTopUp = <ThrowOnError extends boolean = false>(options?: Opt
 export const getBalance = <ThrowOnError extends boolean = false>(options?: Options<GetBalanceData, ThrowOnError>): RequestResult<GetBalanceResponses, GetBalanceErrors, ThrowOnError> => (options?.client ?? client).get<GetBalanceResponses, GetBalanceErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/billing/balance',
@@ -196,7 +355,7 @@ export const getBalance = <ThrowOnError extends boolean = false>(options?: Optio
 export const listLedger = <ThrowOnError extends boolean = false>(options?: Options<ListLedgerData, ThrowOnError>): RequestResult<ListLedgerResponses, ListLedgerErrors, ThrowOnError> => (options?.client ?? client).get<ListLedgerResponses, ListLedgerErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/billing/ledger',
@@ -209,7 +368,7 @@ export const listLedger = <ThrowOnError extends boolean = false>(options?: Optio
 export const listRates = <ThrowOnError extends boolean = false>(options?: Options<ListRatesData, ThrowOnError>): RequestResult<ListRatesResponses, ListRatesErrors, ThrowOnError> => (options?.client ?? client).get<ListRatesResponses, ListRatesErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/billing/rates',
@@ -217,12 +376,55 @@ export const listRates = <ThrowOnError extends boolean = false>(options?: Option
 });
 
 /**
- * List calls, newest first
+ * Numbers this workspace does not answer; their calls are not billed
+ */
+export const listBlockedCallers = <ThrowOnError extends boolean = false>(options?: Options<ListBlockedCallersData, ThrowOnError>): RequestResult<ListBlockedCallersResponses, ListBlockedCallersErrors, ThrowOnError> => (options?.client ?? client).get<ListBlockedCallersResponses, ListBlockedCallersErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/blocked-callers',
+    ...options
+});
+
+/**
+ * Block a caller: their calls are dropped before answering and not billed
+ */
+export const createBlockedCaller = <ThrowOnError extends boolean = false>(options: Options<CreateBlockedCallerData, ThrowOnError>): RequestResult<CreateBlockedCallerResponses, CreateBlockedCallerErrors, ThrowOnError> => (options.client ?? client).post<CreateBlockedCallerResponses, CreateBlockedCallerErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/blocked-callers',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Unblock a caller
+ */
+export const deleteBlockedCaller = <ThrowOnError extends boolean = false>(options: Options<DeleteBlockedCallerData, ThrowOnError>): RequestResult<DeleteBlockedCallerResponses, DeleteBlockedCallerErrors, ThrowOnError> => (options.client ?? client).delete<DeleteBlockedCallerResponses, DeleteBlockedCallerErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/blocked-callers/{id}',
+    ...options
+});
+
+/**
+ * List calls with filters; newest first unless order says otherwise
  */
 export const listCalls = <ThrowOnError extends boolean = false>(options?: Options<ListCallsData, ThrowOnError>): RequestResult<ListCallsResponses, ListCallsErrors, ThrowOnError> => (options?.client ?? client).get<ListCallsResponses, ListCallsErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/calls',
@@ -235,7 +437,7 @@ export const listCalls = <ThrowOnError extends boolean = false>(options?: Option
 export const createCall = <ThrowOnError extends boolean = false>(options: Options<CreateCallData, ThrowOnError>): RequestResult<CreateCallResponses, CreateCallErrors, ThrowOnError> => (options.client ?? client).post<CreateCallResponses, CreateCallErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/calls',
@@ -247,16 +449,46 @@ export const createCall = <ThrowOnError extends boolean = false>(options: Option
 });
 
 /**
+ * Totals for a call filter: counts, billed time, spend and not-billed split
+ */
+export const getCallsSummary = <ThrowOnError extends boolean = false>(options?: Options<GetCallsSummaryData, ThrowOnError>): RequestResult<GetCallsSummaryResponses, GetCallsSummaryErrors, ThrowOnError> => (options?.client ?? client).get<GetCallsSummaryResponses, GetCallsSummaryErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/calls/summary',
+    ...options
+});
+
+/**
  * Get a call
  */
 export const getCall = <ThrowOnError extends boolean = false>(options: Options<GetCallData, ThrowOnError>): RequestResult<GetCallResponses, GetCallErrors, ThrowOnError> => (options.client ?? client).get<GetCallResponses, GetCallErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/calls/{call_id}',
     ...options
+});
+
+/**
+ * Flag a call or set its tags
+ */
+export const updateCall = <ThrowOnError extends boolean = false>(options: Options<UpdateCallData, ThrowOnError>): RequestResult<UpdateCallResponses, UpdateCallErrors, ThrowOnError> => (options.client ?? client).patch<UpdateCallResponses, UpdateCallErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/calls/{call_id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
 });
 
 /**
@@ -265,10 +497,23 @@ export const getCall = <ThrowOnError extends boolean = false>(options: Options<G
 export const getCallAnalysis = <ThrowOnError extends boolean = false>(options: Options<GetCallAnalysisData, ThrowOnError>): RequestResult<GetCallAnalysisResponses, GetCallAnalysisErrors, ThrowOnError> => (options.client ?? client).get<GetCallAnalysisResponses, GetCallAnalysisErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/calls/{call_id}/analysis',
+    ...options
+});
+
+/**
+ * Turns, tools, transfers and markers with offsets and reply latency
+ */
+export const getCallConversation = <ThrowOnError extends boolean = false>(options: Options<GetCallConversationData, ThrowOnError>): RequestResult<GetCallConversationResponses, GetCallConversationErrors, ThrowOnError> => (options.client ?? client).get<GetCallConversationResponses, GetCallConversationErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/calls/{call_id}/conversation',
     ...options
 });
 
@@ -278,7 +523,7 @@ export const getCallAnalysis = <ThrowOnError extends boolean = false>(options: O
 export const endCall = <ThrowOnError extends boolean = false>(options: Options<EndCallData, ThrowOnError>): RequestResult<EndCallResponses, EndCallErrors, ThrowOnError> => (options.client ?? client).post<EndCallResponses, EndCallErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/calls/{call_id}/end',
@@ -295,7 +540,7 @@ export const endCall = <ThrowOnError extends boolean = false>(options: Options<E
 export const listCallEvents = <ThrowOnError extends boolean = false>(options: Options<ListCallEventsData, ThrowOnError>): RequestResult<ListCallEventsResponses, ListCallEventsErrors, ThrowOnError> => (options.client ?? client).get<ListCallEventsResponses, ListCallEventsErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/calls/{call_id}/events',
@@ -308,10 +553,23 @@ export const listCallEvents = <ThrowOnError extends boolean = false>(options: Op
 export const listCallRecordings = <ThrowOnError extends boolean = false>(options: Options<ListCallRecordingsData, ThrowOnError>): RequestResult<ListCallRecordingsResponses, ListCallRecordingsErrors, ThrowOnError> => (options.client ?? client).get<ListCallRecordingsResponses, ListCallRecordingsErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/calls/{call_id}/recordings',
+    ...options
+});
+
+/**
+ * Earlier calls from the same caller, newest first
+ */
+export const listSameCallerCalls = <ThrowOnError extends boolean = false>(options: Options<ListSameCallerCallsData, ThrowOnError>): RequestResult<ListSameCallerCallsResponses, ListSameCallerCallsErrors, ThrowOnError> => (options.client ?? client).get<ListSameCallerCallsResponses, ListSameCallerCallsErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/calls/{call_id}/same-caller',
     ...options
 });
 
@@ -321,7 +579,7 @@ export const listCallRecordings = <ThrowOnError extends boolean = false>(options
 export const listCallTurns = <ThrowOnError extends boolean = false>(options: Options<ListCallTurnsData, ThrowOnError>): RequestResult<ListCallTurnsResponses, ListCallTurnsErrors, ThrowOnError> => (options.client ?? client).get<ListCallTurnsResponses, ListCallTurnsErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/calls/{call_id}/turns',
@@ -334,7 +592,7 @@ export const listCallTurns = <ThrowOnError extends boolean = false>(options: Opt
 export const listCampaigns = <ThrowOnError extends boolean = false>(options?: Options<ListCampaignsData, ThrowOnError>): RequestResult<ListCampaignsResponses, ListCampaignsErrors, ThrowOnError> => (options?.client ?? client).get<ListCampaignsResponses, ListCampaignsErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/campaigns',
@@ -347,10 +605,61 @@ export const listCampaigns = <ThrowOnError extends boolean = false>(options?: Op
 export const createCampaign = <ThrowOnError extends boolean = false>(options: Options<CreateCampaignData, ThrowOnError>): RequestResult<CreateCampaignResponses, CreateCampaignErrors, ThrowOnError> => (options.client ?? client).post<CreateCampaignResponses, CreateCampaignErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/campaigns',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Who an audience reaches: totals, do-not-call, no consent, callable, time zones and states
+ */
+export const previewCampaignAudience = <ThrowOnError extends boolean = false>(options: Options<PreviewCampaignAudienceData, ThrowOnError>): RequestResult<PreviewCampaignAudienceResponses, PreviewCampaignAudienceErrors, ThrowOnError> => (options.client ?? client).post<PreviewCampaignAudienceResponses, PreviewCampaignAudienceErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/campaigns/audience-preview',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Cost estimate with a low-high range, per started minute
+ */
+export const estimateCampaign = <ThrowOnError extends boolean = false>(options: Options<EstimateCampaignData, ThrowOnError>): RequestResult<EstimateCampaignResponses, EstimateCampaignErrors, ThrowOnError> => (options.client ?? client).post<EstimateCampaignResponses, EstimateCampaignErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/campaigns/estimate',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Every launch check for an unsaved draft; writes nothing. A forecast: each dial is checked again
+ */
+export const preflightCampaignDraft = <ThrowOnError extends boolean = false>(options: Options<PreflightCampaignDraftData, ThrowOnError>): RequestResult<PreflightCampaignDraftResponses, PreflightCampaignDraftErrors, ThrowOnError> => (options.client ?? client).post<PreflightCampaignDraftResponses, PreflightCampaignDraftErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/campaigns/preflight',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -364,7 +673,7 @@ export const createCampaign = <ThrowOnError extends boolean = false>(options: Op
 export const getCampaign = <ThrowOnError extends boolean = false>(options: Options<GetCampaignData, ThrowOnError>): RequestResult<GetCampaignResponses, GetCampaignErrors, ThrowOnError> => (options.client ?? client).get<GetCampaignResponses, GetCampaignErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/campaigns/{id}',
@@ -377,7 +686,7 @@ export const getCampaign = <ThrowOnError extends boolean = false>(options: Optio
 export const updateCampaign = <ThrowOnError extends boolean = false>(options: Options<UpdateCampaignData, ThrowOnError>): RequestResult<UpdateCampaignResponses, UpdateCampaignErrors, ThrowOnError> => (options.client ?? client).patch<UpdateCampaignResponses, UpdateCampaignErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/campaigns/{id}',
@@ -394,7 +703,7 @@ export const updateCampaign = <ThrowOnError extends boolean = false>(options: Op
 export const archiveCampaign = <ThrowOnError extends boolean = false>(options: Options<ArchiveCampaignData, ThrowOnError>): RequestResult<ArchiveCampaignResponses, ArchiveCampaignErrors, ThrowOnError> => (options.client ?? client).post<ArchiveCampaignResponses, ArchiveCampaignErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/campaigns/{id}/archive',
@@ -407,7 +716,7 @@ export const archiveCampaign = <ThrowOnError extends boolean = false>(options: O
 export const listCampaignContacts = <ThrowOnError extends boolean = false>(options: Options<ListCampaignContactsData, ThrowOnError>): RequestResult<ListCampaignContactsResponses, ListCampaignContactsErrors, ThrowOnError> => (options.client ?? client).get<ListCampaignContactsResponses, ListCampaignContactsErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/campaigns/{id}/contacts',
@@ -420,7 +729,7 @@ export const listCampaignContacts = <ThrowOnError extends boolean = false>(optio
 export const addCampaignContacts = <ThrowOnError extends boolean = false>(options: Options<AddCampaignContactsData, ThrowOnError>): RequestResult<AddCampaignContactsResponses, AddCampaignContactsErrors, ThrowOnError> => (options.client ?? client).post<AddCampaignContactsResponses, AddCampaignContactsErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/campaigns/{id}/contacts',
@@ -432,12 +741,42 @@ export const addCampaignContacts = <ThrowOnError extends boolean = false>(option
 });
 
 /**
+ * Copy a campaign as a draft without contacts
+ */
+export const duplicateCampaign = <ThrowOnError extends boolean = false>(options: Options<DuplicateCampaignData, ThrowOnError>): RequestResult<DuplicateCampaignResponses, DuplicateCampaignErrors, ThrowOnError> => (options.client ?? client).post<DuplicateCampaignResponses, DuplicateCampaignErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/campaigns/{id}/duplicate',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Safety checks and lifecycle events in plain terms, rolled up per hour
+ */
+export const listCampaignEvents = <ThrowOnError extends boolean = false>(options: Options<ListCampaignEventsData, ThrowOnError>): RequestResult<ListCampaignEventsResponses, ListCampaignEventsErrors, ThrowOnError> => (options.client ?? client).get<ListCampaignEventsResponses, ListCampaignEventsErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/campaigns/{id}/events',
+    ...options
+});
+
+/**
  * Pause dialing; active calls continue
  */
 export const pauseCampaign = <ThrowOnError extends boolean = false>(options: Options<PauseCampaignData, ThrowOnError>): RequestResult<PauseCampaignResponses, PauseCampaignErrors, ThrowOnError> => (options.client ?? client).post<PauseCampaignResponses, PauseCampaignErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/campaigns/{id}/pause',
@@ -445,12 +784,25 @@ export const pauseCampaign = <ThrowOnError extends boolean = false>(options: Opt
 });
 
 /**
- * Resume a paused campaign
+ * Every launch check for a saved campaign
+ */
+export const getCampaignPreflight = <ThrowOnError extends boolean = false>(options: Options<GetCampaignPreflightData, ThrowOnError>): RequestResult<GetCampaignPreflightResponses, GetCampaignPreflightErrors, ThrowOnError> => (options.client ?? client).get<GetCampaignPreflightResponses, GetCampaignPreflightErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/campaigns/{id}/preflight',
+    ...options
+});
+
+/**
+ * Resume a paused campaign; 409 campaign.safeguard_review while a safety pause waits for Larynth
  */
 export const resumeCampaign = <ThrowOnError extends boolean = false>(options: Options<ResumeCampaignData, ThrowOnError>): RequestResult<ResumeCampaignResponses, ResumeCampaignErrors, ThrowOnError> => (options.client ?? client).post<ResumeCampaignResponses, ResumeCampaignErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/campaigns/{id}/resume',
@@ -463,11 +815,15 @@ export const resumeCampaign = <ThrowOnError extends boolean = false>(options: Op
 export const startCampaign = <ThrowOnError extends boolean = false>(options: Options<StartCampaignData, ThrowOnError>): RequestResult<StartCampaignResponses, StartCampaignErrors, ThrowOnError> => (options.client ?? client).post<StartCampaignResponses, StartCampaignErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/campaigns/{id}/start',
-    ...options
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
 });
 
 /**
@@ -476,10 +832,36 @@ export const startCampaign = <ThrowOnError extends boolean = false>(options: Opt
 export const getCampaignStats = <ThrowOnError extends boolean = false>(options: Options<GetCampaignStatsData, ThrowOnError>): RequestResult<GetCampaignStatsResponses, GetCampaignStatsErrors, ThrowOnError> => (options.client ?? client).get<GetCampaignStatsResponses, GetCampaignStatsErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/campaigns/{id}/stats',
+    ...options
+});
+
+/**
+ * Built-in guardrail rules every agent follows; they cannot be switched off
+ */
+export const listGuardrailRules = <ThrowOnError extends boolean = false>(options?: Options<ListGuardrailRulesData, ThrowOnError>): RequestResult<ListGuardrailRulesResponses, ListGuardrailRulesErrors, ThrowOnError> => (options?.client ?? client).get<ListGuardrailRulesResponses, ListGuardrailRulesErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/catalog/guardrails',
+    ...options
+});
+
+/**
+ * List the languages agents can speak on calls
+ */
+export const listCatalogLanguages = <ThrowOnError extends boolean = false>(options?: Options<ListCatalogLanguagesData, ThrowOnError>): RequestResult<ListCatalogLanguagesResponses, ListCatalogLanguagesErrors, ThrowOnError> => (options?.client ?? client).get<ListCatalogLanguagesResponses, ListCatalogLanguagesErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/catalog/languages',
     ...options
 });
 
@@ -489,10 +871,23 @@ export const getCampaignStats = <ThrowOnError extends boolean = false>(options: 
 export const listCatalogModels = <ThrowOnError extends boolean = false>(options?: Options<ListCatalogModelsData, ThrowOnError>): RequestResult<ListCatalogModelsResponses, ListCatalogModelsErrors, ThrowOnError> => (options?.client ?? client).get<ListCatalogModelsResponses, ListCatalogModelsErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/catalog/models',
+    ...options
+});
+
+/**
+ * Turn-taking presets (patient, balanced, snappy) with their advanced values
+ */
+export const listTurnPresets = <ThrowOnError extends boolean = false>(options?: Options<ListTurnPresetsData, ThrowOnError>): RequestResult<ListTurnPresetsResponses, ListTurnPresetsErrors, ThrowOnError> => (options?.client ?? client).get<ListTurnPresetsResponses, ListTurnPresetsErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/catalog/turn-presets',
     ...options
 });
 
@@ -502,10 +897,23 @@ export const listCatalogModels = <ThrowOnError extends boolean = false>(options?
 export const listCatalogVoices = <ThrowOnError extends boolean = false>(options?: Options<ListCatalogVoicesData, ThrowOnError>): RequestResult<ListCatalogVoicesResponses, ListCatalogVoicesErrors, ThrowOnError> => (options?.client ?? client).get<ListCatalogVoicesResponses, ListCatalogVoicesErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/catalog/voices',
+    ...options
+});
+
+/**
+ * Calling rules applied at dial time, per US state
+ */
+export const getCallingRules = <ThrowOnError extends boolean = false>(options?: Options<GetCallingRulesData, ThrowOnError>): RequestResult<GetCallingRulesResponses, GetCallingRulesErrors, ThrowOnError> => (options?.client ?? client).get<GetCallingRulesResponses, GetCallingRulesErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/compliance/calling-rules',
     ...options
 });
 
@@ -515,7 +923,7 @@ export const listCatalogVoices = <ThrowOnError extends boolean = false>(options?
 export const listConsents = <ThrowOnError extends boolean = false>(options?: Options<ListConsentsData, ThrowOnError>): RequestResult<ListConsentsResponses, ListConsentsErrors, ThrowOnError> => (options?.client ?? client).get<ListConsentsResponses, ListConsentsErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/compliance/consents',
@@ -523,12 +931,12 @@ export const listConsents = <ThrowOnError extends boolean = false>(options?: Opt
 });
 
 /**
- * Record consent with evidence
+ * Record consent with evidence and an attestation
  */
 export const createConsent = <ThrowOnError extends boolean = false>(options: Options<CreateConsentData, ThrowOnError>): RequestResult<CreateConsentResponses, CreateConsentErrors, ThrowOnError> => (options.client ?? client).post<CreateConsentResponses, CreateConsentErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/compliance/consents',
@@ -545,7 +953,7 @@ export const createConsent = <ThrowOnError extends boolean = false>(options: Opt
 export const listComplianceDecisions = <ThrowOnError extends boolean = false>(options?: Options<ListComplianceDecisionsData, ThrowOnError>): RequestResult<ListComplianceDecisionsResponses, ListComplianceDecisionsErrors, ThrowOnError> => (options?.client ?? client).get<ListComplianceDecisionsResponses, ListComplianceDecisionsErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/compliance/decisions',
@@ -558,7 +966,7 @@ export const listComplianceDecisions = <ThrowOnError extends boolean = false>(op
 export const listDnc = <ThrowOnError extends boolean = false>(options?: Options<ListDncData, ThrowOnError>): RequestResult<ListDncResponses, ListDncErrors, ThrowOnError> => (options?.client ?? client).get<ListDncResponses, ListDncErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/compliance/dnc',
@@ -571,7 +979,7 @@ export const listDnc = <ThrowOnError extends boolean = false>(options?: Options<
 export const createDnc = <ThrowOnError extends boolean = false>(options: Options<CreateDncData, ThrowOnError>): RequestResult<CreateDncResponses, CreateDncErrors, ThrowOnError> => (options.client ?? client).post<CreateDncResponses, CreateDncErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/compliance/dnc',
@@ -583,12 +991,56 @@ export const createDnc = <ThrowOnError extends boolean = false>(options: Options
 });
 
 /**
+ * Add numbers to the workspace do-not-call list from a CSV
+ */
+export const createDncImport = <ThrowOnError extends boolean = false>(options?: Options<CreateDncImportData, ThrowOnError>): RequestResult<CreateDncImportResponses, CreateDncImportErrors, ThrowOnError> => (options?.client ?? client).post<CreateDncImportResponses, CreateDncImportErrors, ThrowOnError>({
+    ...formDataBodySerializer,
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/compliance/dnc/imports',
+    ...options,
+    headers: {
+        'Content-Type': null,
+        ...options?.headers
+    }
+});
+
+/**
+ * Get a do-not-call CSV import
+ */
+export const getDncImport = <ThrowOnError extends boolean = false>(options: Options<GetDncImportData, ThrowOnError>): RequestResult<GetDncImportResponses, GetDncImportErrors, ThrowOnError> => (options.client ?? client).get<GetDncImportResponses, GetDncImportErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/compliance/dnc/imports/{id}',
+    ...options
+});
+
+/**
+ * Opt-outs, newest first
+ */
+export const listRevocations = <ThrowOnError extends boolean = false>(options?: Options<ListRevocationsData, ThrowOnError>): RequestResult<ListRevocationsResponses, ListRevocationsErrors, ThrowOnError> => (options?.client ?? client).get<ListRevocationsResponses, ListRevocationsErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/compliance/revocations',
+    ...options
+});
+
+/**
  * Record a consent revocation; the number is added to the internal DNC
  */
 export const createRevocation = <ThrowOnError extends boolean = false>(options: Options<CreateRevocationData, ThrowOnError>): RequestResult<CreateRevocationResponses, CreateRevocationErrors, ThrowOnError> => (options.client ?? client).post<CreateRevocationResponses, CreateRevocationErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/compliance/revocations',
@@ -600,12 +1052,26 @@ export const createRevocation = <ThrowOnError extends boolean = false>(options: 
 });
 
 /**
+ * Active compliance texts the platform plays or asks to attest
+ */
+export const listComplianceTexts = <ThrowOnError extends boolean = false>(options?: Options<ListComplianceTextsData, ThrowOnError>): RequestResult<ListComplianceTextsResponses, ListComplianceTextsErrors, ThrowOnError> => (options?.client ?? client).get<ListComplianceTextsResponses, ListComplianceTextsErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/compliance/texts',
+    ...options
+});
+
+/**
  * List contacts
  */
 export const listContacts = <ThrowOnError extends boolean = false>(options?: Options<ListContactsData, ThrowOnError>): RequestResult<ListContactsResponses, ListContactsErrors, ThrowOnError> => (options?.client ?? client).get<ListContactsResponses, ListContactsErrors, ThrowOnError>({
+    querySerializer: { parameters: { tag: { array: { explode: false } } } },
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/contacts',
@@ -618,7 +1084,7 @@ export const listContacts = <ThrowOnError extends boolean = false>(options?: Opt
 export const createContact = <ThrowOnError extends boolean = false>(options: Options<CreateContactData, ThrowOnError>): RequestResult<CreateContactResponses, CreateContactErrors, ThrowOnError> => (options.client ?? client).post<CreateContactResponses, CreateContactErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/contacts',
@@ -630,13 +1096,43 @@ export const createContact = <ThrowOnError extends boolean = false>(options: Opt
 });
 
 /**
+ * Tag, untag, mark do-not-call or add to a campaign; selections over 1,000 run as a job
+ */
+export const bulkUpdateContacts = <ThrowOnError extends boolean = false>(options: Options<BulkUpdateContactsData, ThrowOnError>): RequestResult<BulkUpdateContactsResponses, BulkUpdateContactsErrors, ThrowOnError> => (options.client ?? client).post<BulkUpdateContactsResponses, BulkUpdateContactsErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/contacts/bulk',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Imports with their consent attestation, newest first
+ */
+export const listContactImports = <ThrowOnError extends boolean = false>(options?: Options<ListContactImportsData, ThrowOnError>): RequestResult<ListContactImportsResponses, ListContactImportsErrors, ThrowOnError> => (options?.client ?? client).get<ListContactImportsResponses, ListContactImportsErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/contacts/imports',
+    ...options
+});
+
+/**
  * Upload a CSV of contacts with a consent attestation
  */
 export const createContactImport = <ThrowOnError extends boolean = false>(options: Options<CreateContactImportData, ThrowOnError>): RequestResult<CreateContactImportResponses, CreateContactImportErrors, ThrowOnError> => (options.client ?? client).post<CreateContactImportResponses, CreateContactImportErrors, ThrowOnError>({
     ...formDataBodySerializer,
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/contacts/imports',
@@ -653,10 +1149,23 @@ export const createContactImport = <ThrowOnError extends boolean = false>(option
 export const getContactImport = <ThrowOnError extends boolean = false>(options: Options<GetContactImportData, ThrowOnError>): RequestResult<GetContactImportResponses, GetContactImportErrors, ThrowOnError> => (options.client ?? client).get<GetContactImportResponses, GetContactImportErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/contacts/imports/{id}',
+    ...options
+});
+
+/**
+ * Tags in use with their contact counts
+ */
+export const listContactTags = <ThrowOnError extends boolean = false>(options?: Options<ListContactTagsData, ThrowOnError>): RequestResult<ListContactTagsResponses, ListContactTagsErrors, ThrowOnError> => (options?.client ?? client).get<ListContactTagsResponses, ListContactTagsErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/contacts/tags',
     ...options
 });
 
@@ -666,7 +1175,7 @@ export const getContactImport = <ThrowOnError extends boolean = false>(options: 
 export const deleteContact = <ThrowOnError extends boolean = false>(options: Options<DeleteContactData, ThrowOnError>): RequestResult<DeleteContactResponses, DeleteContactErrors, ThrowOnError> => (options.client ?? client).delete<DeleteContactResponses, DeleteContactErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/contacts/{id}',
@@ -679,7 +1188,7 @@ export const deleteContact = <ThrowOnError extends boolean = false>(options: Opt
 export const getContact = <ThrowOnError extends boolean = false>(options: Options<GetContactData, ThrowOnError>): RequestResult<GetContactResponses, GetContactErrors, ThrowOnError> => (options.client ?? client).get<GetContactResponses, GetContactErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/contacts/{id}',
@@ -692,7 +1201,7 @@ export const getContact = <ThrowOnError extends boolean = false>(options: Option
 export const updateContact = <ThrowOnError extends boolean = false>(options: Options<UpdateContactData, ThrowOnError>): RequestResult<UpdateContactResponses, UpdateContactErrors, ThrowOnError> => (options.client ?? client).patch<UpdateContactResponses, UpdateContactErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/contacts/{id}',
@@ -704,12 +1213,51 @@ export const updateContact = <ThrowOnError extends boolean = false>(options: Opt
 });
 
 /**
+ * Do-not-call checks made for this contact's number
+ */
+export const listContactDncChecks = <ThrowOnError extends boolean = false>(options: Options<ListContactDncChecksData, ThrowOnError>): RequestResult<ListContactDncChecksResponses, ListContactDncChecksErrors, ThrowOnError> => (options.client ?? client).get<ListContactDncChecksResponses, ListContactDncChecksErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/contacts/{id}/dnc-checks',
+    ...options
+});
+
+/**
+ * Calls, campaign steps, consent, opt-outs and do-not-call changes, newest first
+ */
+export const getContactTimeline = <ThrowOnError extends boolean = false>(options: Options<GetContactTimelineData, ThrowOnError>): RequestResult<GetContactTimelineResponses, GetContactTimelineErrors, ThrowOnError> => (options.client ?? client).get<GetContactTimelineResponses, GetContactTimelineErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/contacts/{id}/timeline',
+    ...options
+});
+
+/**
+ * Holiday presets for business hours, next 24 months
+ */
+export const listHolidayCalendars = <ThrowOnError extends boolean = false>(options?: Options<ListHolidayCalendarsData, ThrowOnError>): RequestResult<ListHolidayCalendarsResponses, ListHolidayCalendarsErrors, ThrowOnError> => (options?.client ?? client).get<ListHolidayCalendarsResponses, ListHolidayCalendarsErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/holiday-calendars',
+    ...options
+});
+
+/**
  * List knowledge bases
  */
 export const listKnowledgeBases = <ThrowOnError extends boolean = false>(options?: Options<ListKnowledgeBasesData, ThrowOnError>): RequestResult<ListKnowledgeBasesResponses, ListKnowledgeBasesErrors, ThrowOnError> => (options?.client ?? client).get<ListKnowledgeBasesResponses, ListKnowledgeBasesErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/knowledge-bases',
@@ -722,7 +1270,7 @@ export const listKnowledgeBases = <ThrowOnError extends boolean = false>(options
 export const createKnowledgeBase = <ThrowOnError extends boolean = false>(options: Options<CreateKnowledgeBaseData, ThrowOnError>): RequestResult<CreateKnowledgeBaseResponses, CreateKnowledgeBaseErrors, ThrowOnError> => (options.client ?? client).post<CreateKnowledgeBaseResponses, CreateKnowledgeBaseErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/knowledge-bases',
@@ -739,7 +1287,7 @@ export const createKnowledgeBase = <ThrowOnError extends boolean = false>(option
 export const deleteKnowledgeBase = <ThrowOnError extends boolean = false>(options: Options<DeleteKnowledgeBaseData, ThrowOnError>): RequestResult<DeleteKnowledgeBaseResponses, DeleteKnowledgeBaseErrors, ThrowOnError> => (options.client ?? client).delete<DeleteKnowledgeBaseResponses, DeleteKnowledgeBaseErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/knowledge-bases/{id}',
@@ -752,7 +1300,7 @@ export const deleteKnowledgeBase = <ThrowOnError extends boolean = false>(option
 export const getKnowledgeBase = <ThrowOnError extends boolean = false>(options: Options<GetKnowledgeBaseData, ThrowOnError>): RequestResult<GetKnowledgeBaseResponses, GetKnowledgeBaseErrors, ThrowOnError> => (options.client ?? client).get<GetKnowledgeBaseResponses, GetKnowledgeBaseErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/knowledge-bases/{id}',
@@ -765,7 +1313,7 @@ export const getKnowledgeBase = <ThrowOnError extends boolean = false>(options: 
 export const updateKnowledgeBase = <ThrowOnError extends boolean = false>(options: Options<UpdateKnowledgeBaseData, ThrowOnError>): RequestResult<UpdateKnowledgeBaseResponses, UpdateKnowledgeBaseErrors, ThrowOnError> => (options.client ?? client).patch<UpdateKnowledgeBaseResponses, UpdateKnowledgeBaseErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/knowledge-bases/{id}',
@@ -782,7 +1330,7 @@ export const updateKnowledgeBase = <ThrowOnError extends boolean = false>(option
 export const searchKnowledgeBase = <ThrowOnError extends boolean = false>(options: Options<SearchKnowledgeBaseData, ThrowOnError>): RequestResult<SearchKnowledgeBaseResponses, SearchKnowledgeBaseErrors, ThrowOnError> => (options.client ?? client).get<SearchKnowledgeBaseResponses, SearchKnowledgeBaseErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/knowledge-bases/{id}/search',
@@ -795,7 +1343,7 @@ export const searchKnowledgeBase = <ThrowOnError extends boolean = false>(option
 export const listKnowledgeSources = <ThrowOnError extends boolean = false>(options: Options<ListKnowledgeSourcesData, ThrowOnError>): RequestResult<ListKnowledgeSourcesResponses, ListKnowledgeSourcesErrors, ThrowOnError> => (options.client ?? client).get<ListKnowledgeSourcesResponses, ListKnowledgeSourcesErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/knowledge-bases/{id}/sources',
@@ -809,7 +1357,7 @@ export const createKnowledgeFileSource = <ThrowOnError extends boolean = false>(
     ...formDataBodySerializer,
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/knowledge-bases/{id}/sources/file',
@@ -826,7 +1374,7 @@ export const createKnowledgeFileSource = <ThrowOnError extends boolean = false>(
 export const createKnowledgeWebsiteSource = <ThrowOnError extends boolean = false>(options: Options<CreateKnowledgeWebsiteSourceData, ThrowOnError>): RequestResult<CreateKnowledgeWebsiteSourceResponses, CreateKnowledgeWebsiteSourceErrors, ThrowOnError> => (options.client ?? client).post<CreateKnowledgeWebsiteSourceResponses, CreateKnowledgeWebsiteSourceErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/knowledge-bases/{id}/sources/website',
@@ -843,7 +1391,7 @@ export const createKnowledgeWebsiteSource = <ThrowOnError extends boolean = fals
 export const deleteKnowledgeSource = <ThrowOnError extends boolean = false>(options: Options<DeleteKnowledgeSourceData, ThrowOnError>): RequestResult<DeleteKnowledgeSourceResponses, DeleteKnowledgeSourceErrors, ThrowOnError> => (options.client ?? client).delete<DeleteKnowledgeSourceResponses, DeleteKnowledgeSourceErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/knowledge-bases/{id}/sources/{source_id}',
@@ -856,7 +1404,7 @@ export const deleteKnowledgeSource = <ThrowOnError extends boolean = false>(opti
 export const getKnowledgeSource = <ThrowOnError extends boolean = false>(options: Options<GetKnowledgeSourceData, ThrowOnError>): RequestResult<GetKnowledgeSourceResponses, GetKnowledgeSourceErrors, ThrowOnError> => (options.client ?? client).get<GetKnowledgeSourceResponses, GetKnowledgeSourceErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/knowledge-bases/{id}/sources/{source_id}',
@@ -869,10 +1417,23 @@ export const getKnowledgeSource = <ThrowOnError extends boolean = false>(options
 export const syncKnowledgeSource = <ThrowOnError extends boolean = false>(options: Options<SyncKnowledgeSourceData, ThrowOnError>): RequestResult<SyncKnowledgeSourceResponses, SyncKnowledgeSourceErrors, ThrowOnError> => (options.client ?? client).post<SyncKnowledgeSourceResponses, SyncKnowledgeSourceErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/knowledge-bases/{id}/sources/{source_id}/sync',
+    ...options
+});
+
+/**
+ * Calls in progress with their last line and flags
+ */
+export const listLiveCalls = <ThrowOnError extends boolean = false>(options?: Options<ListLiveCallsData, ThrowOnError>): RequestResult<ListLiveCallsResponses, ListLiveCallsErrors, ThrowOnError> => (options?.client ?? client).get<ListLiveCallsResponses, ListLiveCallsErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/live-calls',
     ...options
 });
 
@@ -882,7 +1443,7 @@ export const syncKnowledgeSource = <ThrowOnError extends boolean = false>(option
 export const listNumbers = <ThrowOnError extends boolean = false>(options?: Options<ListNumbersData, ThrowOnError>): RequestResult<ListNumbersResponses, ListNumbersErrors, ThrowOnError> => (options?.client ?? client).get<ListNumbersResponses, ListNumbersErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/numbers',
@@ -895,7 +1456,7 @@ export const listNumbers = <ThrowOnError extends boolean = false>(options?: Opti
 export const orderNumber = <ThrowOnError extends boolean = false>(options: Options<OrderNumberData, ThrowOnError>): RequestResult<OrderNumberResponses, OrderNumberErrors, ThrowOnError> => (options.client ?? client).post<OrderNumberResponses, OrderNumberErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/numbers',
@@ -912,7 +1473,7 @@ export const orderNumber = <ThrowOnError extends boolean = false>(options: Optio
 export const searchAvailableNumbers = <ThrowOnError extends boolean = false>(options?: Options<SearchAvailableNumbersData, ThrowOnError>): RequestResult<SearchAvailableNumbersResponses, SearchAvailableNumbersErrors, ThrowOnError> => (options?.client ?? client).get<SearchAvailableNumbersResponses, SearchAvailableNumbersErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/numbers/available',
@@ -920,12 +1481,29 @@ export const searchAvailableNumbers = <ThrowOnError extends boolean = false>(opt
 });
 
 /**
- * Release a number; asynchronous
+ * Order 1 to 3 numbers with one spend decision; provisioning is asynchronous
+ */
+export const orderNumbers = <ThrowOnError extends boolean = false>(options: Options<OrderNumbersData, ThrowOnError>): RequestResult<OrderNumbersResponses, OrderNumbersErrors, ThrowOnError> => (options.client ?? client).post<OrderNumbersResponses, OrderNumbersErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/numbers/orders',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Release a number; asynchronous. 409 numbers.in_use while it is a running campaign's only caller ID or the opt-out line
  */
 export const releaseNumber = <ThrowOnError extends boolean = false>(options: Options<ReleaseNumberData, ThrowOnError>): RequestResult<ReleaseNumberResponses, ReleaseNumberErrors, ThrowOnError> => (options.client ?? client).delete<ReleaseNumberResponses, ReleaseNumberErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/numbers/{id}',
@@ -938,7 +1516,7 @@ export const releaseNumber = <ThrowOnError extends boolean = false>(options: Opt
 export const getNumber = <ThrowOnError extends boolean = false>(options: Options<GetNumberData, ThrowOnError>): RequestResult<GetNumberResponses, GetNumberErrors, ThrowOnError> => (options.client ?? client).get<GetNumberResponses, GetNumberErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/numbers/{id}',
@@ -951,7 +1529,7 @@ export const getNumber = <ThrowOnError extends boolean = false>(options: Options
 export const updateNumber = <ThrowOnError extends boolean = false>(options: Options<UpdateNumberData, ThrowOnError>): RequestResult<UpdateNumberResponses, UpdateNumberErrors, ThrowOnError> => (options.client ?? client).patch<UpdateNumberResponses, UpdateNumberErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/numbers/{id}',
@@ -963,15 +1541,88 @@ export const updateNumber = <ThrowOnError extends boolean = false>(options: Opti
 });
 
 /**
- * Stream the decrypted WAV; audited
+ * Replace who answers: open-hours target, business hours, holidays, after-hours target and the transfer line
+ */
+export const updateNumberRouting = <ThrowOnError extends boolean = false>(options: Options<UpdateNumberRoutingData, ThrowOnError>): RequestResult<UpdateNumberRoutingResponses, UpdateNumberRoutingErrors, ThrowOnError> => (options.client ?? client).put<UpdateNumberRoutingResponses, UpdateNumberRoutingErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/numbers/{id}/routing',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Stream the decrypted WAV, with byte ranges; each playback is logged
  */
 export const getRecordingAudio = <ThrowOnError extends boolean = false>(options: Options<GetRecordingAudioData, ThrowOnError>): RequestResult<GetRecordingAudioResponses, GetRecordingAudioErrors, ThrowOnError> => (options.client ?? client).get<GetRecordingAudioResponses, GetRecordingAudioErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/recordings/{id}/audio',
+    ...options
+});
+
+/**
+ * Waveform peaks of a recording
+ */
+export const getRecordingPeaks = <ThrowOnError extends boolean = false>(options: Options<GetRecordingPeaksData, ThrowOnError>): RequestResult<GetRecordingPeaksResponses, GetRecordingPeaksErrors, ThrowOnError> => (options.client ?? client).get<GetRecordingPeaksResponses, GetRecordingPeaksErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/recordings/{id}/peaks',
+    ...options
+});
+
+/**
+ * Numbers this workspace never flags as spam, even when their caller ID fails verification
+ */
+export const listSpamAllowList = <ThrowOnError extends boolean = false>(options?: Options<ListSpamAllowListData, ThrowOnError>): RequestResult<ListSpamAllowListResponses, ListSpamAllowListErrors, ThrowOnError> => (options?.client ?? client).get<ListSpamAllowListResponses, ListSpamAllowListErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/spam-allow-list',
+    ...options
+});
+
+/**
+ * Allow a number: its calls are never flagged as spam
+ */
+export const addSpamAllow = <ThrowOnError extends boolean = false>(options: Options<AddSpamAllowData, ThrowOnError>): RequestResult<AddSpamAllowResponses, AddSpamAllowErrors, ThrowOnError> => (options.client ?? client).post<AddSpamAllowResponses, AddSpamAllowErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/spam-allow-list',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Remove a number from the spam allow list
+ */
+export const deleteSpamAllow = <ThrowOnError extends boolean = false>(options: Options<DeleteSpamAllowData, ThrowOnError>): RequestResult<DeleteSpamAllowResponses, DeleteSpamAllowErrors, ThrowOnError> => (options.client ?? client).delete<DeleteSpamAllowResponses, DeleteSpamAllowErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/spam-allow-list/{id}',
     ...options
 });
 
@@ -981,7 +1632,7 @@ export const getRecordingAudio = <ThrowOnError extends boolean = false>(options:
 export const createIceServers = <ThrowOnError extends boolean = false>(options?: Options<CreateIceServersData, ThrowOnError>): RequestResult<CreateIceServersResponses, CreateIceServersErrors, ThrowOnError> => (options?.client ?? client).post<CreateIceServersResponses, CreateIceServersErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/web-calls/ice-servers',
@@ -994,7 +1645,7 @@ export const createIceServers = <ThrowOnError extends boolean = false>(options?:
 export const listWebhooks = <ThrowOnError extends boolean = false>(options?: Options<ListWebhooksData, ThrowOnError>): RequestResult<ListWebhooksResponses, ListWebhooksErrors, ThrowOnError> => (options?.client ?? client).get<ListWebhooksResponses, ListWebhooksErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/webhooks',
@@ -1007,7 +1658,7 @@ export const listWebhooks = <ThrowOnError extends boolean = false>(options?: Opt
 export const createWebhook = <ThrowOnError extends boolean = false>(options: Options<CreateWebhookData, ThrowOnError>): RequestResult<CreateWebhookResponses, CreateWebhookErrors, ThrowOnError> => (options.client ?? client).post<CreateWebhookResponses, CreateWebhookErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/webhooks',
@@ -1024,7 +1675,7 @@ export const createWebhook = <ThrowOnError extends boolean = false>(options: Opt
 export const deleteWebhook = <ThrowOnError extends boolean = false>(options: Options<DeleteWebhookData, ThrowOnError>): RequestResult<DeleteWebhookResponses, DeleteWebhookErrors, ThrowOnError> => (options.client ?? client).delete<DeleteWebhookResponses, DeleteWebhookErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/webhooks/{id}',
@@ -1037,7 +1688,7 @@ export const deleteWebhook = <ThrowOnError extends boolean = false>(options: Opt
 export const getWebhook = <ThrowOnError extends boolean = false>(options: Options<GetWebhookData, ThrowOnError>): RequestResult<GetWebhookResponses, GetWebhookErrors, ThrowOnError> => (options.client ?? client).get<GetWebhookResponses, GetWebhookErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/webhooks/{id}',
@@ -1050,7 +1701,7 @@ export const getWebhook = <ThrowOnError extends boolean = false>(options: Option
 export const updateWebhook = <ThrowOnError extends boolean = false>(options: Options<UpdateWebhookData, ThrowOnError>): RequestResult<UpdateWebhookResponses, UpdateWebhookErrors, ThrowOnError> => (options.client ?? client).patch<UpdateWebhookResponses, UpdateWebhookErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/webhooks/{id}',
@@ -1067,7 +1718,7 @@ export const updateWebhook = <ThrowOnError extends boolean = false>(options: Opt
 export const listWebhookDeliveries = <ThrowOnError extends boolean = false>(options: Options<ListWebhookDeliveriesData, ThrowOnError>): RequestResult<ListWebhookDeliveriesResponses, ListWebhookDeliveriesErrors, ThrowOnError> => (options.client ?? client).get<ListWebhookDeliveriesResponses, ListWebhookDeliveriesErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/webhooks/{id}/deliveries',
@@ -1080,7 +1731,7 @@ export const listWebhookDeliveries = <ThrowOnError extends boolean = false>(opti
 export const rotateWebhookSecret = <ThrowOnError extends boolean = false>(options: Options<RotateWebhookSecretData, ThrowOnError>): RequestResult<RotateWebhookSecretResponses, RotateWebhookSecretErrors, ThrowOnError> => (options.client ?? client).post<RotateWebhookSecretResponses, RotateWebhookSecretErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/webhooks/{id}/rotate-secret',
@@ -1093,7 +1744,7 @@ export const rotateWebhookSecret = <ThrowOnError extends boolean = false>(option
 export const testWebhook = <ThrowOnError extends boolean = false>(options: Options<TestWebhookData, ThrowOnError>): RequestResult<TestWebhookResponses, TestWebhookErrors, ThrowOnError> => (options.client ?? client).post<TestWebhookResponses, TestWebhookErrors, ThrowOnError>({
     security: [{
             in: 'cookie',
-            name: 'lx_session',
+            name: '__Host-lx_session',
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/webhooks/{id}/test',
