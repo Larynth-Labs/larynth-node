@@ -20734,6 +20734,12 @@
       "status": 409,
       "type": "https://larynth.com/problems/workspace.other_region",
       "title": "Workspace is served from another region"
+    },
+    {
+      "code": "workspace.test_restricted",
+      "status": 403,
+      "type": "https://larynth.com/problems/workspace.test_restricted",
+      "title": "Not available in a test workspace"
     }
   ]
 }
