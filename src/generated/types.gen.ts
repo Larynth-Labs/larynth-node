@@ -37,6 +37,15 @@ export type AfterHoursTarget = {
     mode: 'same_agent' | 'assistant' | 'forward' | 'take_message';
 };
 
+export type AnswerKnowledgeGapRequest = {
+    answer: string;
+    knowledge_base_id: string;
+    /**
+     * Question to store; unset uses the group's wording
+     */
+    question?: string;
+};
+
 export type AreaCode = {
     cities: Array<string>;
     /**
@@ -108,6 +117,10 @@ export type AssistantCoverageBand = {
 };
 
 export type AssistantDraft = {
+    /**
+     * Unset is single_prompt; flow needs mode cascade
+     */
+    agent_type?: 'single_prompt' | 'flow';
     assistant_id: string;
     call_handling?: CallHandling;
     /**
@@ -123,6 +136,10 @@ export type AssistantDraft = {
     denoise?: boolean;
     disclosure?: DisclosureSpec;
     fillers?: Array<string>;
+    /**
+     * flow agents only; flow.ui is the canvas layout, stored as is (at most 200 KB)
+     */
+    flow?: FlowSpec;
     greeting_text: string;
     /**
      * Owner-added guardrails; the built-in rules from listGuardrailRules always apply and cannot be removed
@@ -130,6 +147,10 @@ export type AssistantDraft = {
     guardrails?: GuardrailsSpec;
     id: string;
     interruption_profile?: InterruptionProfile;
+    /**
+     * Flow problems; the draft saves anyway, errors block publish
+     */
+    issues: Array<FlowValidationIssue>;
     /**
      * Knowledge bases the assistant can search with the search_knowledge tool; each must be ready when the version is published
      */
@@ -241,6 +262,10 @@ export type AssistantPublished = {
 };
 
 export type AssistantTool = {
+    /**
+     * calendar: expands into the booking tools find_availability, hold_slot, confirm_booking, find_my_bookings, cancel_booking and reschedule_booking
+     */
+    calendar_tool?: CalendarToolConfig;
     class: 'fast' | 'slow' | 'terminal';
     config?: {
         [key: string]: unknown;
@@ -254,12 +279,32 @@ export type AssistantTool = {
     json_schema: {
         [key: string]: unknown;
     };
-    kind: 'end_call' | 'opt_out' | 'http_request' | 'transfer';
+    kind: 'end_call' | 'opt_out' | 'http_request' | 'transfer' | 'workspace_http' | 'mcp' | 'calendar';
+    /**
+     * mcp: an approved MCP tool
+     */
+    mcp_tool_id?: string;
     name: string;
+    /**
+     * mcp: the tool changed on its server or lost its approval. The draft keeps the old pin; review and approve the tool, then save and publish again
+     */
+    readonly stale?: boolean;
     timeout_ms?: number;
+    /**
+     * workspace_http: the HTTP tool from the library
+     */
+    workspace_tool_id?: string;
+    /**
+     * workspace_http: pinned revision; set by the server when the draft is saved
+     */
+    workspace_tool_revision?: number;
 };
 
 export type AssistantVersion = {
+    /**
+     * Unset is single_prompt; flow needs mode cascade
+     */
+    agent_type?: 'single_prompt' | 'flow';
     assistant_id: string;
     call_handling?: CallHandling;
     created_at: string;
@@ -267,6 +312,10 @@ export type AssistantVersion = {
     denoise?: boolean;
     disclosure?: DisclosureSpec;
     fillers?: Array<string>;
+    /**
+     * flow agents only; flow.ui is the canvas layout, stored as is (at most 200 KB)
+     */
+    flow?: FlowSpec;
     greeting_text: string;
     /**
      * Owner-added guardrails; the built-in rules from listGuardrailRules always apply and cannot be removed
@@ -346,10 +395,18 @@ export type AssistantVersion = {
 };
 
 export type AssistantVersionSpec = {
+    /**
+     * Unset is single_prompt; flow needs mode cascade
+     */
+    agent_type?: 'single_prompt' | 'flow';
     call_handling?: CallHandling;
     denoise?: boolean;
     disclosure?: DisclosureSpec;
     fillers?: Array<string>;
+    /**
+     * flow agents only; flow.ui is the canvas layout, stored as is (at most 200 KB)
+     */
+    flow?: FlowSpec;
     greeting_text: string;
     /**
      * Owner-added guardrails; the built-in rules from listGuardrailRules always apply and cannot be removed
@@ -450,9 +507,17 @@ export type AudiencePreview = {
 
 export type AutoTopUp = {
     amount_micro: number;
+    /**
+     * False before the first paid top-up or bundle payment
+     */
+    available: boolean;
     enabled: boolean;
     has_payment_method: boolean;
     low_balance_threshold_micro: number;
+    /**
+     * Card auto top-up charges; the default card when empty
+     */
+    payment_method_id?: string;
     threshold_micro: number;
     updated_at: string;
 };
@@ -472,17 +537,40 @@ export type AvailableNumber = {
 };
 
 export type Balance = {
+    /**
+     * Paid credit available
+     */
     available_micro: number;
+    /**
+     * Unused bundle credit; pays per-minute call charges only
+     */
+    bundle_credit_micro: number;
+    /**
+     * Settled charges over the last 7 local days divided by 7; null below 3 active days
+     */
+    burn_micro_per_day_7d: number | null;
     currency: 'USD';
+    /**
+     * First settled, risk-checked top-up or bundle payment
+     */
+    first_paid_at?: string;
     /**
      * Reserved by calls in progress
      */
     held_micro: number;
     low_balance_threshold_micro: number;
     /**
-     * Free credit (signup and promotions), spent before available funds
+     * Free credit (signup and promotions), spent before available funds on browser test and inbound calls
      */
     promo_credit_micro: number;
+    /**
+     * Days the total credit lasts at the 7-day burn; Owners and Admins only
+     */
+    runway_days?: number;
+    /**
+     * available + promo + bundle credit
+     */
+    total_credit_micro: number;
     updated_at: string;
 };
 
@@ -499,6 +587,88 @@ export type BlockedCaller = {
     last_blocked_at?: string;
     reason?: string;
     source_call_id?: string;
+};
+
+export type Booking = {
+    assistant: BookingAssistant;
+    call_id?: string;
+    caller: BookingCaller;
+    connection_id: string;
+    created_at: string;
+    decided_by_name?: string;
+    end_at: string;
+    id: string;
+    /**
+     * The calendar provider emailed the caller an invite
+     */
+    invite_sent: boolean;
+    notes?: string;
+    /**
+     * Opaque reference in the calendar
+     */
+    provider_ref?: string;
+    reason?: string;
+    resource_id: string;
+    service?: string;
+    start_at: string;
+    status: 'held' | 'pending_approval' | 'confirmed' | 'declined' | 'cancelled' | 'failed' | 'needs_check';
+    timezone: string;
+    updated_at: string;
+};
+
+export type BookingAssistant = {
+    id: string;
+    name: string;
+};
+
+export type BookingCaller = {
+    /**
+     * Caller number with the middle digits hidden
+     */
+    e164_masked: string;
+    email_masked?: string;
+    name?: string;
+};
+
+export type BookingDefaults = {
+    /**
+     * Unset is direct
+     */
+    approval?: 'direct' | 'owner_approval';
+    buffer_min?: number;
+    duration_min?: number;
+    hold_minutes?: number;
+    hours?: BookingHours;
+    /**
+     * optional: the agent offers an email invite and spells the address back. Unset is optional
+     */
+    invite_caller?: 'off' | 'optional';
+    min_notice_min?: number;
+    /**
+     * Variables {{caller_name}} and {{service}}
+     */
+    title_template?: string;
+    window_days?: number;
+};
+
+export type BookingHours = {
+    /**
+     * own only; the W2 routing hours bands
+     */
+    bands?: Array<HoursBand>;
+    /**
+     * number_routing uses the business hours of the number the call came in on
+     */
+    source: 'number_routing' | 'own';
+    /**
+     * IANA zone; own only
+     */
+    timezone?: string;
+};
+
+export type BookingService = {
+    duration_min: number;
+    name: string;
 };
 
 export type BulkResult = {
@@ -518,6 +688,83 @@ export type BulkUpdateContactsRequest = {
     campaign_id?: string;
     selection: ContactSelection;
     tag?: string;
+};
+
+export type Bundle = {
+    credit_micro: number;
+    /**
+     * Discount in basis points of the credit
+     */
+    discount_bp: number;
+    key: string;
+    /**
+     * Credit divided by this workspace's current agent minute price, rounded down
+     */
+    minutes_estimate: number;
+    name_key: string;
+    price_micro: number;
+    sort: number;
+};
+
+export type BundleList = {
+    data: Array<Bundle>;
+};
+
+export type BundleLot = {
+    /**
+     * Unused credit becomes normal balance at the price paid
+     */
+    converts_at: string;
+    credit_micro: number;
+    id: string;
+    left_micro: number;
+    starts_at: string;
+};
+
+export type BundleSubscription = {
+    bundle?: Bundle;
+    credit_left_micro: number;
+    current_period_end?: string;
+    last_failure_code?: string;
+    lots: Array<BundleLot>;
+    /**
+     * Size from the next renewal
+     */
+    next_bundle_key?: string;
+    payment_method_id?: string;
+    renews_at?: string;
+    status: 'none' | 'pending' | 'active' | 'canceling' | 'past_due';
+};
+
+export type CalendarConnection = {
+    account_label: string;
+    connected_by_name?: string;
+    created_at: string;
+    defaults: BookingDefaults;
+    id: string;
+    provider: IntegrationProvider;
+    resources: Array<CalendarResource>;
+    status: 'connected' | 'needs_reconnect' | 'revoked';
+    used_by: Array<ToolUse>;
+};
+
+export type CalendarResource = {
+    duration_min?: number;
+    external_id: string;
+    id: string;
+    kind: 'calendar' | 'event_type';
+    name: string;
+    timezone: string;
+};
+
+export type CalendarToolConfig = {
+    connection_id: string;
+    /**
+     * Per-agent changes to the connection's defaults
+     */
+    overrides?: BookingDefaults;
+    resource_id: string;
+    services?: Array<BookingService>;
 };
 
 export type Call = {
@@ -581,6 +828,10 @@ export type Call = {
     disclosure_played_at?: string;
     ended_at?: string;
     flagged?: CallFlag;
+    /**
+     * Flow agents only
+     */
+    flow?: CallFlow;
     from_e164?: string;
     hangup_by?: 'local' | 'remote' | 'system';
     /**
@@ -687,6 +938,30 @@ export type CallEvent = {
 export type CallFlag = {
     at: string;
     by_user_id?: string;
+};
+
+export type CallFlow = {
+    /**
+     * Outcome of the end node the call reached
+     */
+    outcome?: string;
+    /**
+     * Node ids visited, at most 200
+     */
+    path: Array<string>;
+    /**
+     * Flow variables at the end of the call; members and above only
+     */
+    variables?: {
+        [key: string]: unknown;
+    };
+};
+
+export type CallFlowEvents = {
+    /**
+     * At most 2,000, in seq order
+     */
+    events: Array<FlowEvent>;
 };
 
 export type CallHandling = {
@@ -813,7 +1088,23 @@ export type CallReceipt = {
 export type CallReceiptLine = {
     amount_micro: number;
     billed_minutes: number;
+    /**
+     * Part of amount_micro paid from bundle credit
+     */
+    bundle_funded_micro?: number;
+    /**
+     * Catalog name of the premium voice or model; only on premium lines
+     */
+    display_name?: string;
     kind: 'agent_minutes' | 'bridged_minutes' | 'premium_voice' | 'premium_model';
+    /**
+     * The workspace's launch price applied to this line
+     */
+    launch_price?: boolean;
+    /**
+     * Per-minute list price the launch price replaced; only with launch_price
+     */
+    list_price_micro?: number;
     quantity_ms: number;
     unit_price_micro: number;
 };
@@ -1177,6 +1468,10 @@ export type CatalogModel = {
      * Typical time this model adds to a reply, measured on our cells
      */
     typical_reply_ms?: number;
+    /**
+     * A flow step may pick this model (cascade LLMs only, at most 3 per flow)
+     */
+    usable_in_flows: boolean;
     wire_rates: Array<number>;
 };
 
@@ -1269,7 +1564,7 @@ export type ComplianceTextView = {
     body: string;
     counsel_reviewed: boolean;
     id: string;
-    kind: 'disclosure_inbound' | 'disclosure_outbound' | 'optout_instruction' | 'recording_notice' | 'optout_ack' | 'voicemail_intro' | 'voicemail_optout' | 'screener_line' | 'unavailable' | 'goodbye' | 'inbound_ai_attestation' | 'voicemail_callback' | 'transcript_notice' | 'ca_preamble' | 'ca_preamble_decline_ack' | 'after_hours_message_mode' | 'optout_line_greeting' | 'optout_line_ack' | 'callback_check_code' | 'biometric_consent' | 'campaign_launch_attestation' | 'consent_attestation';
+    kind: 'disclosure_inbound' | 'disclosure_outbound' | 'optout_instruction' | 'recording_notice' | 'optout_ack' | 'voicemail_intro' | 'voicemail_optout' | 'screener_line' | 'unavailable' | 'goodbye' | 'inbound_ai_attestation' | 'voicemail_callback' | 'transcript_notice' | 'ca_preamble' | 'ca_preamble_decline_ack' | 'after_hours_message_mode' | 'optout_line_greeting' | 'optout_line_ack' | 'callback_check_code' | 'biometric_consent' | 'campaign_launch_attestation' | 'consent_attestation' | 'callback_check_replay' | 'callback_check_goodbye' | 'callback_check_digits' | 'booking_instructions' | 'booking_fallback_line';
     language: string;
     /**
      * inbound_ai_attestation only: the statements the owner confirms one by one
@@ -1650,6 +1945,11 @@ export type CreateKnowledgeBaseRequest = {
     name: string;
 };
 
+export type CreateKnowledgeFaqSourceRequest = {
+    entries: Array<KnowledgeFaqEntry>;
+    name: string;
+};
+
 export type CreateRevocationRequest = {
     /**
      * Opt-out scope: telemarketing covers all marketing calls, another value one informational category; empty covers every call
@@ -1673,9 +1973,19 @@ export type CreateRevocationRequest = {
 
 export type CreateWebCallRequest = {
     /**
+     * Flow agents: seed declared variables, in string form
+     */
+    flow_variables?: {
+        [key: string]: string;
+    };
+    /**
      * Complete (non-trickle) SDP offer
      */
     sdp_offer: string;
+    /**
+     * Flow agents: start the test call at this step
+     */
+    start_node_id?: string;
     /**
      * Use the open draft (else the latest version) instead of the published one
      */
@@ -1685,9 +1995,17 @@ export type CreateWebCallRequest = {
     };
 };
 
+export type CreateWebhookReplayRequest = {
+    /**
+     * At most 7 days ago
+     */
+    since: string;
+    status?: 'failed' | 'all';
+};
+
 export type CreateWebhookRequest = {
     description?: string;
-    event_types: Array<'call.started' | 'call.answered' | 'call.ended' | 'call.analyzed' | 'call.recording.ready' | 'call.transferred' | 'campaign.started' | 'campaign.paused' | 'campaign.completed' | 'campaign.contact.completed' | 'compliance.opt_out' | 'billing.balance.low' | 'billing.top_up.succeeded' | 'billing.auto_top_up.failed' | 'number.provisioned' | 'number.released' | 'notification.call.summary' | 'notification.campaign.completed' | 'notification.campaign.paused' | 'notification.billing.balance_low' | 'notification.billing.top_up_succeeded' | 'notification.billing.auto_top_up_failed' | 'notification.spending_request.created' | 'notification.number.provisioned' | 'notification.number.released' | 'notification.compliance.optout_alert' | 'notification.inbox.callback_waiting' | 'notification.alert.missed_calls_spike' | 'notification.alert.transfers_failing' | 'notification.alert.tool_failing' | 'notification.agent.paused' | 'inbox.item.created' | 'inbox.item.cleared' | 'agent.published' | 'agent.paused' | 'agent.resumed' | 'call.flagged' | 'recording.deleted' | 'caller.blocked' | 'number.routing_changed' | 'notification.campaign.safeguard_paused' | 'notification.campaign.review_decided' | 'notification.verification.updated'>;
+    event_types: Array<'call.started' | 'call.answered' | 'call.ended' | 'call.analyzed' | 'call.recording.ready' | 'call.transferred' | 'campaign.started' | 'campaign.paused' | 'campaign.completed' | 'campaign.contact.completed' | 'compliance.opt_out' | 'billing.balance.low' | 'billing.top_up.succeeded' | 'billing.auto_top_up.failed' | 'number.provisioned' | 'number.released' | 'notification.call.summary' | 'notification.campaign.completed' | 'notification.campaign.paused' | 'notification.billing.balance_low' | 'notification.billing.top_up_succeeded' | 'notification.billing.auto_top_up_failed' | 'notification.spending_request.created' | 'notification.number.provisioned' | 'notification.number.released' | 'notification.compliance.optout_alert' | 'notification.inbox.callback_waiting' | 'notification.alert.missed_calls_spike' | 'notification.alert.transfers_failing' | 'notification.alert.tool_failing' | 'notification.agent.paused' | 'inbox.item.created' | 'inbox.item.cleared' | 'agent.published' | 'agent.paused' | 'agent.resumed' | 'call.flagged' | 'recording.deleted' | 'caller.blocked' | 'number.routing_changed' | 'notification.campaign.safeguard_paused' | 'notification.campaign.review_decided' | 'notification.verification.updated' | 'billing.spend_limit.alert' | 'billing.bundle.renewed' | 'billing.bundle.renewal_failed' | 'billing.payment.refunded' | 'number.rental_failed' | 'notification.billing.spend_limit_alert' | 'notification.billing.bundle_renewed' | 'notification.billing.bundle_renewal_failed' | 'notification.billing.payment_refunded' | 'notification.number.rental_failed' | 'booking.created' | 'booking.confirmed' | 'booking.cancelled' | 'booking.declined' | 'booking.failed' | 'integration.disconnected' | 'tool.disabled' | 'knowledge.gap.created'>;
     url: string;
 };
 
@@ -1698,6 +2016,10 @@ export type CreateWebsiteSourceRequest = {
     max_depth?: number;
     max_pages?: number;
     name?: string;
+    /**
+     * Unset is weekly
+     */
+    resync?: KnowledgeResync;
     /**
      * Start page; only pages on the same host are crawled and robots.txt is respected
      */
@@ -1724,6 +2046,24 @@ export type DncEntry = {
     removed_reason?: string;
     scope: 'tenant' | 'platform';
     source: 'internal' | 'in_call_opt_out' | 'revocation' | 'api' | 'import' | 'operator';
+};
+
+export type DailySpendLimit = {
+    alert_at_pct: Array<number>;
+    cap_micro?: number;
+    enabled: boolean;
+    /**
+     * Next midnight in the workspace time zone
+     */
+    resets_at: string;
+    /**
+     * Settled charges of every kind plus open holds today
+     */
+    used_micro: number;
+};
+
+export type DecideBookingRequest = {
+    reason?: string;
 };
 
 export type DiffLine = {
@@ -1762,6 +2102,11 @@ export type DncImport = {
     rows_rejected: number;
     rows_total: number;
     status: 'queued' | 'running' | 'done' | 'failed';
+};
+
+export type DownloadLink = {
+    download_url: string;
+    expires_at: string;
 };
 
 export type DraftWarning = {
@@ -1827,11 +2172,186 @@ export type ExtractionField = {
     type: 'string' | 'number' | 'boolean' | 'enum' | 'date';
 };
 
+export type FlowAssignment = {
+    value: unknown;
+    variable: string;
+};
+
+export type FlowBridge = {
+    text: string;
+};
+
+export type FlowCondition = {
+    description?: string;
+    event?: string;
+    guard?: FlowRule;
+    rule?: FlowRule;
+    type: string;
+};
+
+export type FlowEdge = {
+    bridge?: FlowBridge;
+    id: string;
+    set?: Array<FlowAssignment>;
+    to: string;
+    when: FlowCondition;
+};
+
+export type FlowEvent = {
+    at: string;
+    edge_id?: string;
+    from_node_id?: string;
+    kind: 'node_entered' | 'variable_set' | 'guard_tripped' | 'ended';
+    node_id?: string;
+    outcome?: string;
+    path?: Array<string>;
+    seq: number;
+    took_ms?: number;
+    turn_index?: number;
+    variables?: {
+        [key: string]: unknown;
+    };
+    via?: 'ai' | 'rule' | 'event' | 'always' | 'else' | 'global' | 'resume' | 'start';
+};
+
+export type FlowField = {
+    confirm?: boolean;
+    pattern?: string;
+    required?: boolean;
+    variable: string;
+};
+
+export type FlowGlobalSpec = {
+    cooldown_steps?: number;
+    description?: string;
+    exclude_nodes?: Array<string>;
+    resume?: string;
+    rule?: FlowRule;
+};
+
+export type FlowIssues = {
+    issues: Array<FlowValidationIssue>;
+};
+
+export type FlowLlmOverride = {
+    model_id: string;
+    temperature?: number;
+};
+
+export type FlowLimits = {
+    max_node_visits?: number;
+    max_transitions?: number;
+};
+
+export type FlowNode = {
+    args?: unknown;
+    edges?: Array<FlowEdge>;
+    fields?: Array<FlowField>;
+    global?: FlowGlobalSpec;
+    globals?: string;
+    id: string;
+    inherit_tools?: boolean;
+    kind: string;
+    llm?: FlowLlmOverride;
+    max_attempts?: number;
+    max_turns?: number;
+    mode?: string;
+    name: string;
+    on_enter?: FlowSay;
+    outcome?: string;
+    outputs?: {
+        [key: string]: string;
+    };
+    prompt?: string;
+    prompt_mode?: string;
+    say?: FlowSay;
+    set?: Array<FlowAssignment>;
+    speak_result?: boolean;
+    subflow_id?: string;
+    target?: FlowTarget;
+    tool?: string;
+    tools?: Array<string>;
+    ui?: unknown;
+    warm_summary?: boolean;
+};
+
+export type FlowRule = {
+    all?: Array<FlowRule>;
+    any?: Array<FlowRule>;
+    not?: FlowRule;
+    op?: string;
+    value?: unknown;
+    var?: string;
+};
+
+export type FlowSay = {
+    mode?: string;
+    text?: string;
+};
+
+export type FlowSpec = {
+    default_tools?: Array<string>;
+    entry_node_id: string;
+    fallback_node_id?: string;
+    global_prompt_mode?: string;
+    limits?: FlowLimits;
+    nodes: Array<FlowNode>;
+    schema: string;
+    subflows?: Array<FlowSubflow>;
+    ui?: unknown;
+    variables?: Array<FlowVariable>;
+};
+
+export type FlowSubflow = {
+    entry_node_id: string;
+    id: string;
+    name: string;
+    nodes: Array<FlowNode>;
+};
+
+export type FlowTarget = {
+    type: string;
+    value: string;
+};
+
+export type FlowValidationIssue = {
+    /**
+     * Issue code from the flow validator, for example unreachable_node
+     */
+    code: string;
+    edge_id?: string;
+    message: string;
+    node_id?: string;
+    /**
+     * JSON pointer into the flow
+     */
+    path: string;
+    severity: 'error' | 'warning';
+};
+
+export type FlowVariable = {
+    default?: unknown;
+    description?: string;
+    enum?: Array<string>;
+    input?: boolean;
+    name: string;
+    pii?: boolean;
+    required_input?: boolean;
+    type: string;
+};
+
 export type ForwardSource = {
     calls: number;
     e164: string;
     first_seen_at: string;
     last_seen_at: string;
+};
+
+export type FreeRule = {
+    key: string;
+    params?: {
+        [key: string]: unknown;
+    };
 };
 
 export type GuardrailBuiltIn = {
@@ -1970,6 +2490,15 @@ export type InstructionsDiff = {
     lines: Array<DiffLine>;
 };
 
+export type IntegrationProvider = {
+    auth: 'oauth' | 'api_key';
+    display_name: string;
+    id: string;
+    kind: 'google_calendar' | 'cal_com';
+    logo_key: string;
+    status: 'enabled' | 'disabled';
+};
+
 export type InterruptionProfile = {
     enabled?: boolean;
     false_interruption_ms?: number;
@@ -1993,6 +2522,10 @@ export type KnowledgeBase = {
     error?: string;
     id: string;
     name: string;
+    /**
+     * Open questions asked of agents that had this base attached
+     */
+    open_gap_count: number;
     ready_source_count: number;
     source_count: number;
     /**
@@ -2000,10 +2533,108 @@ export type KnowledgeBase = {
      */
     status: 'empty' | 'building' | 'ready' | 'failed';
     updated_at: string;
+    /**
+     * Agents whose published version or open draft attaches the base
+     */
+    used_by: Array<KnowledgeBaseUse>;
+};
+
+export type KnowledgeBaseUse = {
+    assistant_id: string;
+    /**
+     * true when the published version attaches the base; false when only the open draft does
+     */
+    live: boolean;
+    name: string;
+};
+
+export type KnowledgeDocument = {
+    /**
+     * Left out of the next build; for pages the choice survives a re-crawl
+     */
+    excluded: boolean;
+    fetched_at: string;
+    file_name?: string;
+    id: string;
+    source_id: string;
+    title: string;
+    url?: string;
+    words: number;
+};
+
+export type KnowledgeFaqEntry = {
+    /**
+     * Answer
+     */
+    a: string;
+    /**
+     * Question
+     */
+    q: string;
+};
+
+export type KnowledgeFaqSource = {
+    created_at: string;
+    /**
+     * Pages or files extracted
+     */
+    documents: number;
+    entries: Array<KnowledgeFaqEntry>;
+    /**
+     * Reason when status is failed
+     */
+    error?: string;
+    file_bytes?: number;
+    file_name?: string;
+    id: string;
+    kind: 'file' | 'website' | 'faq';
+    knowledge_base_id: string;
+    last_synced_at?: string;
+    max_depth?: number;
+    max_pages?: number;
+    name: string;
+    next_sync_at?: string;
+    /**
+     * Websites only
+     */
+    resync?: KnowledgeResync;
+    status: 'pending' | 'processing' | 'ready' | 'failed';
+    updated_at: string;
+    url?: string;
+};
+
+export type KnowledgeGap = {
+    answered_source_id?: string;
+    assistant_ids: Array<string>;
+    /**
+     * Up to 5 most recent calls
+     */
+    call_ids: Array<string>;
+    count: number;
+    decided_at?: string;
+    decided_by_name?: string;
+    /**
+     * Up to 3 questions as callers asked them
+     */
+    examples: Array<string>;
+    id: string;
+    /**
+     * Bases attached to the asking agents' versions when the question came up
+     */
+    knowledge_base_ids: Array<string>;
+    last_asked_at: string;
+    /**
+     * Normalised wording of the group
+     */
+    question: string;
+    state: 'open' | 'answered' | 'dismissed';
 };
 
 export type KnowledgeHit = {
     chunk_id: string;
+    /**
+     * Rank-fusion score scaled to 0..1: 1 means every search leg ranked the hit first. Compare hits within one response only
+     */
     score: number;
     /**
      * Document name or page address
@@ -2011,6 +2642,24 @@ export type KnowledgeHit = {
     source: string;
     text: string;
     topic: string;
+};
+
+export type KnowledgeLimits = {
+    /**
+     * Accepted file extensions, lower case without the dot
+     */
+    file_types: Array<string>;
+    max_bases: number;
+    max_depth: number;
+    max_faq_entries: number;
+    max_file_bytes: number;
+    max_pages_per_site: number;
+    max_sources_per_base: number;
+};
+
+export type KnowledgeResync = {
+    enabled: boolean;
+    interval_days?: number;
 };
 
 export type KnowledgeSearchResult = {
@@ -2035,12 +2684,17 @@ export type KnowledgeSource = {
     file_bytes?: number;
     file_name?: string;
     id: string;
-    kind: 'file' | 'website';
+    kind: 'file' | 'website' | 'faq';
     knowledge_base_id: string;
     last_synced_at?: string;
     max_depth?: number;
     max_pages?: number;
     name: string;
+    next_sync_at?: string;
+    /**
+     * Websites only
+     */
+    resync?: KnowledgeResync;
     status: 'pending' | 'processing' | 'ready' | 'failed';
     updated_at: string;
     url?: string;
@@ -2073,16 +2727,31 @@ export type LaunchAttestation = {
     text_version: string;
 };
 
+export type LaunchPrice = {
+    applies_to: Array<'call_minute'>;
+    /**
+     * This workspace's own end date
+     */
+    ends_at: string;
+    list_price_micro: number;
+    price_micro: number;
+    starts_at: string;
+};
+
 export type LedgerEntry = {
-    account: 'available' | 'held';
+    account: 'available' | 'held' | 'promo_credit' | 'pending_review' | 'bundle_credit';
     /**
      * Signed
      */
     amount_micro: number;
+    /**
+     * Balance of the account after this entry
+     */
+    balance_after_micro?: number;
     call_id?: string;
     created_at: string;
     id: string;
-    kind: 'top_up' | 'auto_top_up' | 'promo' | 'hold' | 'settle' | 'number_rental' | 'refund' | 'adjustment';
+    kind: 'top_up' | 'auto_top_up' | 'promo' | 'hold' | 'settle' | 'number_rental' | 'refund' | 'adjustment' | 'review_release' | 'bundle_purchase' | 'bundle_conversion';
     memo?: string;
     payment_id?: string;
     transaction_id: string;
@@ -2096,6 +2765,14 @@ export type LeftOutContact = {
 
 export type ListAreaCode = {
     data: Array<AreaCode>;
+};
+
+export type ListCalendarConnection = {
+    data: Array<CalendarConnection>;
+};
+
+export type ListCalendarResource = {
+    data: Array<CalendarResource>;
 };
 
 export type ListCallingRule = {
@@ -2116,6 +2793,14 @@ export type ListGuardrailBuiltIn = {
 
 export type ListHolidayCalendar = {
     data: Array<HolidayCalendar>;
+};
+
+export type ListIntegrationProvider = {
+    data: Array<IntegrationProvider>;
+};
+
+export type ListMcpServer = {
+    data: Array<McpServer>;
 };
 
 export type ListSpamAllow = {
@@ -2160,6 +2845,98 @@ export type LiveCallLine = {
 export type LiveCalls = {
     concurrency: Concurrency;
     data: Array<LiveCall>;
+};
+
+export type McpAuth = {
+    /**
+     * header only; not Host, Cookie, Content-Length or hop-by-hop headers
+     */
+    header_name?: string;
+    kind: 'none' | 'bearer' | 'header';
+    /**
+     * bearer and header
+     */
+    secret_id?: string;
+};
+
+export type McpServer = {
+    auth: McpAuth;
+    created_at: string;
+    error?: string;
+    id: string;
+    last_discovered_at?: string;
+    last_invocation?: ToolInvocationSummary;
+    name: string;
+    status: 'connected' | 'error' | 'needs_review';
+    tools: Array<McpTool>;
+    transport: 'streamable_http';
+    updated_at: string;
+    url: string;
+    used_by: Array<ToolUse>;
+};
+
+export type McpTool = {
+    approved_sha256?: string;
+    /**
+     * Our description; the only text the call-time model sees besides the input schema
+     */
+    description: string;
+    enabled: boolean;
+    id: string;
+    input_schema: {
+        [key: string]: unknown;
+    };
+    /**
+     * Drifted tools only: the upstream description and input schema that were approved
+     */
+    previous?: McpToolPrevious;
+    /**
+     * Hex hash of name, upstream description and input schema
+     */
+    sha256: string;
+    state: 'new' | 'approved' | 'drifted' | 'disabled';
+    /**
+     * The server's own text; returned to Owners and Admins only
+     */
+    upstream_description?: string;
+    upstream_name: string;
+    write: boolean;
+};
+
+export type McpToolDescription = {
+    description: string;
+};
+
+export type McpToolPrevious = {
+    input_schema: {
+        [key: string]: unknown;
+    };
+    upstream_description?: string;
+};
+
+export type MonthlySpendLimit = {
+    alert_at_pct: Array<number>;
+    budget_micro?: number;
+    enabled: boolean;
+    resets_at: string;
+    /**
+     * Settled charges of every kind plus open holds this month
+     */
+    used_micro: number;
+};
+
+export type MonthlyStatement = {
+    /**
+     * False for the current month (statement so far)
+     */
+    complete: boolean;
+    from: string;
+    month: string;
+    to: string;
+};
+
+export type MonthlyStatementList = {
+    data: Array<MonthlyStatement>;
 };
 
 export type Number = {
@@ -2355,6 +3132,14 @@ export type PageBlockedCaller = {
     next_cursor: string | null;
 };
 
+export type PageBooking = {
+    data: Array<Booking>;
+    /**
+     * Cursor for the next page; null on the last page
+     */
+    next_cursor: string | null;
+};
+
 export type PageCallEvent = {
     data: Array<CallEvent>;
     /**
@@ -2451,6 +3236,22 @@ export type PageKnowledgeBase = {
     next_cursor: string | null;
 };
 
+export type PageKnowledgeDocument = {
+    data: Array<KnowledgeDocument>;
+    /**
+     * Cursor for the next page; null on the last page
+     */
+    next_cursor: string | null;
+};
+
+export type PageKnowledgeGap = {
+    data: Array<KnowledgeGap>;
+    /**
+     * Cursor for the next page; null on the last page
+     */
+    next_cursor: string | null;
+};
+
 export type PageKnowledgeSource = {
     data: Array<KnowledgeSource>;
     /**
@@ -2469,6 +3270,14 @@ export type PageLedgerEntry = {
 
 export type PageNumber = {
     data: Array<Number>;
+    /**
+     * Cursor for the next page; null on the last page
+     */
+    next_cursor: string | null;
+};
+
+export type PagePayment = {
+    data: Array<Payment>;
     /**
      * Cursor for the next page; null on the last page
      */
@@ -2515,8 +3324,88 @@ export type PageWebhookEndpoint = {
     next_cursor: string | null;
 };
 
+export type PageWebhookMessage = {
+    data: Array<WebhookMessage>;
+    /**
+     * Cursor for the next page; null on the last page
+     */
+    next_cursor: string | null;
+};
+
+export type PageWorkspaceTool = {
+    data: Array<WorkspaceTool>;
+    /**
+     * Cursor for the next page; null on the last page
+     */
+    next_cursor: string | null;
+};
+
 export type PauseAssistantRequest = {
     reason?: string;
+};
+
+export type Payment = {
+    /**
+     * Credit bought
+     */
+    amount_micro: number;
+    bundle_key?: string;
+    card?: PaymentCard;
+    created_at: string;
+    credited_at?: string;
+    failure_reason_code?: string;
+    /**
+     * This payment set the workspace's first_paid_at
+     */
+    first_paid: boolean;
+    id: string;
+    kind: 'top_up' | 'auto_top_up' | 'bundle';
+    /**
+     * Charged before tax; equals amount_micro for top-ups
+     */
+    price_micro: number;
+    /**
+     * The payment provider's receipt
+     */
+    receipt_url?: string;
+    refunded_micro: number;
+    status: 'pending' | 'under_review' | 'succeeded' | 'failed' | 'canceled' | 'refunded' | 'disputed';
+    tax_micro?: number;
+    total_charged_micro?: number;
+};
+
+export type PaymentCard = {
+    brand: string;
+    last4: string;
+};
+
+export type PaymentMethod = {
+    brand: string;
+    created_at: string;
+    exp_month: number;
+    exp_year: number;
+    /**
+     * Payment provider id; opaque
+     */
+    id: string;
+    is_default: boolean;
+    last4: string;
+    used_by: Array<'auto_top_up' | 'bundle'>;
+};
+
+export type PaymentMethodList = {
+    data: Array<PaymentMethod>;
+};
+
+export type PlatformSpendCaps = {
+    /**
+     * Set by Larynth; shown when lower than the customer cap
+     */
+    operator_cap_micro?: number;
+    /**
+     * Verification tier cap; shown when lower than the customer cap
+     */
+    tier_cap_micro?: number;
 };
 
 export type PostCallSettings = {
@@ -2569,6 +3458,10 @@ export type Problem = {
      */
     campaign_ids?: Array<string>;
     /**
+     * Cap of that limit (billing.spend_limit_reached)
+     */
+    cap_micro?: number;
+    /**
      * Failed launch checks (campaign.preflight_failed)
      */
     checks?: Array<PreflightCheck>;
@@ -2584,9 +3477,29 @@ export type Problem = {
     errors?: Array<ErrorDetail>;
     instance?: string;
     /**
+     * Problems to fix (assistant.invalid)
+     */
+    issues?: Array<FlowValidationIssue>;
+    /**
+     * Maximum top-up (billing.top_up_above_maximum)
+     */
+    max_micro?: number;
+    /**
+     * Minimum top-up (billing.top_up_below_minimum)
+     */
+    min_micro?: number;
+    /**
      * The number is the opt-out line (numbers.in_use)
      */
     optout_line?: boolean;
+    /**
+     * Limit that was reached (billing.spend_limit_reached)
+     */
+    period?: 'daily' | 'monthly';
+    /**
+     * Machine-readable cause (tools.url_blocked, mcp.discovery_failed)
+     */
+    reason?: string;
     /**
      * Ways to re-authenticate, in preference order (auth.reauth_required)
      */
@@ -2610,6 +3523,14 @@ export type Problem = {
      */
     type: string;
     updated_by_name?: string;
+    /**
+     * What uses the card (billing.payment_method_in_use)
+     */
+    used_by?: Array<'auto_top_up' | 'bundle'>;
+    /**
+     * Spend counted against it (billing.spend_limit_reached)
+     */
+    used_micro?: number;
     [key: string]: unknown;
 };
 
@@ -2628,17 +3549,62 @@ export type PublishResult = {
 };
 
 export type Rate = {
+    /**
+     * premium_model only
+     */
+    ai_model_id?: string;
     currency: 'USD';
     direction?: 'inbound' | 'outbound' | 'web_test';
     effective_from: string;
     effective_to?: string;
     id: string;
-    kind: 'call_minute' | 'number_month' | 'transfer_minute';
+    kind: 'call_minute' | 'number_month' | 'number_month_toll_free' | 'transfer_minute' | 'forward_minute' | 'byo_sip_minute' | 'premium_model' | 'premium_voice' | 'branded_call' | 'branded_brand_month';
     mode?: 'cascade' | 's2s';
     /**
-     * Per minute for call_minute and transfer_minute, per month for number_month
+     * Per minute for the *_minute and premium kinds, per month for number_month*, branded_brand_month, per display for branded_call
      */
     price_micro: number;
+    /**
+     * premium_voice only
+     */
+    voice_id?: string;
+};
+
+export type RateCard = {
+    bundles_note_key: string;
+    free_rules: Array<FreeRule>;
+    groups: Array<RateCardGroup>;
+    /**
+     * Only while this workspace's launch window is open
+     */
+    launch_price?: LaunchPrice;
+    trial: TrialTerms;
+};
+
+export type RateCardGroup = {
+    key: 'calls' | 'numbers' | 'telephony' | 'free' | 'premium' | 'branded' | 'simulations';
+    lines: Array<RateCardLine>;
+};
+
+export type RateCardLine = {
+    key: string;
+    label_key: string;
+    /**
+     * Price before the launch price
+     */
+    list_price_micro?: number;
+    /**
+     * Premium lines only, from the catalog row
+     */
+    model_label?: string;
+    note_key?: string;
+    price_micro?: number;
+    /**
+     * Premium lines only, from the catalog row
+     */
+    provider_label?: string;
+    rounding: 'started_minute' | 'none';
+    unit: 'per_minute' | 'per_month' | 'per_display' | 'free' | 'at_cost';
 };
 
 export type Recording = {
@@ -2666,6 +3632,13 @@ export type RecordingPeaks = {
      * Normalised 0 to 1
      */
     points: Array<number>;
+};
+
+export type RefreshDraftToolsRequest = {
+    /**
+     * Workspace tool ids; unset refreshes all
+     */
+    tool_ids?: Array<string>;
 };
 
 export type RetryPolicy = {
@@ -2797,6 +3770,21 @@ export type SpamAllow = {
     note?: string;
 };
 
+export type SpendLimits = {
+    daily: DailySpendLimit;
+    monthly: MonthlySpendLimit;
+    platform: PlatformSpendCaps;
+    /**
+     * daily or monthly once that limit is reached, else null
+     */
+    reached: string | null;
+    revision: number;
+    /**
+     * Reaching a limit also stops answering inbound calls
+     */
+    stop_inbound: boolean;
+};
+
 export type StartCampaignRequest = {
     attest: LaunchAttestation;
 };
@@ -2807,13 +3795,61 @@ export type StateAudience = {
     state: string;
 };
 
+export type StatementLine = {
+    /**
+     * Signed
+     */
+    amount_micro: number;
+    /**
+     * Time of the line's last transaction
+     */
+    at: string;
+    /**
+     * Customer credit (available + held + promo + bundle) after this line
+     */
+    balance_after_micro: number;
+    id: string;
+    kind: 'free_credit' | 'top_up' | 'auto_top_up' | 'bundle_purchase' | 'bundle_conversion' | 'calls' | 'number_rental' | 'branded_fee' | 'refund' | 'dispute' | 'adjustment';
+    /**
+     * Day in the workspace time zone
+     */
+    local_date: string;
+    memo_key: string;
+    params: StatementLineParams;
+};
+
+export type StatementLinePage = {
+    /**
+     * Customer credit after the last line of the period
+     */
+    closing_balance_micro: number;
+    data: Array<StatementLine>;
+    /**
+     * Cursor for the next page; null on the last page
+     */
+    next_cursor: string | null;
+    /**
+     * Customer credit before the first line of the period
+     */
+    opening_balance_micro: number;
+};
+
+export type StatementLineParams = {
+    bundle_key?: string;
+    calls?: number;
+    e164?: string;
+    numbers?: number;
+    payment_id?: string;
+    reason?: string;
+};
+
 export type TagCount = {
     count: number;
     tag: string;
 };
 
 export type TestWebhookRequest = {
-    event_type?: 'call.started' | 'call.answered' | 'call.ended' | 'call.analyzed' | 'call.recording.ready' | 'call.transferred' | 'campaign.started' | 'campaign.paused' | 'campaign.completed' | 'campaign.contact.completed' | 'compliance.opt_out' | 'billing.balance.low' | 'billing.top_up.succeeded' | 'billing.auto_top_up.failed' | 'number.provisioned' | 'number.released' | 'notification.call.summary' | 'notification.campaign.completed' | 'notification.campaign.paused' | 'notification.billing.balance_low' | 'notification.billing.top_up_succeeded' | 'notification.billing.auto_top_up_failed' | 'notification.spending_request.created' | 'notification.number.provisioned' | 'notification.number.released' | 'notification.compliance.optout_alert';
+    event_type?: 'call.started' | 'call.answered' | 'call.ended' | 'call.analyzed' | 'call.recording.ready' | 'call.transferred' | 'campaign.started' | 'campaign.paused' | 'campaign.completed' | 'campaign.contact.completed' | 'compliance.opt_out' | 'billing.balance.low' | 'billing.top_up.succeeded' | 'billing.auto_top_up.failed' | 'number.provisioned' | 'number.released' | 'notification.call.summary' | 'notification.campaign.completed' | 'notification.campaign.paused' | 'notification.billing.balance_low' | 'notification.billing.top_up_succeeded' | 'notification.billing.auto_top_up_failed' | 'notification.spending_request.created' | 'notification.number.provisioned' | 'notification.number.released' | 'notification.compliance.optout_alert' | 'notification.inbox.callback_waiting' | 'notification.alert.missed_calls_spike' | 'notification.alert.transfers_failing' | 'notification.alert.tool_failing' | 'notification.agent.paused' | 'inbox.item.created' | 'inbox.item.cleared' | 'agent.published' | 'agent.paused' | 'agent.resumed' | 'call.flagged' | 'recording.deleted' | 'caller.blocked' | 'number.routing_changed' | 'notification.campaign.safeguard_paused' | 'notification.campaign.review_decided' | 'notification.verification.updated' | 'billing.spend_limit.alert' | 'billing.bundle.renewed' | 'billing.bundle.renewal_failed' | 'billing.payment.refunded' | 'number.rental_failed' | 'notification.billing.spend_limit_alert' | 'notification.billing.bundle_renewed' | 'notification.billing.bundle_renewal_failed' | 'notification.billing.payment_refunded' | 'notification.number.rental_failed' | 'booking.created' | 'booking.confirmed' | 'booking.cancelled' | 'booking.declined' | 'booking.failed' | 'integration.disconnected' | 'tool.disabled' | 'knowledge.gap.created';
 };
 
 export type TimelineCall = {
@@ -2863,6 +3899,34 @@ export type TimezoneShare = {
     tz: string;
 };
 
+export type ToolInvocationSummary = {
+    at: string;
+    outcome: 'ok' | 'error' | 'timeout' | 'blocked' | 'circuit_open' | 'canceled';
+    took_ms: number;
+};
+
+export type ToolResponseHandling = {
+    max_bytes?: number;
+    /**
+     * JSON pointers into the response passed to the model; unset passes the trimmed body
+     */
+    pick?: Array<string>;
+    template?: string;
+};
+
+export type ToolUse = {
+    assistant_id: string;
+    /**
+     * true when the published version uses it; false when only the open draft does
+     */
+    live: boolean;
+    name: string;
+    /**
+     * HTTP tools: the revision the version pins
+     */
+    pinned_revision?: number;
+};
+
 export type TransferDestination = {
     /**
      * When to use this destination; shown to the agent
@@ -2892,6 +3956,17 @@ export type TransferDestination = {
      * Warm only: what the agent says to the human before bridging. Variables {{summary}} and {{destination}}
      */
     whisper?: string;
+};
+
+export type TrialTerms = {
+    /**
+     * Call kinds free credit pays for
+     */
+    covers: Array<'web_test' | 'inbound'>;
+    /**
+     * Free credit granted at signup; never refundable, never expires
+     */
+    credit_micro: number;
 };
 
 export type TurnLatency = {
@@ -2951,6 +4026,11 @@ export type UpdateAssistantRequest = {
     description?: string;
     latency_target_ms?: number;
     name?: string;
+};
+
+export type UpdateCalendarConnectionRequest = {
+    defaults?: BookingDefaults;
+    label?: string;
 };
 
 export type UpdateCallRequest = {
@@ -3028,11 +4108,79 @@ export type UpdateKnowledgeBaseRequest = {
     name?: string;
 };
 
+export type UpdateKnowledgeDocumentRequest = {
+    excluded: boolean;
+};
+
+export type UpdateKnowledgeFaqSourceRequest = {
+    entries: Array<KnowledgeFaqEntry>;
+    name?: string;
+};
+
 export type UpdateWebhookRequest = {
     description?: string;
-    event_types?: Array<'call.started' | 'call.answered' | 'call.ended' | 'call.analyzed' | 'call.recording.ready' | 'call.transferred' | 'campaign.started' | 'campaign.paused' | 'campaign.completed' | 'campaign.contact.completed' | 'compliance.opt_out' | 'billing.balance.low' | 'billing.top_up.succeeded' | 'billing.auto_top_up.failed' | 'number.provisioned' | 'number.released' | 'notification.call.summary' | 'notification.campaign.completed' | 'notification.campaign.paused' | 'notification.billing.balance_low' | 'notification.billing.top_up_succeeded' | 'notification.billing.auto_top_up_failed' | 'notification.spending_request.created' | 'notification.number.provisioned' | 'notification.number.released' | 'notification.compliance.optout_alert' | 'notification.inbox.callback_waiting' | 'notification.alert.missed_calls_spike' | 'notification.alert.transfers_failing' | 'notification.alert.tool_failing' | 'notification.agent.paused' | 'inbox.item.created' | 'inbox.item.cleared' | 'agent.published' | 'agent.paused' | 'agent.resumed' | 'call.flagged' | 'recording.deleted' | 'caller.blocked' | 'number.routing_changed' | 'notification.campaign.safeguard_paused' | 'notification.campaign.review_decided' | 'notification.verification.updated'>;
+    event_types?: Array<'call.started' | 'call.answered' | 'call.ended' | 'call.analyzed' | 'call.recording.ready' | 'call.transferred' | 'campaign.started' | 'campaign.paused' | 'campaign.completed' | 'campaign.contact.completed' | 'compliance.opt_out' | 'billing.balance.low' | 'billing.top_up.succeeded' | 'billing.auto_top_up.failed' | 'number.provisioned' | 'number.released' | 'notification.call.summary' | 'notification.campaign.completed' | 'notification.campaign.paused' | 'notification.billing.balance_low' | 'notification.billing.top_up_succeeded' | 'notification.billing.auto_top_up_failed' | 'notification.spending_request.created' | 'notification.number.provisioned' | 'notification.number.released' | 'notification.compliance.optout_alert' | 'notification.inbox.callback_waiting' | 'notification.alert.missed_calls_spike' | 'notification.alert.transfers_failing' | 'notification.alert.tool_failing' | 'notification.agent.paused' | 'inbox.item.created' | 'inbox.item.cleared' | 'agent.published' | 'agent.paused' | 'agent.resumed' | 'call.flagged' | 'recording.deleted' | 'caller.blocked' | 'number.routing_changed' | 'notification.campaign.safeguard_paused' | 'notification.campaign.review_decided' | 'notification.verification.updated' | 'billing.spend_limit.alert' | 'billing.bundle.renewed' | 'billing.bundle.renewal_failed' | 'billing.payment.refunded' | 'number.rental_failed' | 'notification.billing.spend_limit_alert' | 'notification.billing.bundle_renewed' | 'notification.billing.bundle_renewal_failed' | 'notification.billing.payment_refunded' | 'notification.number.rental_failed' | 'booking.created' | 'booking.confirmed' | 'booking.cancelled' | 'booking.declined' | 'booking.failed' | 'integration.disconnected' | 'tool.disabled' | 'knowledge.gap.created'>;
     status?: 'active' | 'disabled';
     url?: string;
+};
+
+export type Usage = {
+    from: string;
+    group_by: 'category' | 'assistant' | 'day' | 'number';
+    /**
+     * Charges of the period read straight from the ledger; equals totals.amount_micro
+     */
+    ledger_check_micro: number;
+    rows: Array<UsageRow>;
+    timezone: string;
+    to: string;
+    totals: UsageRow;
+};
+
+export type UsageLines = {
+    agent_micro: number;
+    branded_micro: number;
+    bridged_micro: number;
+    byo_micro: number;
+    forward_micro: number;
+    number_micro: number;
+    premium_micro: number;
+    simulation_micro: number;
+};
+
+export type UsageRow = {
+    amount_micro: number;
+    billed_minutes: number;
+    calls: number;
+    /**
+     * Category, agent id, local date or number id
+     */
+    key: string;
+    /**
+     * Agent name (last name of deleted agents) or number
+     */
+    label?: string;
+    lines: UsageLines;
+    /**
+     * Units billed: billed minutes, numbers renewed, branded calls or brand months; set with unit
+     */
+    quantity?: number;
+    /**
+     * Price per unit when every line of the row has the same one; omitted when rates differ
+     */
+    rate_micro?: number;
+    /**
+     * Billing unit of the row; omitted when the row mixes units
+     */
+    unit?: 'minute' | 'number_month' | 'call' | 'brand_month';
+};
+
+export type ValidateAssistantFlowRequest = {
+    flow: FlowSpec;
+    /**
+     * Tools to check tool nodes against; unset uses the draft's tools
+     */
+    tools?: Array<AssistantTool>;
 };
 
 export type Vocabulary = {
@@ -3089,6 +4237,11 @@ export type WebhookEndpoint = {
     event_types: Array<string>;
     id: string;
     previous_secret_expires_at?: string;
+    /**
+     * Last 4 characters of the current signing secret
+     */
+    secret_hint?: string;
+    stats_24h: WebhookStats;
     status: 'active' | 'disabled';
     updated_at: string;
     url: string;
@@ -3106,13 +4259,562 @@ export type WebhookEndpointWithSecret = {
      * Standard Webhooks signing secret (whsec_<base64>); returned only once
      */
     secret: string;
+    /**
+     * Last 4 characters of the current signing secret
+     */
+    secret_hint?: string;
+    stats_24h: WebhookStats;
     status: 'active' | 'disabled';
     updated_at: string;
     url: string;
 };
 
-export type WebhookTestResult = {
+export type WebhookEventCatalogue = {
+    data: Array<WebhookEventType>;
+    retry_policy: WebhookRetryPolicy;
+};
+
+export type WebhookEventType = {
+    deprecated: boolean;
+    description_key: string;
+    group: 'calls' | 'agents' | 'campaigns' | 'compliance' | 'billing' | 'numbers' | 'inbox' | 'notifications';
+    label_key: string;
+    type: string;
+};
+
+export type WebhookMessage = {
+    attempts: number;
+    created_at: string;
+    /**
+     * Also the webhook-id header
+     */
     event_id: string;
+    event_type: string;
+    last_attempt_at?: string;
+    last_response_code?: number;
+    last_response_ms?: number;
+    next_attempt_at?: string;
+    redelivered_by_name?: string;
+    status: 'pending' | 'retrying' | 'delivered' | 'failed';
+    test: boolean;
+};
+
+export type WebhookReplay = {
+    count: number;
+    id: string;
+};
+
+export type WebhookRetryPolicy = {
+    disable_after_consecutive_failures: number;
+    max_attempts: number;
+    /**
+     * Delay before each retry
+     */
+    schedule_seconds: Array<number>;
+};
+
+export type WebhookStats = {
+    delivered: number;
+    failed: number;
+    retrying: number;
+};
+
+export type WebhookTestResult = {
+    /**
+     * The first attempt got a 2xx answer
+     */
+    delivered: boolean;
+    /**
+     * Why the first attempt failed without a response (timeout, connection, TLS)
+     */
+    error_code?: string;
+    event_id: string;
+    response_code?: number;
+    response_ms?: number;
+};
+
+export type WorkspaceTool = {
+    /**
+     * Closed object schema, at most 16 properties and depth 3
+     */
+    args_schema: {
+        [key: string]: unknown;
+    };
+    /**
+     * JSON body with {{arg}} and {{call.field}} placeholders
+     */
+    body_template?: {
+        [key: string]: unknown;
+    };
+    /**
+     * JSON pointer in the request to a call field the model cannot change: call_id, caller_e164, agent_e164, contact_id, campaign_id
+     */
+    bound?: {
+        [key: string]: string;
+    };
+    /**
+     * fast answers without a filler line; slow plays one filler first
+     */
+    class: 'fast' | 'slow';
+    created_at: string;
+    /**
+     * The user who created the tool; absent when an API key did
+     */
+    created_by?: string;
+    /**
+     * The API key that created the tool, when no user did
+     */
+    created_by_api_key_id?: string;
+    created_by_name?: string;
+    /**
+     * Shown to the model
+     */
+    description: string;
+    /**
+     * Spoken when the call fails
+     */
+    fallback_line?: string;
+    /**
+     * Fixed headers; Authorization and Cookie need secret_headers
+     */
+    headers?: {
+        [key: string]: string;
+    };
+    id: string;
+    kind: 'http';
+    last_invocation?: ToolInvocationSummary;
+    method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+    /**
+     * Name the model calls
+     */
+    name: string;
+    /**
+     * Query parameters with {{arg}} and {{call.field}} placeholders
+     */
+    query_template?: {
+        [key: string]: string;
+    };
+    response?: ToolResponseHandling;
+    revision: number;
+    /**
+     * Header name to secret id
+     */
+    secret_headers?: {
+        [key: string]: string;
+    };
+    status: 'ok' | 'failing' | 'disabled';
+    /**
+     * fast 300 to 1500, slow 500 to 10000
+     */
+    timeout_ms: number;
+    title: string;
+    updated_at: string;
+    /**
+     * https only, no user info; checked against private and reserved addresses
+     */
+    url: string;
+    used_by: Array<ToolUse>;
+    /**
+     * Changes data: never retried
+     */
+    write: boolean;
+};
+
+export type WorkspaceToolInput = {
+    /**
+     * Closed object schema, at most 16 properties and depth 3
+     */
+    args_schema: {
+        [key: string]: unknown;
+    };
+    /**
+     * JSON body with {{arg}} and {{call.field}} placeholders
+     */
+    body_template?: {
+        [key: string]: unknown;
+    };
+    /**
+     * JSON pointer in the request to a call field the model cannot change: call_id, caller_e164, agent_e164, contact_id, campaign_id
+     */
+    bound?: {
+        [key: string]: string;
+    };
+    /**
+     * fast answers without a filler line; slow plays one filler first
+     */
+    class: 'fast' | 'slow';
+    /**
+     * Shown to the model
+     */
+    description: string;
+    /**
+     * Spoken when the call fails
+     */
+    fallback_line?: string;
+    /**
+     * Fixed headers; Authorization and Cookie need secret_headers
+     */
+    headers?: {
+        [key: string]: string;
+    };
+    method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+    /**
+     * Name the model calls
+     */
+    name: string;
+    /**
+     * Query parameters with {{arg}} and {{call.field}} placeholders
+     */
+    query_template?: {
+        [key: string]: string;
+    };
+    response?: ToolResponseHandling;
+    /**
+     * Header name to secret id
+     */
+    secret_headers?: {
+        [key: string]: string;
+    };
+    /**
+     * fast 300 to 1500, slow 500 to 10000
+     */
+    timeout_ms: number;
+    title: string;
+    /**
+     * https only, no user info; checked against private and reserved addresses
+     */
+    url: string;
+    /**
+     * Changes data: never retried
+     */
+    write: boolean;
+};
+
+export type AssistantDraftWritable = {
+    /**
+     * Unset is single_prompt; flow needs mode cascade
+     */
+    agent_type?: 'single_prompt' | 'flow';
+    assistant_id: string;
+    call_handling?: CallHandling;
+    /**
+     * Set when phone menu navigation is on
+     */
+    call_limits?: CallLimits;
+    /**
+     * basics, instructions, voice, model, knowledge, tools, call_handling, disclosures, guardrails, post_call, advanced
+     */
+    changed_sections: Array<string>;
+    created_at: string;
+    created_by: string;
+    denoise?: boolean;
+    disclosure?: DisclosureSpec;
+    fillers?: Array<string>;
+    /**
+     * flow agents only; flow.ui is the canvas layout, stored as is (at most 200 KB)
+     */
+    flow?: FlowSpec;
+    greeting_text: string;
+    /**
+     * Owner-added guardrails; the built-in rules from listGuardrailRules always apply and cannot be removed
+     */
+    guardrails?: GuardrailsSpec;
+    id: string;
+    interruption_profile?: InterruptionProfile;
+    /**
+     * Flow problems; the draft saves anyway, errors block publish
+     */
+    issues: Array<FlowValidationIssue>;
+    /**
+     * Knowledge bases the assistant can search with the search_knowledge tool; each must be ready when the version is published
+     */
+    knowledge_base_ids?: Array<string>;
+    language: string;
+    /**
+     * Voice id per languages_extra entry, on the same tts model; unset uses the main voice when it speaks the language
+     */
+    language_voices?: {
+        [key: string]: string;
+    };
+    /**
+     * Languages the agent switches to when the caller speaks them; only languages the catalog marks switchable
+     */
+    languages_extra?: Array<string>;
+    latency?: LatencySettings;
+    llm_fallback_model_ids?: Array<string>;
+    /**
+     * Required for cascade
+     */
+    llm_model_id?: string;
+    llm_params?: {
+        [key: string]: unknown;
+    };
+    max_call_seconds?: number;
+    mode: 'cascade' | 's2s';
+    /**
+     * Post-call summary, data extraction and success evaluation
+     */
+    post_call?: PostCallSettings;
+    published_at?: string;
+    revision: number;
+    /**
+     * Required for s2s
+     */
+    s2s_model_id?: string;
+    s2s_params?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Required for cascade
+     */
+    stt_model_id?: string;
+    stt_params?: {
+        [key: string]: unknown;
+    };
+    system_prompt: string;
+    tools?: Array<AssistantToolWritable>;
+    /**
+     * What happens when nobody picks up a transfer
+     */
+    transfer_fallback?: 'take_message' | 'next_target' | 'end';
+    /**
+     * Required for cascade
+     */
+    tts_model_id?: string;
+    tts_params?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Required for cascade
+     */
+    tts_voice_id?: string;
+    /**
+     * Turn-taking preset from listTurnPresets; custom means turn_profile and interruption_profile hold the advanced values. Unset is balanced
+     */
+    turn_preset?: 'patient' | 'balanced' | 'snappy' | 'custom';
+    turn_profile?: TurnProfile;
+    updated_at: string;
+    updated_by_name?: string;
+    version: number;
+    vocabulary?: Vocabulary;
+    warnings: Array<DraftWarning>;
+};
+
+export type AssistantToolWritable = {
+    /**
+     * calendar: expands into the booking tools find_availability, hold_slot, confirm_booking, find_my_bookings, cancel_booking and reschedule_booking
+     */
+    calendar_tool?: CalendarToolConfig;
+    class: 'fast' | 'slow' | 'terminal';
+    config?: {
+        [key: string]: unknown;
+    };
+    description: string;
+    /**
+     * Transfer tools only (kind transfer, name transfer_call): where the agent may transfer the caller
+     */
+    destinations?: Array<TransferDestination>;
+    endpoint_ref?: string;
+    json_schema: {
+        [key: string]: unknown;
+    };
+    kind: 'end_call' | 'opt_out' | 'http_request' | 'transfer' | 'workspace_http' | 'mcp' | 'calendar';
+    /**
+     * mcp: an approved MCP tool
+     */
+    mcp_tool_id?: string;
+    name: string;
+    timeout_ms?: number;
+    /**
+     * workspace_http: the HTTP tool from the library
+     */
+    workspace_tool_id?: string;
+    /**
+     * workspace_http: pinned revision; set by the server when the draft is saved
+     */
+    workspace_tool_revision?: number;
+};
+
+export type AssistantVersionWritable = {
+    /**
+     * Unset is single_prompt; flow needs mode cascade
+     */
+    agent_type?: 'single_prompt' | 'flow';
+    assistant_id: string;
+    call_handling?: CallHandling;
+    created_at: string;
+    created_by: string;
+    denoise?: boolean;
+    disclosure?: DisclosureSpec;
+    fillers?: Array<string>;
+    /**
+     * flow agents only; flow.ui is the canvas layout, stored as is (at most 200 KB)
+     */
+    flow?: FlowSpec;
+    greeting_text: string;
+    /**
+     * Owner-added guardrails; the built-in rules from listGuardrailRules always apply and cannot be removed
+     */
+    guardrails?: GuardrailsSpec;
+    id: string;
+    interruption_profile?: InterruptionProfile;
+    /**
+     * Knowledge bases the assistant can search with the search_knowledge tool; each must be ready when the version is published
+     */
+    knowledge_base_ids?: Array<string>;
+    language: string;
+    /**
+     * Voice id per languages_extra entry, on the same tts model; unset uses the main voice when it speaks the language
+     */
+    language_voices?: {
+        [key: string]: string;
+    };
+    /**
+     * Languages the agent switches to when the caller speaks them; only languages the catalog marks switchable
+     */
+    languages_extra?: Array<string>;
+    latency?: LatencySettings;
+    llm_fallback_model_ids?: Array<string>;
+    /**
+     * Required for cascade
+     */
+    llm_model_id?: string;
+    llm_params?: {
+        [key: string]: unknown;
+    };
+    max_call_seconds?: number;
+    mode: 'cascade' | 's2s';
+    /**
+     * Post-call summary, data extraction and success evaluation
+     */
+    post_call?: PostCallSettings;
+    published_at?: string;
+    /**
+     * Required for s2s
+     */
+    s2s_model_id?: string;
+    s2s_params?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Required for cascade
+     */
+    stt_model_id?: string;
+    stt_params?: {
+        [key: string]: unknown;
+    };
+    system_prompt: string;
+    tools?: Array<AssistantToolWritable>;
+    /**
+     * What happens when nobody picks up a transfer
+     */
+    transfer_fallback?: 'take_message' | 'next_target' | 'end';
+    /**
+     * Required for cascade
+     */
+    tts_model_id?: string;
+    tts_params?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Required for cascade
+     */
+    tts_voice_id?: string;
+    /**
+     * Turn-taking preset from listTurnPresets; custom means turn_profile and interruption_profile hold the advanced values. Unset is balanced
+     */
+    turn_preset?: 'patient' | 'balanced' | 'snappy' | 'custom';
+    turn_profile?: TurnProfile;
+    version: number;
+    vocabulary?: Vocabulary;
+};
+
+export type AssistantVersionSpecWritable = {
+    /**
+     * Unset is single_prompt; flow needs mode cascade
+     */
+    agent_type?: 'single_prompt' | 'flow';
+    call_handling?: CallHandling;
+    denoise?: boolean;
+    disclosure?: DisclosureSpec;
+    fillers?: Array<string>;
+    /**
+     * flow agents only; flow.ui is the canvas layout, stored as is (at most 200 KB)
+     */
+    flow?: FlowSpec;
+    greeting_text: string;
+    /**
+     * Owner-added guardrails; the built-in rules from listGuardrailRules always apply and cannot be removed
+     */
+    guardrails?: GuardrailsSpec;
+    interruption_profile?: InterruptionProfile;
+    /**
+     * Knowledge bases the assistant can search with the search_knowledge tool; each must be ready when the version is published
+     */
+    knowledge_base_ids?: Array<string>;
+    language: string;
+    /**
+     * Voice id per languages_extra entry, on the same tts model; unset uses the main voice when it speaks the language
+     */
+    language_voices?: {
+        [key: string]: string;
+    };
+    /**
+     * Languages the agent switches to when the caller speaks them; only languages the catalog marks switchable
+     */
+    languages_extra?: Array<string>;
+    latency?: LatencySettings;
+    llm_fallback_model_ids?: Array<string>;
+    /**
+     * Required for cascade
+     */
+    llm_model_id?: string;
+    llm_params?: {
+        [key: string]: unknown;
+    };
+    max_call_seconds?: number;
+    mode: 'cascade' | 's2s';
+    /**
+     * Post-call summary, data extraction and success evaluation
+     */
+    post_call?: PostCallSettings;
+    /**
+     * Required for s2s
+     */
+    s2s_model_id?: string;
+    s2s_params?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Required for cascade
+     */
+    stt_model_id?: string;
+    stt_params?: {
+        [key: string]: unknown;
+    };
+    system_prompt: string;
+    tools?: Array<AssistantToolWritable>;
+    /**
+     * What happens when nobody picks up a transfer
+     */
+    transfer_fallback?: 'take_message' | 'next_target' | 'end';
+    /**
+     * Required for cascade
+     */
+    tts_model_id?: string;
+    tts_params?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Required for cascade
+     */
+    tts_voice_id?: string;
+    /**
+     * Turn-taking preset from listTurnPresets; custom means turn_profile and interruption_profile hold the advanced values. Unset is balanced
+     */
+    turn_preset?: 'patient' | 'balanced' | 'snappy' | 'custom';
+    turn_profile?: TurnProfile;
+    vocabulary?: Vocabulary;
 };
 
 export type NumberWritable = {
@@ -3211,6 +4913,14 @@ export type OrderNumbersResultWritable = {
     numbers: Array<NumberWritable>;
 };
 
+export type PageAssistantVersionWritable = {
+    data: Array<AssistantVersionWritable>;
+    /**
+     * Cursor for the next page; null on the last page
+     */
+    next_cursor: string | null;
+};
+
 export type PageNumberWritable = {
     data: Array<NumberWritable>;
     /**
@@ -3233,6 +4943,18 @@ export type RoutingPlanWritable = {
      */
     hours?: RoutingHours;
     open: RoutingTarget;
+};
+
+export type SaveAssistantDraftRequestWritable = {
+    spec: AssistantVersionSpecWritable;
+};
+
+export type ValidateAssistantFlowRequestWritable = {
+    flow: FlowSpec;
+    /**
+     * Tools to check tool nodes against; unset uses the draft's tools
+     */
+    tools?: Array<AssistantToolWritable>;
 };
 
 export type ListAreaCodesData = {
@@ -3733,7 +5455,7 @@ export type GetAssistantDraftResponses = {
 export type GetAssistantDraftResponse = GetAssistantDraftResponses[keyof GetAssistantDraftResponses];
 
 export type SaveAssistantDraftData = {
-    body: SaveAssistantDraftRequest;
+    body: SaveAssistantDraftRequestWritable;
     headers?: {
         /**
          * Required once a draft exists
@@ -3797,6 +5519,130 @@ export type SaveAssistantDraftResponses = {
 
 export type SaveAssistantDraftResponse = SaveAssistantDraftResponses[keyof SaveAssistantDraftResponses];
 
+export type RefreshDraftToolsData = {
+    body: RefreshDraftToolsRequest;
+    headers: {
+        'If-Match': string;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/assistants/{id}/draft/tools:refresh';
+};
+
+export type RefreshDraftToolsErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Precondition Required
+     */
+    428: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type RefreshDraftToolsError = RefreshDraftToolsErrors[keyof RefreshDraftToolsErrors];
+
+export type RefreshDraftToolsResponses = {
+    /**
+     * OK
+     */
+    200: AssistantDraft;
+};
+
+export type RefreshDraftToolsResponse = RefreshDraftToolsResponses[keyof RefreshDraftToolsResponses];
+
+export type ConvertAssistantDraftToFlowData = {
+    body?: never;
+    headers: {
+        'If-Match': string;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/assistants/{id}/draft:convert-to-flow';
+};
+
+export type ConvertAssistantDraftToFlowErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Precondition Required
+     */
+    428: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ConvertAssistantDraftToFlowError = ConvertAssistantDraftToFlowErrors[keyof ConvertAssistantDraftToFlowErrors];
+
+export type ConvertAssistantDraftToFlowResponses = {
+    /**
+     * OK
+     */
+    200: AssistantDraft;
+};
+
+export type ConvertAssistantDraftToFlowResponse = ConvertAssistantDraftToFlowResponses[keyof ConvertAssistantDraftToFlowResponses];
+
 export type DuplicateAssistantData = {
     body?: DuplicateAssistantRequest;
     path: {
@@ -3851,6 +5697,61 @@ export type DuplicateAssistantResponses = {
 };
 
 export type DuplicateAssistantResponse = DuplicateAssistantResponses[keyof DuplicateAssistantResponses];
+
+export type ValidateAssistantFlowData = {
+    body: ValidateAssistantFlowRequestWritable;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/assistants/{id}/flow:validate';
+};
+
+export type ValidateAssistantFlowErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ValidateAssistantFlowError = ValidateAssistantFlowErrors[keyof ValidateAssistantFlowErrors];
+
+export type ValidateAssistantFlowResponses = {
+    /**
+     * OK
+     */
+    200: FlowIssues;
+};
+
+export type ValidateAssistantFlowResponse = ValidateAssistantFlowResponses[keyof ValidateAssistantFlowResponses];
 
 export type PauseAssistantData = {
     body?: PauseAssistantRequest;
@@ -4138,7 +6039,7 @@ export type ListAssistantVersionsResponses = {
 export type ListAssistantVersionsResponse = ListAssistantVersionsResponses[keyof ListAssistantVersionsResponses];
 
 export type CreateAssistantVersionData = {
-    body: AssistantVersionSpec;
+    body: AssistantVersionSpecWritable;
     path: {
         id: string;
     };
@@ -4300,6 +6201,58 @@ export type CompareAssistantVersionsResponses = {
 };
 
 export type CompareAssistantVersionsResponse = CompareAssistantVersionsResponses[keyof CompareAssistantVersionsResponses];
+
+export type GetAssistantVersionFlowData = {
+    body?: never;
+    path: {
+        id: string;
+        v: number;
+    };
+    query?: never;
+    url: '/v1/assistants/{id}/versions/{v}/flow';
+};
+
+export type GetAssistantVersionFlowErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetAssistantVersionFlowError = GetAssistantVersionFlowErrors[keyof GetAssistantVersionFlowErrors];
+
+export type GetAssistantVersionFlowResponses = {
+    /**
+     * OK
+     */
+    200: FlowSpec;
+};
+
+export type GetAssistantVersionFlowResponse = GetAssistantVersionFlowResponses[keyof GetAssistantVersionFlowResponses];
 
 export type PublishAssistantVersionData = {
     body?: PublishAssistantVersionRequest;
@@ -4509,6 +6462,96 @@ export type GetBalanceResponses = {
 
 export type GetBalanceResponse = GetBalanceResponses[keyof GetBalanceResponses];
 
+export type GetBundleSubscriptionData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/billing/bundle-subscription';
+};
+
+export type GetBundleSubscriptionErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetBundleSubscriptionError = GetBundleSubscriptionErrors[keyof GetBundleSubscriptionErrors];
+
+export type GetBundleSubscriptionResponses = {
+    /**
+     * OK
+     */
+    200: BundleSubscription;
+};
+
+export type GetBundleSubscriptionResponse = GetBundleSubscriptionResponses[keyof GetBundleSubscriptionResponses];
+
+export type ListBundlesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/billing/bundles';
+};
+
+export type ListBundlesErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListBundlesError = ListBundlesErrors[keyof ListBundlesErrors];
+
+export type ListBundlesResponses = {
+    /**
+     * OK
+     */
+    200: BundleList;
+};
+
+export type ListBundlesResponse = ListBundlesResponses[keyof ListBundlesResponses];
+
 export type ListLedgerData = {
     body?: never;
     path?: never;
@@ -4521,8 +6564,8 @@ export type ListLedgerData = {
          * Opaque cursor from next_cursor of the previous page
          */
         after?: string;
-        kind?: 'top_up' | 'auto_top_up' | 'promo' | 'hold' | 'settle' | 'number_rental' | 'refund' | 'adjustment';
-        account?: 'available' | 'held';
+        kind?: 'top_up' | 'auto_top_up' | 'promo' | 'hold' | 'settle' | 'number_rental' | 'refund' | 'adjustment' | 'review_release' | 'bundle_purchase' | 'bundle_conversion';
+        account?: 'available' | 'held' | 'promo_credit' | 'pending_review' | 'bundle_credit';
         call_id?: string;
         since?: string;
         until?: string;
@@ -4568,6 +6611,152 @@ export type ListLedgerResponses = {
 
 export type ListLedgerResponse = ListLedgerResponses[keyof ListLedgerResponses];
 
+export type ListPaymentMethodsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/billing/payment-methods';
+};
+
+export type ListPaymentMethodsErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListPaymentMethodsError = ListPaymentMethodsErrors[keyof ListPaymentMethodsErrors];
+
+export type ListPaymentMethodsResponses = {
+    /**
+     * OK
+     */
+    200: PaymentMethodList;
+};
+
+export type ListPaymentMethodsResponse = ListPaymentMethodsResponses[keyof ListPaymentMethodsResponses];
+
+export type ListPaymentsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page size
+         */
+        limit?: number;
+        /**
+         * Opaque cursor from next_cursor of the previous page
+         */
+        after?: string;
+        kind?: 'top_up' | 'auto_top_up' | 'bundle';
+        status?: 'pending' | 'under_review' | 'succeeded' | 'failed' | 'canceled' | 'refunded' | 'disputed';
+    };
+    url: '/v1/billing/payments';
+};
+
+export type ListPaymentsErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListPaymentsError = ListPaymentsErrors[keyof ListPaymentsErrors];
+
+export type ListPaymentsResponses = {
+    /**
+     * OK
+     */
+    200: PagePayment;
+};
+
+export type ListPaymentsResponse = ListPaymentsResponses[keyof ListPaymentsResponses];
+
+export type GetRateCardData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/billing/rate-card';
+};
+
+export type GetRateCardErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetRateCardError = GetRateCardErrors[keyof GetRateCardErrors];
+
+export type GetRateCardResponses = {
+    /**
+     * OK
+     */
+    200: RateCard;
+};
+
+export type GetRateCardResponse = GetRateCardResponses[keyof GetRateCardResponses];
+
 export type ListRatesData = {
     body?: never;
     path?: never;
@@ -4612,6 +6801,323 @@ export type ListRatesResponses = {
 };
 
 export type ListRatesResponse = ListRatesResponses[keyof ListRatesResponses];
+
+export type GetSpendLimitsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/billing/spend-limits';
+};
+
+export type GetSpendLimitsErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetSpendLimitsError = GetSpendLimitsErrors[keyof GetSpendLimitsErrors];
+
+export type GetSpendLimitsResponses = {
+    /**
+     * OK
+     */
+    200: SpendLimits;
+};
+
+export type GetSpendLimitsResponse = GetSpendLimitsResponses[keyof GetSpendLimitsResponses];
+
+export type ListStatementLinesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        group?: 'top_ups' | 'free_credit' | 'calls' | 'numbers' | 'bundles' | 'adjustments';
+        /**
+         * First local day
+         */
+        from?: string;
+        /**
+         * Last local day
+         */
+        to?: string;
+        /**
+         * Page size
+         */
+        limit?: number;
+        /**
+         * Opaque cursor from next_cursor of the previous page
+         */
+        after?: string;
+    };
+    url: '/v1/billing/statement-lines';
+};
+
+export type ListStatementLinesErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListStatementLinesError = ListStatementLinesErrors[keyof ListStatementLinesErrors];
+
+export type ListStatementLinesResponses = {
+    /**
+     * OK
+     */
+    200: StatementLinePage;
+};
+
+export type ListStatementLinesResponse = ListStatementLinesResponses[keyof ListStatementLinesResponses];
+
+export type ListMonthlyStatementsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/billing/statements';
+};
+
+export type ListMonthlyStatementsErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListMonthlyStatementsError = ListMonthlyStatementsErrors[keyof ListMonthlyStatementsErrors];
+
+export type ListMonthlyStatementsResponses = {
+    /**
+     * OK
+     */
+    200: MonthlyStatementList;
+};
+
+export type ListMonthlyStatementsResponse = ListMonthlyStatementsResponses[keyof ListMonthlyStatementsResponses];
+
+export type GetMonthlyStatementData = {
+    body?: never;
+    path: {
+        /**
+         * YYYY-MM
+         */
+        month: string;
+    };
+    query?: never;
+    url: '/v1/billing/statements/{month}';
+};
+
+export type GetMonthlyStatementErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetMonthlyStatementError = GetMonthlyStatementErrors[keyof GetMonthlyStatementErrors];
+
+export type GetMonthlyStatementResponses = {
+    /**
+     * OK
+     */
+    200: DownloadLink;
+};
+
+export type GetMonthlyStatementResponse = GetMonthlyStatementResponses[keyof GetMonthlyStatementResponses];
+
+export type GetTopUpData = {
+    body?: never;
+    path: {
+        payment_id: string;
+    };
+    query?: never;
+    url: '/v1/billing/top-ups/{payment_id}';
+};
+
+export type GetTopUpErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetTopUpError = GetTopUpErrors[keyof GetTopUpErrors];
+
+export type GetTopUpResponses = {
+    /**
+     * OK
+     */
+    200: Payment;
+};
+
+export type GetTopUpResponse = GetTopUpResponses[keyof GetTopUpResponses];
+
+export type GetBillingUsageData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * First local day; at most 366 days before to
+         */
+        from?: string;
+        /**
+         * Last local day
+         */
+        to?: string;
+        /**
+         * Instead of from and to: this_month, last_30_days or month:YYYY-MM
+         */
+        period?: string;
+        group_by?: 'category' | 'assistant' | 'day' | 'number';
+    };
+    url: '/v1/billing/usage';
+};
+
+export type GetBillingUsageErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetBillingUsageError = GetBillingUsageErrors[keyof GetBillingUsageErrors];
+
+export type GetBillingUsageResponses = {
+    /**
+     * OK
+     */
+    200: Usage;
+};
+
+export type GetBillingUsageResponse = GetBillingUsageResponses[keyof GetBillingUsageResponses];
 
 export type ListBlockedCallersData = {
     body?: never;
@@ -4771,6 +7277,627 @@ export type DeleteBlockedCallerResponses = {
 };
 
 export type DeleteBlockedCallerResponse = DeleteBlockedCallerResponses[keyof DeleteBlockedCallerResponses];
+
+export type ListBookingsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page size
+         */
+        limit?: number;
+        /**
+         * Opaque cursor from next_cursor of the previous page
+         */
+        after?: string;
+        /**
+         * upcoming sorts by start time ascending, past descending
+         */
+        when?: 'upcoming' | 'past';
+        connection_id?: string;
+        assistant_id?: string;
+        call_id?: string;
+        status?: Array<'held' | 'pending_approval' | 'confirmed' | 'declined' | 'cancelled' | 'failed' | 'needs_check'>;
+        from?: string;
+        to?: string;
+    };
+    url: '/v1/bookings';
+};
+
+export type ListBookingsErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListBookingsError = ListBookingsErrors[keyof ListBookingsErrors];
+
+export type ListBookingsResponses = {
+    /**
+     * OK
+     */
+    200: PageBooking;
+};
+
+export type ListBookingsResponse = ListBookingsResponses[keyof ListBookingsResponses];
+
+export type GetBookingData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/bookings/{id}';
+};
+
+export type GetBookingErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetBookingError = GetBookingErrors[keyof GetBookingErrors];
+
+export type GetBookingResponses = {
+    /**
+     * OK
+     */
+    200: Booking;
+};
+
+export type GetBookingResponse = GetBookingResponses[keyof GetBookingResponses];
+
+export type CancelBookingData = {
+    body?: DecideBookingRequest;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/bookings/{id}:cancel';
+};
+
+export type CancelBookingErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+    /**
+     * Bad Gateway
+     */
+    502: Problem;
+};
+
+export type CancelBookingError = CancelBookingErrors[keyof CancelBookingErrors];
+
+export type CancelBookingResponses = {
+    /**
+     * OK
+     */
+    200: Booking;
+};
+
+export type CancelBookingResponse = CancelBookingResponses[keyof CancelBookingResponses];
+
+export type RetryBookingCheckData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/bookings/{id}:check';
+};
+
+export type RetryBookingCheckErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+    /**
+     * Bad Gateway
+     */
+    502: Problem;
+};
+
+export type RetryBookingCheckError = RetryBookingCheckErrors[keyof RetryBookingCheckErrors];
+
+export type RetryBookingCheckResponses = {
+    /**
+     * OK
+     */
+    200: Booking;
+};
+
+export type RetryBookingCheckResponse = RetryBookingCheckResponses[keyof RetryBookingCheckResponses];
+
+export type ConfirmBookingData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/bookings/{id}:confirm';
+};
+
+export type ConfirmBookingErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+    /**
+     * Bad Gateway
+     */
+    502: Problem;
+};
+
+export type ConfirmBookingError = ConfirmBookingErrors[keyof ConfirmBookingErrors];
+
+export type ConfirmBookingResponses = {
+    /**
+     * OK
+     */
+    200: Booking;
+};
+
+export type ConfirmBookingResponse = ConfirmBookingResponses[keyof ConfirmBookingResponses];
+
+export type DeclineBookingData = {
+    body?: DecideBookingRequest;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/bookings/{id}:decline';
+};
+
+export type DeclineBookingErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+    /**
+     * Bad Gateway
+     */
+    502: Problem;
+};
+
+export type DeclineBookingError = DeclineBookingErrors[keyof DeclineBookingErrors];
+
+export type DeclineBookingResponses = {
+    /**
+     * OK
+     */
+    200: Booking;
+};
+
+export type DeclineBookingResponse = DeclineBookingResponses[keyof DeclineBookingResponses];
+
+export type ListCalendarConnectionsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/calendar-connections';
+};
+
+export type ListCalendarConnectionsErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListCalendarConnectionsError = ListCalendarConnectionsErrors[keyof ListCalendarConnectionsErrors];
+
+export type ListCalendarConnectionsResponses = {
+    /**
+     * OK
+     */
+    200: ListCalendarConnection;
+};
+
+export type ListCalendarConnectionsResponse = ListCalendarConnectionsResponses[keyof ListCalendarConnectionsResponses];
+
+export type DeleteCalendarConnectionData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/calendar-connections/{id}';
+};
+
+export type DeleteCalendarConnectionErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+    /**
+     * Bad Gateway
+     */
+    502: Problem;
+};
+
+export type DeleteCalendarConnectionError = DeleteCalendarConnectionErrors[keyof DeleteCalendarConnectionErrors];
+
+export type DeleteCalendarConnectionResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type DeleteCalendarConnectionResponse = DeleteCalendarConnectionResponses[keyof DeleteCalendarConnectionResponses];
+
+export type GetCalendarConnectionData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/calendar-connections/{id}';
+};
+
+export type GetCalendarConnectionErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetCalendarConnectionError = GetCalendarConnectionErrors[keyof GetCalendarConnectionErrors];
+
+export type GetCalendarConnectionResponses = {
+    /**
+     * OK
+     */
+    200: CalendarConnection;
+};
+
+export type GetCalendarConnectionResponse = GetCalendarConnectionResponses[keyof GetCalendarConnectionResponses];
+
+export type UpdateCalendarConnectionData = {
+    body: UpdateCalendarConnectionRequest;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/calendar-connections/{id}';
+};
+
+export type UpdateCalendarConnectionErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type UpdateCalendarConnectionError = UpdateCalendarConnectionErrors[keyof UpdateCalendarConnectionErrors];
+
+export type UpdateCalendarConnectionResponses = {
+    /**
+     * OK
+     */
+    200: CalendarConnection;
+};
+
+export type UpdateCalendarConnectionResponse = UpdateCalendarConnectionResponses[keyof UpdateCalendarConnectionResponses];
+
+export type ListCalendarResourcesData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        /**
+         * Read the list from the provider again
+         */
+        refresh?: boolean;
+    };
+    url: '/v1/calendar-connections/{id}/resources';
+};
+
+export type ListCalendarResourcesErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+    /**
+     * Bad Gateway
+     */
+    502: Problem;
+};
+
+export type ListCalendarResourcesError = ListCalendarResourcesErrors[keyof ListCalendarResourcesErrors];
+
+export type ListCalendarResourcesResponses = {
+    /**
+     * OK
+     */
+    200: ListCalendarResource;
+};
+
+export type ListCalendarResourcesResponse = ListCalendarResourcesResponses[keyof ListCalendarResourcesResponses];
 
 export type ListCallsData = {
     body?: never;
@@ -5349,6 +8476,60 @@ export type ListCallEventsResponses = {
 };
 
 export type ListCallEventsResponse = ListCallEventsResponses[keyof ListCallEventsResponses];
+
+export type GetCallFlowEventsData = {
+    body?: never;
+    path: {
+        /**
+         * <cell>_<ULID>
+         */
+        call_id: string;
+    };
+    query?: never;
+    url: '/v1/calls/{call_id}/flow-events';
+};
+
+export type GetCallFlowEventsErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetCallFlowEventsError = GetCallFlowEventsErrors[keyof GetCallFlowEventsErrors];
+
+export type GetCallFlowEventsResponses = {
+    /**
+     * OK
+     */
+    200: CallFlowEvents;
+};
+
+export type GetCallFlowEventsResponse = GetCallFlowEventsResponses[keyof GetCallFlowEventsResponses];
 
 export type ListCallRecordingsData = {
     body?: never;
@@ -7259,7 +10440,7 @@ export type ListComplianceTextsData = {
     body?: never;
     path?: never;
     query?: {
-        kind?: 'disclosure_inbound' | 'disclosure_outbound' | 'optout_instruction' | 'recording_notice' | 'optout_ack' | 'voicemail_intro' | 'voicemail_optout' | 'screener_line' | 'unavailable' | 'goodbye' | 'inbound_ai_attestation' | 'voicemail_callback' | 'transcript_notice' | 'ca_preamble' | 'ca_preamble_decline_ack' | 'after_hours_message_mode' | 'optout_line_greeting' | 'optout_line_ack' | 'callback_check_code' | 'biometric_consent' | 'campaign_launch_attestation' | 'consent_attestation';
+        kind?: 'disclosure_inbound' | 'disclosure_outbound' | 'optout_instruction' | 'recording_notice' | 'optout_ack' | 'voicemail_intro' | 'voicemail_optout' | 'screener_line' | 'unavailable' | 'goodbye' | 'inbound_ai_attestation' | 'voicemail_callback' | 'transcript_notice' | 'ca_preamble' | 'ca_preamble_decline_ack' | 'after_hours_message_mode' | 'optout_line_greeting' | 'optout_line_ack' | 'callback_check_code' | 'biometric_consent' | 'campaign_launch_attestation' | 'consent_attestation' | 'callback_check_replay' | 'callback_check_goodbye' | 'callback_check_digits' | 'booking_instructions' | 'booking_fallback_line';
         language?: string;
     };
     url: '/v1/compliance/texts';
@@ -8045,6 +11226,51 @@ export type ListHolidayCalendarsResponses = {
 
 export type ListHolidayCalendarsResponse = ListHolidayCalendarsResponses[keyof ListHolidayCalendarsResponses];
 
+export type ListIntegrationProvidersData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/integration-providers';
+};
+
+export type ListIntegrationProvidersErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListIntegrationProvidersError = ListIntegrationProvidersErrors[keyof ListIntegrationProvidersErrors];
+
+export type ListIntegrationProvidersResponses = {
+    /**
+     * OK
+     */
+    200: ListIntegrationProvider;
+};
+
+export type ListIntegrationProvidersResponse = ListIntegrationProvidersResponses[keyof ListIntegrationProvidersResponses];
+
 export type ListKnowledgeBasesData = {
     body?: never;
     path?: never;
@@ -8309,6 +11535,62 @@ export type UpdateKnowledgeBaseResponses = {
 
 export type UpdateKnowledgeBaseResponse = UpdateKnowledgeBaseResponses[keyof UpdateKnowledgeBaseResponses];
 
+export type UpdateKnowledgeDocumentData = {
+    body: UpdateKnowledgeDocumentRequest;
+    path: {
+        id: string;
+        document_id: string;
+    };
+    query?: never;
+    url: '/v1/knowledge-bases/{id}/documents/{document_id}';
+};
+
+export type UpdateKnowledgeDocumentErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type UpdateKnowledgeDocumentError = UpdateKnowledgeDocumentErrors[keyof UpdateKnowledgeDocumentErrors];
+
+export type UpdateKnowledgeDocumentResponses = {
+    /**
+     * OK
+     */
+    200: KnowledgeDocument;
+};
+
+export type UpdateKnowledgeDocumentResponse = UpdateKnowledgeDocumentResponses[keyof UpdateKnowledgeDocumentResponses];
+
 export type SearchKnowledgeBaseData = {
     body?: never;
     path: {
@@ -8422,6 +11704,61 @@ export type ListKnowledgeSourcesResponses = {
 };
 
 export type ListKnowledgeSourcesResponse = ListKnowledgeSourcesResponses[keyof ListKnowledgeSourcesResponses];
+
+export type CreateKnowledgeFaqSourceData = {
+    body: CreateKnowledgeFaqSourceRequest;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/knowledge-bases/{id}/sources/faq';
+};
+
+export type CreateKnowledgeFaqSourceErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type CreateKnowledgeFaqSourceError = CreateKnowledgeFaqSourceErrors[keyof CreateKnowledgeFaqSourceErrors];
+
+export type CreateKnowledgeFaqSourceResponses = {
+    /**
+     * Created
+     */
+    201: KnowledgeFaqSource;
+};
+
+export type CreateKnowledgeFaqSourceResponse = CreateKnowledgeFaqSourceResponses[keyof CreateKnowledgeFaqSourceResponses];
 
 export type CreateKnowledgeFileSourceData = {
     body?: {
@@ -8650,6 +11987,182 @@ export type GetKnowledgeSourceResponses = {
 
 export type GetKnowledgeSourceResponse = GetKnowledgeSourceResponses[keyof GetKnowledgeSourceResponses];
 
+export type ListKnowledgeDocumentsData = {
+    body?: never;
+    path: {
+        id: string;
+        source_id: string;
+    };
+    query?: {
+        /**
+         * Page size
+         */
+        limit?: number;
+        /**
+         * Opaque cursor from next_cursor of the previous page
+         */
+        after?: string;
+    };
+    url: '/v1/knowledge-bases/{id}/sources/{source_id}/documents';
+};
+
+export type ListKnowledgeDocumentsErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListKnowledgeDocumentsError = ListKnowledgeDocumentsErrors[keyof ListKnowledgeDocumentsErrors];
+
+export type ListKnowledgeDocumentsResponses = {
+    /**
+     * OK
+     */
+    200: PageKnowledgeDocument;
+};
+
+export type ListKnowledgeDocumentsResponse = ListKnowledgeDocumentsResponses[keyof ListKnowledgeDocumentsResponses];
+
+export type GetKnowledgeFaqSourceData = {
+    body?: never;
+    path: {
+        id: string;
+        source_id: string;
+    };
+    query?: never;
+    url: '/v1/knowledge-bases/{id}/sources/{source_id}/faq';
+};
+
+export type GetKnowledgeFaqSourceErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetKnowledgeFaqSourceError = GetKnowledgeFaqSourceErrors[keyof GetKnowledgeFaqSourceErrors];
+
+export type GetKnowledgeFaqSourceResponses = {
+    /**
+     * OK
+     */
+    200: KnowledgeFaqSource;
+};
+
+export type GetKnowledgeFaqSourceResponse = GetKnowledgeFaqSourceResponses[keyof GetKnowledgeFaqSourceResponses];
+
+export type UpdateKnowledgeFaqSourceData = {
+    body: UpdateKnowledgeFaqSourceRequest;
+    headers: {
+        'If-Match': string;
+    };
+    path: {
+        id: string;
+        source_id: string;
+    };
+    query?: never;
+    url: '/v1/knowledge-bases/{id}/sources/{source_id}/faq';
+};
+
+export type UpdateKnowledgeFaqSourceErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Precondition Required
+     */
+    428: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type UpdateKnowledgeFaqSourceError = UpdateKnowledgeFaqSourceErrors[keyof UpdateKnowledgeFaqSourceErrors];
+
+export type UpdateKnowledgeFaqSourceResponses = {
+    /**
+     * OK
+     */
+    200: KnowledgeFaqSource;
+};
+
+export type UpdateKnowledgeFaqSourceResponse = UpdateKnowledgeFaqSourceResponses[keyof UpdateKnowledgeFaqSourceResponses];
+
 export type SyncKnowledgeSourceData = {
     body?: never;
     path: {
@@ -8706,6 +12219,221 @@ export type SyncKnowledgeSourceResponses = {
 
 export type SyncKnowledgeSourceResponse = SyncKnowledgeSourceResponses[keyof SyncKnowledgeSourceResponses];
 
+export type ListKnowledgeGapsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page size
+         */
+        limit?: number;
+        /**
+         * Opaque cursor from next_cursor of the previous page
+         */
+        after?: string;
+        /**
+         * Only questions asked of agents that had this base attached
+         */
+        knowledge_base_id?: string;
+        assistant_id?: string;
+        state?: 'open' | 'answered' | 'dismissed';
+    };
+    url: '/v1/knowledge-gaps';
+};
+
+export type ListKnowledgeGapsErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListKnowledgeGapsError = ListKnowledgeGapsErrors[keyof ListKnowledgeGapsErrors];
+
+export type ListKnowledgeGapsResponses = {
+    /**
+     * OK
+     */
+    200: PageKnowledgeGap;
+};
+
+export type ListKnowledgeGapsResponse = ListKnowledgeGapsResponses[keyof ListKnowledgeGapsResponses];
+
+export type AnswerKnowledgeGapData = {
+    body: AnswerKnowledgeGapRequest;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/knowledge-gaps/{id}:answer';
+};
+
+export type AnswerKnowledgeGapErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type AnswerKnowledgeGapError = AnswerKnowledgeGapErrors[keyof AnswerKnowledgeGapErrors];
+
+export type AnswerKnowledgeGapResponses = {
+    /**
+     * OK
+     */
+    200: KnowledgeGap;
+};
+
+export type AnswerKnowledgeGapResponse = AnswerKnowledgeGapResponses[keyof AnswerKnowledgeGapResponses];
+
+export type DismissKnowledgeGapData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/knowledge-gaps/{id}:dismiss';
+};
+
+export type DismissKnowledgeGapErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type DismissKnowledgeGapError = DismissKnowledgeGapErrors[keyof DismissKnowledgeGapErrors];
+
+export type DismissKnowledgeGapResponses = {
+    /**
+     * OK
+     */
+    200: KnowledgeGap;
+};
+
+export type DismissKnowledgeGapResponse = DismissKnowledgeGapResponses[keyof DismissKnowledgeGapResponses];
+
+export type GetKnowledgeLimitsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/knowledge/limits';
+};
+
+export type GetKnowledgeLimitsErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetKnowledgeLimitsError = GetKnowledgeLimitsErrors[keyof GetKnowledgeLimitsErrors];
+
+export type GetKnowledgeLimitsResponses = {
+    /**
+     * OK
+     */
+    200: KnowledgeLimits;
+};
+
+export type GetKnowledgeLimitsResponse = GetKnowledgeLimitsResponses[keyof GetKnowledgeLimitsResponses];
+
 export type ListLiveCallsData = {
     body?: never;
     path?: never;
@@ -8750,6 +12478,225 @@ export type ListLiveCallsResponses = {
 };
 
 export type ListLiveCallsResponse = ListLiveCallsResponses[keyof ListLiveCallsResponses];
+
+export type ListMcpServersData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/mcp-servers';
+};
+
+export type ListMcpServersErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListMcpServersError = ListMcpServersErrors[keyof ListMcpServersErrors];
+
+export type ListMcpServersResponses = {
+    /**
+     * OK
+     */
+    200: ListMcpServer;
+};
+
+export type ListMcpServersResponse = ListMcpServersResponses[keyof ListMcpServersResponses];
+
+export type DeleteMcpServerData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/mcp-servers/{id}';
+};
+
+export type DeleteMcpServerErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type DeleteMcpServerError = DeleteMcpServerErrors[keyof DeleteMcpServerErrors];
+
+export type DeleteMcpServerResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type DeleteMcpServerResponse = DeleteMcpServerResponses[keyof DeleteMcpServerResponses];
+
+export type SuggestMcpToolDescriptionData = {
+    body?: never;
+    path: {
+        id: string;
+        tool_id: string;
+    };
+    query?: never;
+    url: '/v1/mcp-servers/{id}/tools/{tool_id}:suggest-description';
+};
+
+export type SuggestMcpToolDescriptionErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+    /**
+     * Bad Gateway
+     */
+    502: Problem;
+};
+
+export type SuggestMcpToolDescriptionError = SuggestMcpToolDescriptionErrors[keyof SuggestMcpToolDescriptionErrors];
+
+export type SuggestMcpToolDescriptionResponses = {
+    /**
+     * OK
+     */
+    200: McpToolDescription;
+};
+
+export type SuggestMcpToolDescriptionResponse = SuggestMcpToolDescriptionResponses[keyof SuggestMcpToolDescriptionResponses];
+
+export type DiscoverMcpServerData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/mcp-servers/{id}:discover';
+};
+
+export type DiscoverMcpServerErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+    /**
+     * Bad Gateway
+     */
+    502: Problem;
+};
+
+export type DiscoverMcpServerError = DiscoverMcpServerErrors[keyof DiscoverMcpServerErrors];
+
+export type DiscoverMcpServerResponses = {
+    /**
+     * OK
+     */
+    200: McpServer;
+};
+
+export type DiscoverMcpServerResponse = DiscoverMcpServerResponses[keyof DiscoverMcpServerResponses];
 
 export type ListNumbersData = {
     body?: never;
@@ -8817,6 +12764,12 @@ export type ListNumbersResponse = ListNumbersResponses[keyof ListNumbersResponse
 
 export type OrderNumberData = {
     body: OrderNumberRequestWritable;
+    headers: {
+        /**
+         * Replays within 24 h return the stored response; the same key with a different body returns 409
+         */
+        'Idempotency-Key': string;
+    };
     path?: never;
     query?: never;
     url: '/v1/numbers';
@@ -9493,6 +13446,277 @@ export type DeleteSpamAllowResponses = {
 
 export type DeleteSpamAllowResponse = DeleteSpamAllowResponses[keyof DeleteSpamAllowResponses];
 
+export type ListWorkspaceToolsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page size
+         */
+        limit?: number;
+        /**
+         * Opaque cursor from next_cursor of the previous page
+         */
+        after?: string;
+    };
+    url: '/v1/tools';
+};
+
+export type ListWorkspaceToolsErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListWorkspaceToolsError = ListWorkspaceToolsErrors[keyof ListWorkspaceToolsErrors];
+
+export type ListWorkspaceToolsResponses = {
+    /**
+     * OK
+     */
+    200: PageWorkspaceTool;
+};
+
+export type ListWorkspaceToolsResponse = ListWorkspaceToolsResponses[keyof ListWorkspaceToolsResponses];
+
+export type CreateWorkspaceToolData = {
+    body: WorkspaceToolInput;
+    path?: never;
+    query?: never;
+    url: '/v1/tools';
+};
+
+export type CreateWorkspaceToolErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type CreateWorkspaceToolError = CreateWorkspaceToolErrors[keyof CreateWorkspaceToolErrors];
+
+export type CreateWorkspaceToolResponses = {
+    /**
+     * Created
+     */
+    201: WorkspaceTool;
+};
+
+export type CreateWorkspaceToolResponse = CreateWorkspaceToolResponses[keyof CreateWorkspaceToolResponses];
+
+export type DeleteWorkspaceToolData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/tools/{id}';
+};
+
+export type DeleteWorkspaceToolErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type DeleteWorkspaceToolError = DeleteWorkspaceToolErrors[keyof DeleteWorkspaceToolErrors];
+
+export type DeleteWorkspaceToolResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type DeleteWorkspaceToolResponse = DeleteWorkspaceToolResponses[keyof DeleteWorkspaceToolResponses];
+
+export type GetWorkspaceToolData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/tools/{id}';
+};
+
+export type GetWorkspaceToolErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetWorkspaceToolError = GetWorkspaceToolErrors[keyof GetWorkspaceToolErrors];
+
+export type GetWorkspaceToolResponses = {
+    /**
+     * OK
+     */
+    200: WorkspaceTool;
+};
+
+export type GetWorkspaceToolResponse = GetWorkspaceToolResponses[keyof GetWorkspaceToolResponses];
+
+export type UpdateWorkspaceToolData = {
+    body: WorkspaceToolInput;
+    headers: {
+        'If-Match': string;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/tools/{id}';
+};
+
+export type UpdateWorkspaceToolErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Precondition Required
+     */
+    428: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type UpdateWorkspaceToolError = UpdateWorkspaceToolErrors[keyof UpdateWorkspaceToolErrors];
+
+export type UpdateWorkspaceToolResponses = {
+    /**
+     * OK
+     */
+    200: WorkspaceTool;
+};
+
+export type UpdateWorkspaceToolResponse = UpdateWorkspaceToolResponses[keyof UpdateWorkspaceToolResponses];
+
 export type CreateIceServersData = {
     body?: never;
     path?: never;
@@ -9644,6 +13868,51 @@ export type CreateWebhookResponses = {
 };
 
 export type CreateWebhookResponse = CreateWebhookResponses[keyof CreateWebhookResponses];
+
+export type ListWebhookEventTypesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/webhooks/event-types';
+};
+
+export type ListWebhookEventTypesErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListWebhookEventTypesError = ListWebhookEventTypesErrors[keyof ListWebhookEventTypesErrors];
+
+export type ListWebhookEventTypesResponses = {
+    /**
+     * OK
+     */
+    200: WebhookEventCatalogue;
+};
+
+export type ListWebhookEventTypesResponse = ListWebhookEventTypesResponses[keyof ListWebhookEventTypesResponses];
 
 export type DeleteWebhookData = {
     body?: never;
@@ -9821,6 +14090,10 @@ export type ListWebhookDeliveriesData = {
          */
         after?: string;
         status?: 'succeeded' | 'failed' | 'retrying';
+        /**
+         * Attempts of one message
+         */
+        event_id?: string;
     };
     url: '/v1/webhooks/{id}/deliveries';
 };
@@ -9866,6 +14139,179 @@ export type ListWebhookDeliveriesResponses = {
 };
 
 export type ListWebhookDeliveriesResponse = ListWebhookDeliveriesResponses[keyof ListWebhookDeliveriesResponses];
+
+export type ListWebhookMessagesData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        /**
+         * Page size
+         */
+        limit?: number;
+        /**
+         * Opaque cursor from next_cursor of the previous page
+         */
+        after?: string;
+        status?: 'pending' | 'retrying' | 'delivered' | 'failed';
+        event_type?: string;
+    };
+    url: '/v1/webhooks/{id}/messages';
+};
+
+export type ListWebhookMessagesErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListWebhookMessagesError = ListWebhookMessagesErrors[keyof ListWebhookMessagesErrors];
+
+export type ListWebhookMessagesResponses = {
+    /**
+     * OK
+     */
+    200: PageWebhookMessage;
+};
+
+export type ListWebhookMessagesResponse = ListWebhookMessagesResponses[keyof ListWebhookMessagesResponses];
+
+export type RedeliverWebhookMessageData = {
+    body?: never;
+    path: {
+        id: string;
+        event_id: string;
+    };
+    query?: never;
+    url: '/v1/webhooks/{id}/messages/{event_id}/redeliver';
+};
+
+export type RedeliverWebhookMessageErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type RedeliverWebhookMessageError = RedeliverWebhookMessageErrors[keyof RedeliverWebhookMessageErrors];
+
+export type RedeliverWebhookMessageResponses = {
+    /**
+     * Accepted
+     */
+    202: WebhookMessage;
+};
+
+export type RedeliverWebhookMessageResponse = RedeliverWebhookMessageResponses[keyof RedeliverWebhookMessageResponses];
+
+export type CreateWebhookReplayData = {
+    body: CreateWebhookReplayRequest;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/webhooks/{id}/replays';
+};
+
+export type CreateWebhookReplayErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type CreateWebhookReplayError = CreateWebhookReplayErrors[keyof CreateWebhookReplayErrors];
+
+export type CreateWebhookReplayResponses = {
+    /**
+     * Accepted
+     */
+    202: WebhookReplay;
+};
+
+export type CreateWebhookReplayResponse = CreateWebhookReplayResponses[keyof CreateWebhookReplayResponses];
 
 export type RotateWebhookSecretData = {
     body?: never;
