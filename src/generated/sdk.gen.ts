@@ -2,7 +2,7 @@
 
 import { type Client, type ClientMeta, formDataBodySerializer, type Options as Options2, type RequestResult, type TDataShape } from './client';
 import { client } from './client.gen';
-import type { AddCampaignContactsData, AddCampaignContactsErrors, AddCampaignContactsResponses, AddSpamAllowData, AddSpamAllowErrors, AddSpamAllowResponses, ArchiveCampaignData, ArchiveCampaignErrors, ArchiveCampaignResponses, BulkUpdateContactsData, BulkUpdateContactsErrors, BulkUpdateContactsResponses, CompareAssistantVersionsData, CompareAssistantVersionsErrors, CompareAssistantVersionsResponses, CreateAssistantData, CreateAssistantErrors, CreateAssistantResponses, CreateAssistantVersionData, CreateAssistantVersionErrors, CreateAssistantVersionResponses, CreateBlockedCallerData, CreateBlockedCallerErrors, CreateBlockedCallerResponses, CreateCallData, CreateCallErrors, CreateCallResponses, CreateCampaignData, CreateCampaignErrors, CreateCampaignResponses, CreateConsentData, CreateConsentErrors, CreateConsentResponses, CreateContactData, CreateContactErrors, CreateContactImportData, CreateContactImportErrors, CreateContactImportResponses, CreateContactResponses, CreateDncData, CreateDncErrors, CreateDncImportData, CreateDncImportErrors, CreateDncImportResponses, CreateDncResponses, CreateIceServersData, CreateIceServersErrors, CreateIceServersResponses, CreateKnowledgeBaseData, CreateKnowledgeBaseErrors, CreateKnowledgeBaseResponses, CreateKnowledgeFileSourceData, CreateKnowledgeFileSourceErrors, CreateKnowledgeFileSourceResponses, CreateKnowledgeWebsiteSourceData, CreateKnowledgeWebsiteSourceErrors, CreateKnowledgeWebsiteSourceResponses, CreateRevocationData, CreateRevocationErrors, CreateRevocationResponses, CreateWebCallData, CreateWebCallErrors, CreateWebCallResponses, CreateWebhookData, CreateWebhookErrors, CreateWebhookResponses, DeleteAssistantData, DeleteAssistantErrors, DeleteAssistantResponses, DeleteBlockedCallerData, DeleteBlockedCallerErrors, DeleteBlockedCallerResponses, DeleteContactData, DeleteContactErrors, DeleteContactResponses, DeleteKnowledgeBaseData, DeleteKnowledgeBaseErrors, DeleteKnowledgeBaseResponses, DeleteKnowledgeSourceData, DeleteKnowledgeSourceErrors, DeleteKnowledgeSourceResponses, DeleteSpamAllowData, DeleteSpamAllowErrors, DeleteSpamAllowResponses, DeleteWebhookData, DeleteWebhookErrors, DeleteWebhookResponses, DiscardAssistantDraftData, DiscardAssistantDraftErrors, DiscardAssistantDraftResponses, DuplicateAssistantData, DuplicateAssistantErrors, DuplicateAssistantResponses, DuplicateCampaignData, DuplicateCampaignErrors, DuplicateCampaignResponses, EndCallData, EndCallErrors, EndCallResponses, EstimateCampaignData, EstimateCampaignErrors, EstimateCampaignResponses, GetAssistantData, GetAssistantDraftData, GetAssistantDraftErrors, GetAssistantDraftResponses, GetAssistantErrors, GetAssistantResponses, GetAssistantVersionData, GetAssistantVersionErrors, GetAssistantVersionResponses, GetAutoTopUpData, GetAutoTopUpErrors, GetAutoTopUpResponses, GetBalanceData, GetBalanceErrors, GetBalanceResponses, GetCallAnalysisData, GetCallAnalysisErrors, GetCallAnalysisResponses, GetCallConversationData, GetCallConversationErrors, GetCallConversationResponses, GetCallData, GetCallErrors, GetCallingRulesData, GetCallingRulesErrors, GetCallingRulesResponses, GetCallResponses, GetCallsSummaryData, GetCallsSummaryErrors, GetCallsSummaryResponses, GetCampaignData, GetCampaignErrors, GetCampaignPreflightData, GetCampaignPreflightErrors, GetCampaignPreflightResponses, GetCampaignResponses, GetCampaignStatsData, GetCampaignStatsErrors, GetCampaignStatsResponses, GetContactData, GetContactErrors, GetContactImportData, GetContactImportErrors, GetContactImportResponses, GetContactResponses, GetContactTimelineData, GetContactTimelineErrors, GetContactTimelineResponses, GetDncImportData, GetDncImportErrors, GetDncImportResponses, GetKnowledgeBaseData, GetKnowledgeBaseErrors, GetKnowledgeBaseResponses, GetKnowledgeSourceData, GetKnowledgeSourceErrors, GetKnowledgeSourceResponses, GetNumberData, GetNumberErrors, GetNumberResponses, GetRecordingAudioData, GetRecordingAudioErrors, GetRecordingAudioResponses, GetRecordingPeaksData, GetRecordingPeaksErrors, GetRecordingPeaksResponses, GetScriptCheckData, GetScriptCheckErrors, GetScriptCheckResponses, GetWebhookData, GetWebhookErrors, GetWebhookResponses, ListAreaCodesData, ListAreaCodesErrors, ListAreaCodesResponses, ListAssistantPublishesData, ListAssistantPublishesErrors, ListAssistantPublishesResponses, ListAssistantsData, ListAssistantsErrors, ListAssistantsResponses, ListAssistantVersionsData, ListAssistantVersionsErrors, ListAssistantVersionsResponses, ListBlockedCallersData, ListBlockedCallersErrors, ListBlockedCallersResponses, ListCallEventsData, ListCallEventsErrors, ListCallEventsResponses, ListCallRecordingsData, ListCallRecordingsErrors, ListCallRecordingsResponses, ListCallsData, ListCallsErrors, ListCallsResponses, ListCallTurnsData, ListCallTurnsErrors, ListCallTurnsResponses, ListCampaignContactsData, ListCampaignContactsErrors, ListCampaignContactsResponses, ListCampaignEventsData, ListCampaignEventsErrors, ListCampaignEventsResponses, ListCampaignsData, ListCampaignsErrors, ListCampaignsResponses, ListCatalogLanguagesData, ListCatalogLanguagesErrors, ListCatalogLanguagesResponses, ListCatalogModelsData, ListCatalogModelsErrors, ListCatalogModelsResponses, ListCatalogVoicesData, ListCatalogVoicesErrors, ListCatalogVoicesResponses, ListComplianceDecisionsData, ListComplianceDecisionsErrors, ListComplianceDecisionsResponses, ListComplianceTextsData, ListComplianceTextsErrors, ListComplianceTextsResponses, ListConsentsData, ListConsentsErrors, ListConsentsResponses, ListContactDncChecksData, ListContactDncChecksErrors, ListContactDncChecksResponses, ListContactImportsData, ListContactImportsErrors, ListContactImportsResponses, ListContactsData, ListContactsErrors, ListContactsResponses, ListContactTagsData, ListContactTagsErrors, ListContactTagsResponses, ListDncData, ListDncErrors, ListDncResponses, ListGuardrailRulesData, ListGuardrailRulesErrors, ListGuardrailRulesResponses, ListHolidayCalendarsData, ListHolidayCalendarsErrors, ListHolidayCalendarsResponses, ListKnowledgeBasesData, ListKnowledgeBasesErrors, ListKnowledgeBasesResponses, ListKnowledgeSourcesData, ListKnowledgeSourcesErrors, ListKnowledgeSourcesResponses, ListLedgerData, ListLedgerErrors, ListLedgerResponses, ListLiveCallsData, ListLiveCallsErrors, ListLiveCallsResponses, ListNumbersData, ListNumbersErrors, ListNumbersResponses, ListRatesData, ListRatesErrors, ListRatesResponses, ListRevocationsData, ListRevocationsErrors, ListRevocationsResponses, ListSameCallerCallsData, ListSameCallerCallsErrors, ListSameCallerCallsResponses, ListSpamAllowListData, ListSpamAllowListErrors, ListSpamAllowListResponses, ListTurnPresetsData, ListTurnPresetsErrors, ListTurnPresetsResponses, ListWebhookDeliveriesData, ListWebhookDeliveriesErrors, ListWebhookDeliveriesResponses, ListWebhooksData, ListWebhooksErrors, ListWebhooksResponses, OrderNumberData, OrderNumberErrors, OrderNumberResponses, OrderNumbersData, OrderNumbersErrors, OrderNumbersResponses, PauseAssistantData, PauseAssistantErrors, PauseAssistantResponses, PauseCampaignData, PauseCampaignErrors, PauseCampaignResponses, PreflightCampaignDraftData, PreflightCampaignDraftErrors, PreflightCampaignDraftResponses, PreviewCampaignAudienceData, PreviewCampaignAudienceErrors, PreviewCampaignAudienceResponses, PublishAssistantVersionData, PublishAssistantVersionErrors, PublishAssistantVersionResponses, ReleaseNumberData, ReleaseNumberErrors, ReleaseNumberResponses, RestoreAssistantData, RestoreAssistantErrors, RestoreAssistantResponses, ResumeAssistantData, ResumeAssistantErrors, ResumeAssistantResponses, ResumeCampaignData, ResumeCampaignErrors, ResumeCampaignResponses, RotateWebhookSecretData, RotateWebhookSecretErrors, RotateWebhookSecretResponses, SaveAssistantDraftData, SaveAssistantDraftErrors, SaveAssistantDraftResponses, SearchAvailableNumbersData, SearchAvailableNumbersErrors, SearchAvailableNumbersResponses, SearchKnowledgeBaseData, SearchKnowledgeBaseErrors, SearchKnowledgeBaseResponses, StartCampaignData, StartCampaignErrors, StartCampaignResponses, SyncKnowledgeSourceData, SyncKnowledgeSourceErrors, SyncKnowledgeSourceResponses, TestWebhookData, TestWebhookErrors, TestWebhookResponses, UpdateAssistantData, UpdateAssistantErrors, UpdateAssistantResponses, UpdateCallData, UpdateCallErrors, UpdateCallResponses, UpdateCampaignData, UpdateCampaignErrors, UpdateCampaignResponses, UpdateContactData, UpdateContactErrors, UpdateContactResponses, UpdateKnowledgeBaseData, UpdateKnowledgeBaseErrors, UpdateKnowledgeBaseResponses, UpdateNumberData, UpdateNumberErrors, UpdateNumberResponses, UpdateNumberRoutingData, UpdateNumberRoutingErrors, UpdateNumberRoutingResponses, UpdateWebhookData, UpdateWebhookErrors, UpdateWebhookResponses } from './types.gen';
+import type { AddCampaignContactsData, AddCampaignContactsErrors, AddCampaignContactsResponses, AddSpamAllowData, AddSpamAllowErrors, AddSpamAllowResponses, AnswerKnowledgeGapData, AnswerKnowledgeGapErrors, AnswerKnowledgeGapResponses, ArchiveCampaignData, ArchiveCampaignErrors, ArchiveCampaignResponses, BulkUpdateContactsData, BulkUpdateContactsErrors, BulkUpdateContactsResponses, CancelBookingData, CancelBookingErrors, CancelBookingResponses, CompareAssistantVersionsData, CompareAssistantVersionsErrors, CompareAssistantVersionsResponses, ConfirmBookingData, ConfirmBookingErrors, ConfirmBookingResponses, ConvertAssistantDraftToFlowData, ConvertAssistantDraftToFlowErrors, ConvertAssistantDraftToFlowResponses, CreateAssistantData, CreateAssistantErrors, CreateAssistantResponses, CreateAssistantVersionData, CreateAssistantVersionErrors, CreateAssistantVersionResponses, CreateBlockedCallerData, CreateBlockedCallerErrors, CreateBlockedCallerResponses, CreateCallData, CreateCallErrors, CreateCallResponses, CreateCampaignData, CreateCampaignErrors, CreateCampaignResponses, CreateConsentData, CreateConsentErrors, CreateConsentResponses, CreateContactData, CreateContactErrors, CreateContactImportData, CreateContactImportErrors, CreateContactImportResponses, CreateContactResponses, CreateDncData, CreateDncErrors, CreateDncImportData, CreateDncImportErrors, CreateDncImportResponses, CreateDncResponses, CreateIceServersData, CreateIceServersErrors, CreateIceServersResponses, CreateKnowledgeBaseData, CreateKnowledgeBaseErrors, CreateKnowledgeBaseResponses, CreateKnowledgeFaqSourceData, CreateKnowledgeFaqSourceErrors, CreateKnowledgeFaqSourceResponses, CreateKnowledgeFileSourceData, CreateKnowledgeFileSourceErrors, CreateKnowledgeFileSourceResponses, CreateKnowledgeWebsiteSourceData, CreateKnowledgeWebsiteSourceErrors, CreateKnowledgeWebsiteSourceResponses, CreateRevocationData, CreateRevocationErrors, CreateRevocationResponses, CreateWebCallData, CreateWebCallErrors, CreateWebCallResponses, CreateWebhookData, CreateWebhookErrors, CreateWebhookReplayData, CreateWebhookReplayErrors, CreateWebhookReplayResponses, CreateWebhookResponses, CreateWorkspaceToolData, CreateWorkspaceToolErrors, CreateWorkspaceToolResponses, DeclineBookingData, DeclineBookingErrors, DeclineBookingResponses, DeleteAssistantData, DeleteAssistantErrors, DeleteAssistantResponses, DeleteBlockedCallerData, DeleteBlockedCallerErrors, DeleteBlockedCallerResponses, DeleteCalendarConnectionData, DeleteCalendarConnectionErrors, DeleteCalendarConnectionResponses, DeleteContactData, DeleteContactErrors, DeleteContactResponses, DeleteKnowledgeBaseData, DeleteKnowledgeBaseErrors, DeleteKnowledgeBaseResponses, DeleteKnowledgeSourceData, DeleteKnowledgeSourceErrors, DeleteKnowledgeSourceResponses, DeleteMcpServerData, DeleteMcpServerErrors, DeleteMcpServerResponses, DeleteSpamAllowData, DeleteSpamAllowErrors, DeleteSpamAllowResponses, DeleteWebhookData, DeleteWebhookErrors, DeleteWebhookResponses, DeleteWorkspaceToolData, DeleteWorkspaceToolErrors, DeleteWorkspaceToolResponses, DiscardAssistantDraftData, DiscardAssistantDraftErrors, DiscardAssistantDraftResponses, DiscoverMcpServerData, DiscoverMcpServerErrors, DiscoverMcpServerResponses, DismissKnowledgeGapData, DismissKnowledgeGapErrors, DismissKnowledgeGapResponses, DuplicateAssistantData, DuplicateAssistantErrors, DuplicateAssistantResponses, DuplicateCampaignData, DuplicateCampaignErrors, DuplicateCampaignResponses, EndCallData, EndCallErrors, EndCallResponses, EstimateCampaignData, EstimateCampaignErrors, EstimateCampaignResponses, GetAssistantData, GetAssistantDraftData, GetAssistantDraftErrors, GetAssistantDraftResponses, GetAssistantErrors, GetAssistantResponses, GetAssistantVersionData, GetAssistantVersionErrors, GetAssistantVersionFlowData, GetAssistantVersionFlowErrors, GetAssistantVersionFlowResponses, GetAssistantVersionResponses, GetAutoTopUpData, GetAutoTopUpErrors, GetAutoTopUpResponses, GetBalanceData, GetBalanceErrors, GetBalanceResponses, GetBillingUsageData, GetBillingUsageErrors, GetBillingUsageResponses, GetBookingData, GetBookingErrors, GetBookingResponses, GetBundleSubscriptionData, GetBundleSubscriptionErrors, GetBundleSubscriptionResponses, GetCalendarConnectionData, GetCalendarConnectionErrors, GetCalendarConnectionResponses, GetCallAnalysisData, GetCallAnalysisErrors, GetCallAnalysisResponses, GetCallConversationData, GetCallConversationErrors, GetCallConversationResponses, GetCallData, GetCallErrors, GetCallFlowEventsData, GetCallFlowEventsErrors, GetCallFlowEventsResponses, GetCallingRulesData, GetCallingRulesErrors, GetCallingRulesResponses, GetCallResponses, GetCallsSummaryData, GetCallsSummaryErrors, GetCallsSummaryResponses, GetCampaignData, GetCampaignErrors, GetCampaignPreflightData, GetCampaignPreflightErrors, GetCampaignPreflightResponses, GetCampaignResponses, GetCampaignStatsData, GetCampaignStatsErrors, GetCampaignStatsResponses, GetContactData, GetContactErrors, GetContactImportData, GetContactImportErrors, GetContactImportResponses, GetContactResponses, GetContactTimelineData, GetContactTimelineErrors, GetContactTimelineResponses, GetDncImportData, GetDncImportErrors, GetDncImportResponses, GetKnowledgeBaseData, GetKnowledgeBaseErrors, GetKnowledgeBaseResponses, GetKnowledgeFaqSourceData, GetKnowledgeFaqSourceErrors, GetKnowledgeFaqSourceResponses, GetKnowledgeLimitsData, GetKnowledgeLimitsErrors, GetKnowledgeLimitsResponses, GetKnowledgeSourceData, GetKnowledgeSourceErrors, GetKnowledgeSourceResponses, GetMonthlyStatementData, GetMonthlyStatementErrors, GetMonthlyStatementResponses, GetNumberData, GetNumberErrors, GetNumberResponses, GetRateCardData, GetRateCardErrors, GetRateCardResponses, GetRecordingAudioData, GetRecordingAudioErrors, GetRecordingAudioResponses, GetRecordingPeaksData, GetRecordingPeaksErrors, GetRecordingPeaksResponses, GetScriptCheckData, GetScriptCheckErrors, GetScriptCheckResponses, GetSpendLimitsData, GetSpendLimitsErrors, GetSpendLimitsResponses, GetTopUpData, GetTopUpErrors, GetTopUpResponses, GetWebhookData, GetWebhookErrors, GetWebhookResponses, GetWorkspaceToolData, GetWorkspaceToolErrors, GetWorkspaceToolResponses, ListAreaCodesData, ListAreaCodesErrors, ListAreaCodesResponses, ListAssistantPublishesData, ListAssistantPublishesErrors, ListAssistantPublishesResponses, ListAssistantsData, ListAssistantsErrors, ListAssistantsResponses, ListAssistantVersionsData, ListAssistantVersionsErrors, ListAssistantVersionsResponses, ListBlockedCallersData, ListBlockedCallersErrors, ListBlockedCallersResponses, ListBookingsData, ListBookingsErrors, ListBookingsResponses, ListBundlesData, ListBundlesErrors, ListBundlesResponses, ListCalendarConnectionsData, ListCalendarConnectionsErrors, ListCalendarConnectionsResponses, ListCalendarResourcesData, ListCalendarResourcesErrors, ListCalendarResourcesResponses, ListCallEventsData, ListCallEventsErrors, ListCallEventsResponses, ListCallRecordingsData, ListCallRecordingsErrors, ListCallRecordingsResponses, ListCallsData, ListCallsErrors, ListCallsResponses, ListCallTurnsData, ListCallTurnsErrors, ListCallTurnsResponses, ListCampaignContactsData, ListCampaignContactsErrors, ListCampaignContactsResponses, ListCampaignEventsData, ListCampaignEventsErrors, ListCampaignEventsResponses, ListCampaignsData, ListCampaignsErrors, ListCampaignsResponses, ListCatalogLanguagesData, ListCatalogLanguagesErrors, ListCatalogLanguagesResponses, ListCatalogModelsData, ListCatalogModelsErrors, ListCatalogModelsResponses, ListCatalogVoicesData, ListCatalogVoicesErrors, ListCatalogVoicesResponses, ListComplianceDecisionsData, ListComplianceDecisionsErrors, ListComplianceDecisionsResponses, ListComplianceTextsData, ListComplianceTextsErrors, ListComplianceTextsResponses, ListConsentsData, ListConsentsErrors, ListConsentsResponses, ListContactDncChecksData, ListContactDncChecksErrors, ListContactDncChecksResponses, ListContactImportsData, ListContactImportsErrors, ListContactImportsResponses, ListContactsData, ListContactsErrors, ListContactsResponses, ListContactTagsData, ListContactTagsErrors, ListContactTagsResponses, ListDncData, ListDncErrors, ListDncResponses, ListGuardrailRulesData, ListGuardrailRulesErrors, ListGuardrailRulesResponses, ListHolidayCalendarsData, ListHolidayCalendarsErrors, ListHolidayCalendarsResponses, ListIntegrationProvidersData, ListIntegrationProvidersErrors, ListIntegrationProvidersResponses, ListKnowledgeBasesData, ListKnowledgeBasesErrors, ListKnowledgeBasesResponses, ListKnowledgeDocumentsData, ListKnowledgeDocumentsErrors, ListKnowledgeDocumentsResponses, ListKnowledgeGapsData, ListKnowledgeGapsErrors, ListKnowledgeGapsResponses, ListKnowledgeSourcesData, ListKnowledgeSourcesErrors, ListKnowledgeSourcesResponses, ListLedgerData, ListLedgerErrors, ListLedgerResponses, ListLiveCallsData, ListLiveCallsErrors, ListLiveCallsResponses, ListMcpServersData, ListMcpServersErrors, ListMcpServersResponses, ListMonthlyStatementsData, ListMonthlyStatementsErrors, ListMonthlyStatementsResponses, ListNumbersData, ListNumbersErrors, ListNumbersResponses, ListPaymentMethodsData, ListPaymentMethodsErrors, ListPaymentMethodsResponses, ListPaymentsData, ListPaymentsErrors, ListPaymentsResponses, ListRatesData, ListRatesErrors, ListRatesResponses, ListRevocationsData, ListRevocationsErrors, ListRevocationsResponses, ListSameCallerCallsData, ListSameCallerCallsErrors, ListSameCallerCallsResponses, ListSpamAllowListData, ListSpamAllowListErrors, ListSpamAllowListResponses, ListStatementLinesData, ListStatementLinesErrors, ListStatementLinesResponses, ListTurnPresetsData, ListTurnPresetsErrors, ListTurnPresetsResponses, ListWebhookDeliveriesData, ListWebhookDeliveriesErrors, ListWebhookDeliveriesResponses, ListWebhookEventTypesData, ListWebhookEventTypesErrors, ListWebhookEventTypesResponses, ListWebhookMessagesData, ListWebhookMessagesErrors, ListWebhookMessagesResponses, ListWebhooksData, ListWebhooksErrors, ListWebhooksResponses, ListWorkspaceToolsData, ListWorkspaceToolsErrors, ListWorkspaceToolsResponses, OrderNumberData, OrderNumberErrors, OrderNumberResponses, OrderNumbersData, OrderNumbersErrors, OrderNumbersResponses, PauseAssistantData, PauseAssistantErrors, PauseAssistantResponses, PauseCampaignData, PauseCampaignErrors, PauseCampaignResponses, PreflightCampaignDraftData, PreflightCampaignDraftErrors, PreflightCampaignDraftResponses, PreviewCampaignAudienceData, PreviewCampaignAudienceErrors, PreviewCampaignAudienceResponses, PublishAssistantVersionData, PublishAssistantVersionErrors, PublishAssistantVersionResponses, RedeliverWebhookMessageData, RedeliverWebhookMessageErrors, RedeliverWebhookMessageResponses, RefreshDraftToolsData, RefreshDraftToolsErrors, RefreshDraftToolsResponses, ReleaseNumberData, ReleaseNumberErrors, ReleaseNumberResponses, RestoreAssistantData, RestoreAssistantErrors, RestoreAssistantResponses, ResumeAssistantData, ResumeAssistantErrors, ResumeAssistantResponses, ResumeCampaignData, ResumeCampaignErrors, ResumeCampaignResponses, RetryBookingCheckData, RetryBookingCheckErrors, RetryBookingCheckResponses, RotateWebhookSecretData, RotateWebhookSecretErrors, RotateWebhookSecretResponses, SaveAssistantDraftData, SaveAssistantDraftErrors, SaveAssistantDraftResponses, SearchAvailableNumbersData, SearchAvailableNumbersErrors, SearchAvailableNumbersResponses, SearchKnowledgeBaseData, SearchKnowledgeBaseErrors, SearchKnowledgeBaseResponses, StartCampaignData, StartCampaignErrors, StartCampaignResponses, SuggestMcpToolDescriptionData, SuggestMcpToolDescriptionErrors, SuggestMcpToolDescriptionResponses, SyncKnowledgeSourceData, SyncKnowledgeSourceErrors, SyncKnowledgeSourceResponses, TestWebhookData, TestWebhookErrors, TestWebhookResponses, UpdateAssistantData, UpdateAssistantErrors, UpdateAssistantResponses, UpdateCalendarConnectionData, UpdateCalendarConnectionErrors, UpdateCalendarConnectionResponses, UpdateCallData, UpdateCallErrors, UpdateCallResponses, UpdateCampaignData, UpdateCampaignErrors, UpdateCampaignResponses, UpdateContactData, UpdateContactErrors, UpdateContactResponses, UpdateKnowledgeBaseData, UpdateKnowledgeBaseErrors, UpdateKnowledgeBaseResponses, UpdateKnowledgeDocumentData, UpdateKnowledgeDocumentErrors, UpdateKnowledgeDocumentResponses, UpdateKnowledgeFaqSourceData, UpdateKnowledgeFaqSourceErrors, UpdateKnowledgeFaqSourceResponses, UpdateNumberData, UpdateNumberErrors, UpdateNumberResponses, UpdateNumberRoutingData, UpdateNumberRoutingErrors, UpdateNumberRoutingResponses, UpdateWebhookData, UpdateWebhookErrors, UpdateWebhookResponses, UpdateWorkspaceToolData, UpdateWorkspaceToolErrors, UpdateWorkspaceToolResponses, ValidateAssistantFlowData, ValidateAssistantFlowErrors, ValidateAssistantFlowResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -165,6 +165,36 @@ export const saveAssistantDraft = <ThrowOnError extends boolean = false>(options
 });
 
 /**
+ * Move the draft's workspace tools to their latest revisions
+ */
+export const refreshDraftTools = <ThrowOnError extends boolean = false>(options: Options<RefreshDraftToolsData, ThrowOnError>): RequestResult<RefreshDraftToolsResponses, RefreshDraftToolsErrors, ThrowOnError> => (options.client ?? client).post<RefreshDraftToolsResponses, RefreshDraftToolsErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/assistants/{id}/draft/tools:refresh',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Turn the draft's single prompt into a starter flow; this cannot be undone
+ */
+export const convertAssistantDraftToFlow = <ThrowOnError extends boolean = false>(options: Options<ConvertAssistantDraftToFlowData, ThrowOnError>): RequestResult<ConvertAssistantDraftToFlowResponses, ConvertAssistantDraftToFlowErrors, ThrowOnError> => (options.client ?? client).post<ConvertAssistantDraftToFlowResponses, ConvertAssistantDraftToFlowErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/assistants/{id}/draft:convert-to-flow',
+    ...options
+});
+
+/**
  * Copy the draft, else the live spec, into a new assistant with only a draft
  */
 export const duplicateAssistant = <ThrowOnError extends boolean = false>(options: Options<DuplicateAssistantData, ThrowOnError>): RequestResult<DuplicateAssistantResponses, DuplicateAssistantErrors, ThrowOnError> => (options.client ?? client).post<DuplicateAssistantResponses, DuplicateAssistantErrors, ThrowOnError>({
@@ -174,6 +204,23 @@ export const duplicateAssistant = <ThrowOnError extends boolean = false>(options
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/assistants/{id}/duplicate',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Check a flow without saving it
+ */
+export const validateAssistantFlow = <ThrowOnError extends boolean = false>(options: Options<ValidateAssistantFlowData, ThrowOnError>): RequestResult<ValidateAssistantFlowResponses, ValidateAssistantFlowErrors, ThrowOnError> => (options.client ?? client).post<ValidateAssistantFlowResponses, ValidateAssistantFlowErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/assistants/{id}/flow:validate',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -294,6 +341,19 @@ export const compareAssistantVersions = <ThrowOnError extends boolean = false>(o
 });
 
 /**
+ * Export a version's flow with its canvas layout
+ */
+export const getAssistantVersionFlow = <ThrowOnError extends boolean = false>(options: Options<GetAssistantVersionFlowData, ThrowOnError>): RequestResult<GetAssistantVersionFlowResponses, GetAssistantVersionFlowErrors, ThrowOnError> => (options.client ?? client).get<GetAssistantVersionFlowResponses, GetAssistantVersionFlowErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/assistants/{id}/versions/{v}/flow',
+    ...options
+});
+
+/**
  * Publish a version; it becomes immutable. Publishing an older version is a rollback
  */
 export const publishAssistantVersion = <ThrowOnError extends boolean = false>(options: Options<PublishAssistantVersionData, ThrowOnError>): RequestResult<PublishAssistantVersionResponses, PublishAssistantVersionErrors, ThrowOnError> => (options.client ?? client).post<PublishAssistantVersionResponses, PublishAssistantVersionErrors, ThrowOnError>({
@@ -350,6 +410,32 @@ export const getBalance = <ThrowOnError extends boolean = false>(options?: Optio
 });
 
 /**
+ * Latest bundle pack, when it ends and credit left per lot
+ */
+export const getBundleSubscription = <ThrowOnError extends boolean = false>(options?: Options<GetBundleSubscriptionData, ThrowOnError>): RequestResult<GetBundleSubscriptionResponses, GetBundleSubscriptionErrors, ThrowOnError> => (options?.client ?? client).get<GetBundleSubscriptionResponses, GetBundleSubscriptionErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/billing/bundle-subscription',
+    ...options
+});
+
+/**
+ * One-time prepaid bundle packs on offer; empty while bundles are switched off
+ */
+export const listBundles = <ThrowOnError extends boolean = false>(options?: Options<ListBundlesData, ThrowOnError>): RequestResult<ListBundlesResponses, ListBundlesErrors, ThrowOnError> => (options?.client ?? client).get<ListBundlesResponses, ListBundlesErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/billing/bundles',
+    ...options
+});
+
+/**
  * Ledger entries of the tenant's accounts, newest first
  */
 export const listLedger = <ThrowOnError extends boolean = false>(options?: Options<ListLedgerData, ThrowOnError>): RequestResult<ListLedgerResponses, ListLedgerErrors, ThrowOnError> => (options?.client ?? client).get<ListLedgerResponses, ListLedgerErrors, ThrowOnError>({
@@ -363,7 +449,46 @@ export const listLedger = <ThrowOnError extends boolean = false>(options?: Optio
 });
 
 /**
- * Rates in force
+ * Saved cards (at most 10)
+ */
+export const listPaymentMethods = <ThrowOnError extends boolean = false>(options?: Options<ListPaymentMethodsData, ThrowOnError>): RequestResult<ListPaymentMethodsResponses, ListPaymentMethodsErrors, ThrowOnError> => (options?.client ?? client).get<ListPaymentMethodsResponses, ListPaymentMethodsErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/billing/payment-methods',
+    ...options
+});
+
+/**
+ * Payments with tax, card and receipt link, newest first
+ */
+export const listPayments = <ThrowOnError extends boolean = false>(options?: Options<ListPaymentsData, ThrowOnError>): RequestResult<ListPaymentsResponses, ListPaymentsErrors, ThrowOnError> => (options?.client ?? client).get<ListPaymentsResponses, ListPaymentsErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/billing/payments',
+    ...options
+});
+
+/**
+ * Customer rate card: per-minute and monthly prices, free rules, trial terms, premium pass-through and this workspace's launch price
+ */
+export const getRateCard = <ThrowOnError extends boolean = false>(options?: Options<GetRateCardData, ThrowOnError>): RequestResult<GetRateCardResponses, GetRateCardErrors, ThrowOnError> => (options?.client ?? client).get<GetRateCardResponses, GetRateCardErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/billing/rate-card',
+    ...options
+});
+
+/**
+ * Rates in force; the launch price is not a rate row and is not listed
  */
 export const listRates = <ThrowOnError extends boolean = false>(options?: Options<ListRatesData, ThrowOnError>): RequestResult<ListRatesResponses, ListRatesErrors, ThrowOnError> => (options?.client ?? client).get<ListRatesResponses, ListRatesErrors, ThrowOnError>({
     security: [{
@@ -372,6 +497,84 @@ export const listRates = <ThrowOnError extends boolean = false>(options?: Option
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/billing/rates',
+    ...options
+});
+
+/**
+ * Daily cap and monthly budget with today's and this month's spend
+ */
+export const getSpendLimits = <ThrowOnError extends boolean = false>(options?: Options<GetSpendLimitsData, ThrowOnError>): RequestResult<GetSpendLimitsResponses, GetSpendLimitsErrors, ThrowOnError> => (options?.client ?? client).get<GetSpendLimitsResponses, GetSpendLimitsErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/billing/spend-limits',
+    ...options
+});
+
+/**
+ * Statement lines, newest first: calls rolled up per local day, every other ledger transaction one line, holds hidden
+ */
+export const listStatementLines = <ThrowOnError extends boolean = false>(options?: Options<ListStatementLinesData, ThrowOnError>): RequestResult<ListStatementLinesResponses, ListStatementLinesErrors, ThrowOnError> => (options?.client ?? client).get<ListStatementLinesResponses, ListStatementLinesErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/billing/statement-lines',
+    ...options
+});
+
+/**
+ * Months with statement lines, newest first (at most 36)
+ */
+export const listMonthlyStatements = <ThrowOnError extends boolean = false>(options?: Options<ListMonthlyStatementsData, ThrowOnError>): RequestResult<ListMonthlyStatementsResponses, ListMonthlyStatementsErrors, ThrowOnError> => (options?.client ?? client).get<ListMonthlyStatementsResponses, ListMonthlyStatementsErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/billing/statements',
+    ...options
+});
+
+/**
+ * Signed link to the month's statement PDF, rendered from its statement lines
+ */
+export const getMonthlyStatement = <ThrowOnError extends boolean = false>(options: Options<GetMonthlyStatementData, ThrowOnError>): RequestResult<GetMonthlyStatementResponses, GetMonthlyStatementErrors, ThrowOnError> => (options.client ?? client).get<GetMonthlyStatementResponses, GetMonthlyStatementErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/billing/statements/{month}',
+    ...options
+});
+
+/**
+ * Top-up payment status after checkout
+ */
+export const getTopUp = <ThrowOnError extends boolean = false>(options: Options<GetTopUpData, ThrowOnError>): RequestResult<GetTopUpResponses, GetTopUpErrors, ThrowOnError> => (options.client ?? client).get<GetTopUpResponses, GetTopUpErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/billing/top-ups/{payment_id}',
+    ...options
+});
+
+/**
+ * Spend by category, agent, day or number from the ledger-written usage lines
+ */
+export const getBillingUsage = <ThrowOnError extends boolean = false>(options?: Options<GetBillingUsageData, ThrowOnError>): RequestResult<GetBillingUsageResponses, GetBillingUsageErrors, ThrowOnError> => (options?.client ?? client).get<GetBillingUsageResponses, GetBillingUsageErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/billing/usage',
     ...options
 });
 
@@ -415,6 +618,161 @@ export const deleteBlockedCaller = <ThrowOnError extends boolean = false>(option
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/blocked-callers/{id}',
+    ...options
+});
+
+/**
+ * List bookings agents made
+ */
+export const listBookings = <ThrowOnError extends boolean = false>(options?: Options<ListBookingsData, ThrowOnError>): RequestResult<ListBookingsResponses, ListBookingsErrors, ThrowOnError> => (options?.client ?? client).get<ListBookingsResponses, ListBookingsErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/bookings',
+    ...options
+});
+
+/**
+ * Get a booking
+ */
+export const getBooking = <ThrowOnError extends boolean = false>(options: Options<GetBookingData, ThrowOnError>): RequestResult<GetBookingResponses, GetBookingErrors, ThrowOnError> => (options.client ?? client).get<GetBookingResponses, GetBookingErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/bookings/{id}',
+    ...options
+});
+
+/**
+ * Cancel a booking in the calendar; Larynth does not contact the caller
+ */
+export const cancelBooking = <ThrowOnError extends boolean = false>(options: Options<CancelBookingData, ThrowOnError>): RequestResult<CancelBookingResponses, CancelBookingErrors, ThrowOnError> => (options.client ?? client).post<CancelBookingResponses, CancelBookingErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/bookings/{id}:cancel',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Look the booking up in the calendar again
+ */
+export const retryBookingCheck = <ThrowOnError extends boolean = false>(options: Options<RetryBookingCheckData, ThrowOnError>): RequestResult<RetryBookingCheckResponses, RetryBookingCheckErrors, ThrowOnError> => (options.client ?? client).post<RetryBookingCheckResponses, RetryBookingCheckErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/bookings/{id}:check',
+    ...options
+});
+
+/**
+ * Confirm a booking waiting for approval
+ */
+export const confirmBooking = <ThrowOnError extends boolean = false>(options: Options<ConfirmBookingData, ThrowOnError>): RequestResult<ConfirmBookingResponses, ConfirmBookingErrors, ThrowOnError> => (options.client ?? client).post<ConfirmBookingResponses, ConfirmBookingErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/bookings/{id}:confirm',
+    ...options
+});
+
+/**
+ * Decline a booking waiting for approval and free the slot; the caller is not contacted
+ */
+export const declineBooking = <ThrowOnError extends boolean = false>(options: Options<DeclineBookingData, ThrowOnError>): RequestResult<DeclineBookingResponses, DeclineBookingErrors, ThrowOnError> => (options.client ?? client).post<DeclineBookingResponses, DeclineBookingErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/bookings/{id}:decline',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * List connected calendars
+ */
+export const listCalendarConnections = <ThrowOnError extends boolean = false>(options?: Options<ListCalendarConnectionsData, ThrowOnError>): RequestResult<ListCalendarConnectionsResponses, ListCalendarConnectionsErrors, ThrowOnError> => (options?.client ?? client).get<ListCalendarConnectionsResponses, ListCalendarConnectionsErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/calendar-connections',
+    ...options
+});
+
+/**
+ * Disconnect a calendar and delete its tokens
+ */
+export const deleteCalendarConnection = <ThrowOnError extends boolean = false>(options: Options<DeleteCalendarConnectionData, ThrowOnError>): RequestResult<DeleteCalendarConnectionResponses, DeleteCalendarConnectionErrors, ThrowOnError> => (options.client ?? client).delete<DeleteCalendarConnectionResponses, DeleteCalendarConnectionErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/calendar-connections/{id}',
+    ...options
+});
+
+/**
+ * Get a calendar connection
+ */
+export const getCalendarConnection = <ThrowOnError extends boolean = false>(options: Options<GetCalendarConnectionData, ThrowOnError>): RequestResult<GetCalendarConnectionResponses, GetCalendarConnectionErrors, ThrowOnError> => (options.client ?? client).get<GetCalendarConnectionResponses, GetCalendarConnectionErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/calendar-connections/{id}',
+    ...options
+});
+
+/**
+ * Change a connection's label and booking defaults
+ */
+export const updateCalendarConnection = <ThrowOnError extends boolean = false>(options: Options<UpdateCalendarConnectionData, ThrowOnError>): RequestResult<UpdateCalendarConnectionResponses, UpdateCalendarConnectionErrors, ThrowOnError> => (options.client ?? client).patch<UpdateCalendarConnectionResponses, UpdateCalendarConnectionErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/calendar-connections/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Calendars or event types of a connection
+ */
+export const listCalendarResources = <ThrowOnError extends boolean = false>(options: Options<ListCalendarResourcesData, ThrowOnError>): RequestResult<ListCalendarResourcesResponses, ListCalendarResourcesErrors, ThrowOnError> => (options.client ?? client).get<ListCalendarResourcesResponses, ListCalendarResourcesErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/calendar-connections/{id}/resources',
     ...options
 });
 
@@ -544,6 +902,19 @@ export const listCallEvents = <ThrowOnError extends boolean = false>(options: Op
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/calls/{call_id}/events',
+    ...options
+});
+
+/**
+ * Steps a flow call went through, in order
+ */
+export const getCallFlowEvents = <ThrowOnError extends boolean = false>(options: Options<GetCallFlowEventsData, ThrowOnError>): RequestResult<GetCallFlowEventsResponses, GetCallFlowEventsErrors, ThrowOnError> => (options.client ?? client).get<GetCallFlowEventsResponses, GetCallFlowEventsErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/calls/{call_id}/flow-events',
     ...options
 });
 
@@ -1252,6 +1623,19 @@ export const listHolidayCalendars = <ThrowOnError extends boolean = false>(optio
 });
 
 /**
+ * Calendar providers a workspace can connect
+ */
+export const listIntegrationProviders = <ThrowOnError extends boolean = false>(options?: Options<ListIntegrationProvidersData, ThrowOnError>): RequestResult<ListIntegrationProvidersResponses, ListIntegrationProvidersErrors, ThrowOnError> => (options?.client ?? client).get<ListIntegrationProvidersResponses, ListIntegrationProvidersErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/integration-providers',
+    ...options
+});
+
+/**
  * List knowledge bases
  */
 export const listKnowledgeBases = <ThrowOnError extends boolean = false>(options?: Options<ListKnowledgeBasesData, ThrowOnError>): RequestResult<ListKnowledgeBasesResponses, ListKnowledgeBasesErrors, ThrowOnError> => (options?.client ?? client).get<ListKnowledgeBasesResponses, ListKnowledgeBasesErrors, ThrowOnError>({
@@ -1325,6 +1709,23 @@ export const updateKnowledgeBase = <ThrowOnError extends boolean = false>(option
 });
 
 /**
+ * Leave a page or file out of the next build, or include it again
+ */
+export const updateKnowledgeDocument = <ThrowOnError extends boolean = false>(options: Options<UpdateKnowledgeDocumentData, ThrowOnError>): RequestResult<UpdateKnowledgeDocumentResponses, UpdateKnowledgeDocumentErrors, ThrowOnError> => (options.client ?? client).patch<UpdateKnowledgeDocumentResponses, UpdateKnowledgeDocumentErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/knowledge-bases/{id}/documents/{document_id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
  * Run a retrieval query against a knowledge base
  */
 export const searchKnowledgeBase = <ThrowOnError extends boolean = false>(options: Options<SearchKnowledgeBaseData, ThrowOnError>): RequestResult<SearchKnowledgeBaseResponses, SearchKnowledgeBaseErrors, ThrowOnError> => (options.client ?? client).get<SearchKnowledgeBaseResponses, SearchKnowledgeBaseErrors, ThrowOnError>({
@@ -1348,6 +1749,23 @@ export const listKnowledgeSources = <ThrowOnError extends boolean = false>(optio
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/knowledge-bases/{id}/sources',
     ...options
+});
+
+/**
+ * Add typed questions and answers as a source
+ */
+export const createKnowledgeFaqSource = <ThrowOnError extends boolean = false>(options: Options<CreateKnowledgeFaqSourceData, ThrowOnError>): RequestResult<CreateKnowledgeFaqSourceResponses, CreateKnowledgeFaqSourceErrors, ThrowOnError> => (options.client ?? client).post<CreateKnowledgeFaqSourceResponses, CreateKnowledgeFaqSourceErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/knowledge-bases/{id}/sources/faq',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
 });
 
 /**
@@ -1412,6 +1830,49 @@ export const getKnowledgeSource = <ThrowOnError extends boolean = false>(options
 });
 
 /**
+ * Pages and files of a source, by title
+ */
+export const listKnowledgeDocuments = <ThrowOnError extends boolean = false>(options: Options<ListKnowledgeDocumentsData, ThrowOnError>): RequestResult<ListKnowledgeDocumentsResponses, ListKnowledgeDocumentsErrors, ThrowOnError> => (options.client ?? client).get<ListKnowledgeDocumentsResponses, ListKnowledgeDocumentsErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/knowledge-bases/{id}/sources/{source_id}/documents',
+    ...options
+});
+
+/**
+ * Get the questions and answers of a FAQ source with its revision as ETag
+ */
+export const getKnowledgeFaqSource = <ThrowOnError extends boolean = false>(options: Options<GetKnowledgeFaqSourceData, ThrowOnError>): RequestResult<GetKnowledgeFaqSourceResponses, GetKnowledgeFaqSourceErrors, ThrowOnError> => (options.client ?? client).get<GetKnowledgeFaqSourceResponses, GetKnowledgeFaqSourceErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/knowledge-bases/{id}/sources/{source_id}/faq',
+    ...options
+});
+
+/**
+ * Replace the questions and answers of a FAQ source; the base rebuilds
+ */
+export const updateKnowledgeFaqSource = <ThrowOnError extends boolean = false>(options: Options<UpdateKnowledgeFaqSourceData, ThrowOnError>): RequestResult<UpdateKnowledgeFaqSourceResponses, UpdateKnowledgeFaqSourceErrors, ThrowOnError> => (options.client ?? client).put<UpdateKnowledgeFaqSourceResponses, UpdateKnowledgeFaqSourceErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/knowledge-bases/{id}/sources/{source_id}/faq',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
  * Re-fetch a website or re-read a file
  */
 export const syncKnowledgeSource = <ThrowOnError extends boolean = false>(options: Options<SyncKnowledgeSourceData, ThrowOnError>): RequestResult<SyncKnowledgeSourceResponses, SyncKnowledgeSourceErrors, ThrowOnError> => (options.client ?? client).post<SyncKnowledgeSourceResponses, SyncKnowledgeSourceErrors, ThrowOnError>({
@@ -1425,6 +1886,62 @@ export const syncKnowledgeSource = <ThrowOnError extends boolean = false>(option
 });
 
 /**
+ * Questions callers asked that agents could not answer, grouped by similar wording
+ */
+export const listKnowledgeGaps = <ThrowOnError extends boolean = false>(options?: Options<ListKnowledgeGapsData, ThrowOnError>): RequestResult<ListKnowledgeGapsResponses, ListKnowledgeGapsErrors, ThrowOnError> => (options?.client ?? client).get<ListKnowledgeGapsResponses, ListKnowledgeGapsErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/knowledge-gaps',
+    ...options
+});
+
+/**
+ * Add an answer to a knowledge base's FAQ source and close the question
+ */
+export const answerKnowledgeGap = <ThrowOnError extends boolean = false>(options: Options<AnswerKnowledgeGapData, ThrowOnError>): RequestResult<AnswerKnowledgeGapResponses, AnswerKnowledgeGapErrors, ThrowOnError> => (options.client ?? client).post<AnswerKnowledgeGapResponses, AnswerKnowledgeGapErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/knowledge-gaps/{id}:answer',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Close a question without answering it
+ */
+export const dismissKnowledgeGap = <ThrowOnError extends boolean = false>(options: Options<DismissKnowledgeGapData, ThrowOnError>): RequestResult<DismissKnowledgeGapResponses, DismissKnowledgeGapErrors, ThrowOnError> => (options.client ?? client).post<DismissKnowledgeGapResponses, DismissKnowledgeGapErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/knowledge-gaps/{id}:dismiss',
+    ...options
+});
+
+/**
+ * Limits for knowledge bases, sources and uploads
+ */
+export const getKnowledgeLimits = <ThrowOnError extends boolean = false>(options?: Options<GetKnowledgeLimitsData, ThrowOnError>): RequestResult<GetKnowledgeLimitsResponses, GetKnowledgeLimitsErrors, ThrowOnError> => (options?.client ?? client).get<GetKnowledgeLimitsResponses, GetKnowledgeLimitsErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/knowledge/limits',
+    ...options
+});
+
+/**
  * Calls in progress with their last line and flags
  */
 export const listLiveCalls = <ThrowOnError extends boolean = false>(options?: Options<ListLiveCallsData, ThrowOnError>): RequestResult<ListLiveCallsResponses, ListLiveCallsErrors, ThrowOnError> => (options?.client ?? client).get<ListLiveCallsResponses, ListLiveCallsErrors, ThrowOnError>({
@@ -1434,6 +1951,58 @@ export const listLiveCalls = <ThrowOnError extends boolean = false>(options?: Op
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/v1/live-calls',
+    ...options
+});
+
+/**
+ * List MCP servers with their discovered tools
+ */
+export const listMcpServers = <ThrowOnError extends boolean = false>(options?: Options<ListMcpServersData, ThrowOnError>): RequestResult<ListMcpServersResponses, ListMcpServersErrors, ThrowOnError> => (options?.client ?? client).get<ListMcpServersResponses, ListMcpServersErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/mcp-servers',
+    ...options
+});
+
+/**
+ * Delete an MCP server no live agent uses
+ */
+export const deleteMcpServer = <ThrowOnError extends boolean = false>(options: Options<DeleteMcpServerData, ThrowOnError>): RequestResult<DeleteMcpServerResponses, DeleteMcpServerErrors, ThrowOnError> => (options.client ?? client).delete<DeleteMcpServerResponses, DeleteMcpServerErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/mcp-servers/{id}',
+    ...options
+});
+
+/**
+ * Draft a description for an MCP tool from its upstream text
+ */
+export const suggestMcpToolDescription = <ThrowOnError extends boolean = false>(options: Options<SuggestMcpToolDescriptionData, ThrowOnError>): RequestResult<SuggestMcpToolDescriptionResponses, SuggestMcpToolDescriptionErrors, ThrowOnError> => (options.client ?? client).post<SuggestMcpToolDescriptionResponses, SuggestMcpToolDescriptionErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/mcp-servers/{id}/tools/{tool_id}:suggest-description',
+    ...options
+});
+
+/**
+ * List the server's tools again; changed tools are turned off until reviewed
+ */
+export const discoverMcpServer = <ThrowOnError extends boolean = false>(options: Options<DiscoverMcpServerData, ThrowOnError>): RequestResult<DiscoverMcpServerResponses, DiscoverMcpServerErrors, ThrowOnError> => (options.client ?? client).post<DiscoverMcpServerResponses, DiscoverMcpServerErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/mcp-servers/{id}:discover',
     ...options
 });
 
@@ -1627,6 +2196,79 @@ export const deleteSpamAllow = <ThrowOnError extends boolean = false>(options: O
 });
 
 /**
+ * List the workspace's HTTP tools
+ */
+export const listWorkspaceTools = <ThrowOnError extends boolean = false>(options?: Options<ListWorkspaceToolsData, ThrowOnError>): RequestResult<ListWorkspaceToolsResponses, ListWorkspaceToolsErrors, ThrowOnError> => (options?.client ?? client).get<ListWorkspaceToolsResponses, ListWorkspaceToolsErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/tools',
+    ...options
+});
+
+/**
+ * Create an HTTP tool agents can call; secret headers need a session that confirmed the sign-in recently
+ */
+export const createWorkspaceTool = <ThrowOnError extends boolean = false>(options: Options<CreateWorkspaceToolData, ThrowOnError>): RequestResult<CreateWorkspaceToolResponses, CreateWorkspaceToolErrors, ThrowOnError> => (options.client ?? client).post<CreateWorkspaceToolResponses, CreateWorkspaceToolErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/tools',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete an HTTP tool no live agent uses
+ */
+export const deleteWorkspaceTool = <ThrowOnError extends boolean = false>(options: Options<DeleteWorkspaceToolData, ThrowOnError>): RequestResult<DeleteWorkspaceToolResponses, DeleteWorkspaceToolErrors, ThrowOnError> => (options.client ?? client).delete<DeleteWorkspaceToolResponses, DeleteWorkspaceToolErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/tools/{id}',
+    ...options
+});
+
+/**
+ * Get an HTTP tool with its revision as ETag
+ */
+export const getWorkspaceTool = <ThrowOnError extends boolean = false>(options: Options<GetWorkspaceToolData, ThrowOnError>): RequestResult<GetWorkspaceToolResponses, GetWorkspaceToolErrors, ThrowOnError> => (options.client ?? client).get<GetWorkspaceToolResponses, GetWorkspaceToolErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/tools/{id}',
+    ...options
+});
+
+/**
+ * Save a new revision of an HTTP tool; agents keep their pinned revision until updated. A new URL host or other secret headers need a session that confirmed the sign-in recently
+ */
+export const updateWorkspaceTool = <ThrowOnError extends boolean = false>(options: Options<UpdateWorkspaceToolData, ThrowOnError>): RequestResult<UpdateWorkspaceToolResponses, UpdateWorkspaceToolErrors, ThrowOnError> => (options.client ?? client).put<UpdateWorkspaceToolResponses, UpdateWorkspaceToolErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/tools/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
  * Issue short-lived STUN/TURN servers for a browser test call
  */
 export const createIceServers = <ThrowOnError extends boolean = false>(options?: Options<CreateIceServersData, ThrowOnError>): RequestResult<CreateIceServersResponses, CreateIceServersErrors, ThrowOnError> => (options?.client ?? client).post<CreateIceServersResponses, CreateIceServersErrors, ThrowOnError>({
@@ -1667,6 +2309,19 @@ export const createWebhook = <ThrowOnError extends boolean = false>(options: Opt
         'Content-Type': 'application/json',
         ...options.headers
     }
+});
+
+/**
+ * Webhook event catalogue with groups, labels and the retry policy
+ */
+export const listWebhookEventTypes = <ThrowOnError extends boolean = false>(options?: Options<ListWebhookEventTypesData, ThrowOnError>): RequestResult<ListWebhookEventTypesResponses, ListWebhookEventTypesErrors, ThrowOnError> => (options?.client ?? client).get<ListWebhookEventTypesResponses, ListWebhookEventTypesErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/webhooks/event-types',
+    ...options
 });
 
 /**
@@ -1726,6 +2381,49 @@ export const listWebhookDeliveries = <ThrowOnError extends boolean = false>(opti
 });
 
 /**
+ * One row per event sent to this endpoint, newest first (30 days)
+ */
+export const listWebhookMessages = <ThrowOnError extends boolean = false>(options: Options<ListWebhookMessagesData, ThrowOnError>): RequestResult<ListWebhookMessagesResponses, ListWebhookMessagesErrors, ThrowOnError> => (options.client ?? client).get<ListWebhookMessagesResponses, ListWebhookMessagesErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/webhooks/{id}/messages',
+    ...options
+});
+
+/**
+ * Send the same event again as a new attempt series signed with the current secret
+ */
+export const redeliverWebhookMessage = <ThrowOnError extends boolean = false>(options: Options<RedeliverWebhookMessageData, ThrowOnError>): RequestResult<RedeliverWebhookMessageResponses, RedeliverWebhookMessageErrors, ThrowOnError> => (options.client ?? client).post<RedeliverWebhookMessageResponses, RedeliverWebhookMessageErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/webhooks/{id}/messages/{event_id}/redeliver',
+    ...options
+});
+
+/**
+ * Redeliver failed (or all) messages since a time, at most 1,000 and 7 days back
+ */
+export const createWebhookReplay = <ThrowOnError extends boolean = false>(options: Options<CreateWebhookReplayData, ThrowOnError>): RequestResult<CreateWebhookReplayResponses, CreateWebhookReplayErrors, ThrowOnError> => (options.client ?? client).post<CreateWebhookReplayResponses, CreateWebhookReplayErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-lx_session',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/v1/webhooks/{id}/replays',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
  * Rotate the signing secret; the old one stays valid for 24 h
  */
 export const rotateWebhookSecret = <ThrowOnError extends boolean = false>(options: Options<RotateWebhookSecretData, ThrowOnError>): RequestResult<RotateWebhookSecretResponses, RotateWebhookSecretErrors, ThrowOnError> => (options.client ?? client).post<RotateWebhookSecretResponses, RotateWebhookSecretErrors, ThrowOnError>({
@@ -1739,7 +2437,7 @@ export const rotateWebhookSecret = <ThrowOnError extends boolean = false>(option
 });
 
 /**
- * Send a test event
+ * Send a test event and wait up to 10 s for the first attempt; test events are never retried
  */
 export const testWebhook = <ThrowOnError extends boolean = false>(options: Options<TestWebhookData, ThrowOnError>): RequestResult<TestWebhookResponses, TestWebhookErrors, ThrowOnError> => (options.client ?? client).post<TestWebhookResponses, TestWebhookErrors, ThrowOnError>({
     security: [{
