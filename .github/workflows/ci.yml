@@ -9,7 +9,38 @@ permissions:
   contents: read
 
 jobs:
+  tested:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
+      pull-requests: read
+    outputs:
+      skip: ${{ steps.tested-tree.outputs.skip }}
+    steps:
+      - name: tested-tree
+        id: tested-tree
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+          api() { gh api "repos/$GITHUB_REPOSITORY/$1" --jq "$2"; }
+          fail() { echo "running everything: $1"; exit 0; }
+          head="$(api "commits/$GITHUB_SHA/pulls" '[.[] | select(.merged_at != null and .merge_commit_sha == "'"$GITHUB_SHA"'" and .base.ref == "main")] | if length == 1 then .[0].head.sha else empty end')" || fail "pull request lookup failed"
+          [ -n "$head" ] || fail "no single merged pull request for $GITHUB_SHA"
+          main_tree="$(api "git/commits/$GITHUB_SHA" .tree.sha)" || fail "tree lookup failed for $GITHUB_SHA"
+          head_tree="$(api "git/commits/$head" .tree.sha)" || fail "tree lookup failed for $head"
+          [ -n "$main_tree" ] && [ "$main_tree" = "$head_tree" ] || fail "tree $main_tree differs from pull request head $head ($head_tree)"
+          conclusion="$(api "actions/workflows/ci.yml/runs?head_sha=$head&event=pull_request&per_page=1" '.workflow_runs[0].conclusion // empty')" || fail "pull request run lookup failed"
+          [ "$conclusion" = "success" ] || fail "pull request run for $head concluded '${conclusion:-none}'"
+          echo "tree $main_tree already passed ci on pull request head $head, skipping the test suites"
+          echo "skip=true" >> "$GITHUB_OUTPUT"
+
   test:
+    needs: tested
+    if: needs.tested.outputs.skip != 'true'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
