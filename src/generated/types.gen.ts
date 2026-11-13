@@ -37,6 +37,124 @@ export type AfterHoursTarget = {
     mode: 'same_agent' | 'assistant' | 'forward' | 'take_message';
 };
 
+export type AnalyticsAgent = {
+    assistant_id: string;
+    avg_duration_ms: number;
+    billed_minutes: number;
+    booked: number;
+    calls: number;
+    connected: number;
+    name: string;
+    /**
+     * Null when no turn latency was recorded
+     */
+    p50_latency_ms: number | null;
+    spend_micro: number;
+};
+
+export type AnalyticsAgentLatency = {
+    assistant_id: string;
+    name: string;
+    p50_ms: number | null;
+    p95_ms: number | null;
+    turns: number;
+};
+
+export type AnalyticsAgents = {
+    data: Array<AnalyticsAgent>;
+    from: string;
+    timezone: string;
+    to: string;
+};
+
+export type AnalyticsLatency = {
+    agents: Array<AnalyticsAgentLatency>;
+    days: Array<AnalyticsLatencyDay>;
+    from: string;
+    /**
+     * Caller finished to agent heard; null when no turn latency was recorded
+     */
+    p50_ms: number | null;
+    p95_ms: number | null;
+    timezone: string;
+    to: string;
+    turns: number;
+};
+
+export type AnalyticsLatencyDay = {
+    date: string;
+    /**
+     * Null on days without recorded turn latency
+     */
+    p50_ms: number | null;
+    p95_ms: number | null;
+    turns: number;
+};
+
+export type AnalyticsOutcomeCount = {
+    calls: number;
+    /**
+     * Call outcome; unknown while a call has none
+     */
+    outcome: string;
+};
+
+export type AnalyticsOutcomes = {
+    /**
+     * Answered to ended, over calls that have both
+     */
+    avg_duration_ms: number;
+    calls: number;
+    connected: number;
+    from: string;
+    opted_out: number;
+    outcomes: Array<AnalyticsOutcomeCount>;
+    timezone: string;
+    to: string;
+};
+
+export type AnalyticsUsage = {
+    days: Array<AnalyticsUsageDay>;
+    from: string;
+    timezone: string;
+    to: string;
+    totals: AnalyticsUsageSplit;
+};
+
+export type AnalyticsUsageBucket = {
+    billed_minutes: number;
+    calls: number;
+    /**
+     * Charges written to the ledger, micro-USD
+     */
+    spend_micro: number;
+};
+
+export type AnalyticsUsageDay = {
+    billed_minutes: number;
+    calls: number;
+    date: string;
+    inbound: AnalyticsUsageBucket;
+    outbound: AnalyticsUsageBucket;
+    /**
+     * Charges written to the ledger, micro-USD
+     */
+    spend_micro: number;
+    web: AnalyticsUsageBucket;
+};
+
+export type AnalyticsUsageSplit = {
+    billed_minutes: number;
+    calls: number;
+    inbound: AnalyticsUsageBucket;
+    outbound: AnalyticsUsageBucket;
+    /**
+     * Charges written to the ledger, micro-USD
+     */
+    spend_micro: number;
+    web: AnalyticsUsageBucket;
+};
+
 export type AnswerKnowledgeGapRequest = {
     answer: string;
     knowledge_base_id: string;
@@ -4965,6 +5083,262 @@ export type ValidateAssistantFlowRequestWritable = {
      */
     tools?: Array<AssistantToolWritable>;
 };
+
+export type GetAnalyticsAgentsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * First local day; defaults to 29 days before to
+         */
+        from?: string;
+        /**
+         * Last local day, inclusive; defaults to today in the workspace time zone. At most 366 days after from
+         */
+        to?: string;
+        /**
+         * Only this agent
+         */
+        assistant_id?: string;
+        /**
+         * Only this call direction
+         */
+        direction?: 'inbound' | 'outbound' | 'web';
+    };
+    url: '/v1/analytics/agents';
+};
+
+export type GetAnalyticsAgentsErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetAnalyticsAgentsError = GetAnalyticsAgentsErrors[keyof GetAnalyticsAgentsErrors];
+
+export type GetAnalyticsAgentsResponses = {
+    /**
+     * OK
+     */
+    200: AnalyticsAgents;
+};
+
+export type GetAnalyticsAgentsResponse = GetAnalyticsAgentsResponses[keyof GetAnalyticsAgentsResponses];
+
+export type GetAnalyticsLatencyData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * First local day; defaults to 29 days before to
+         */
+        from?: string;
+        /**
+         * Last local day, inclusive; defaults to today in the workspace time zone. At most 366 days after from
+         */
+        to?: string;
+        /**
+         * Only this agent
+         */
+        assistant_id?: string;
+        /**
+         * Only this call direction
+         */
+        direction?: 'inbound' | 'outbound' | 'web';
+        /**
+         * day adds one row per local day, zero-filled
+         */
+        group_by?: 'none' | 'day';
+    };
+    url: '/v1/analytics/latency';
+};
+
+export type GetAnalyticsLatencyErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetAnalyticsLatencyError = GetAnalyticsLatencyErrors[keyof GetAnalyticsLatencyErrors];
+
+export type GetAnalyticsLatencyResponses = {
+    /**
+     * OK
+     */
+    200: AnalyticsLatency;
+};
+
+export type GetAnalyticsLatencyResponse = GetAnalyticsLatencyResponses[keyof GetAnalyticsLatencyResponses];
+
+export type GetAnalyticsOutcomesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * First local day; defaults to 29 days before to
+         */
+        from?: string;
+        /**
+         * Last local day, inclusive; defaults to today in the workspace time zone. At most 366 days after from
+         */
+        to?: string;
+        /**
+         * Only this agent
+         */
+        assistant_id?: string;
+        /**
+         * Only this call direction
+         */
+        direction?: 'inbound' | 'outbound' | 'web';
+    };
+    url: '/v1/analytics/outcomes';
+};
+
+export type GetAnalyticsOutcomesErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetAnalyticsOutcomesError = GetAnalyticsOutcomesErrors[keyof GetAnalyticsOutcomesErrors];
+
+export type GetAnalyticsOutcomesResponses = {
+    /**
+     * OK
+     */
+    200: AnalyticsOutcomes;
+};
+
+export type GetAnalyticsOutcomesResponse = GetAnalyticsOutcomesResponses[keyof GetAnalyticsOutcomesResponses];
+
+export type GetAnalyticsUsageData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * First local day; defaults to 29 days before to
+         */
+        from?: string;
+        /**
+         * Last local day, inclusive; defaults to today in the workspace time zone. At most 366 days after from
+         */
+        to?: string;
+        /**
+         * Only this agent
+         */
+        assistant_id?: string;
+        /**
+         * Only this call direction
+         */
+        direction?: 'inbound' | 'outbound' | 'web';
+        /**
+         * day adds one row per local day, zero-filled
+         */
+        group_by?: 'none' | 'day';
+    };
+    url: '/v1/analytics/usage';
+};
+
+export type GetAnalyticsUsageErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetAnalyticsUsageError = GetAnalyticsUsageErrors[keyof GetAnalyticsUsageErrors];
+
+export type GetAnalyticsUsageResponses = {
+    /**
+     * OK
+     */
+    200: AnalyticsUsage;
+};
+
+export type GetAnalyticsUsageResponse = GetAnalyticsUsageResponses[keyof GetAnalyticsUsageResponses];
 
 export type ListAreaCodesData = {
     body?: never;
