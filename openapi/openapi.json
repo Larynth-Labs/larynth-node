@@ -275,6 +275,424 @@
         ],
         "type": "object"
       },
+      "AnalyticsAgent": {
+        "additionalProperties": false,
+        "properties": {
+          "assistant_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "avg_duration_ms": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "billed_minutes": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "booked": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "calls": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "connected": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "p50_latency_ms": {
+            "description": "Null when no turn latency was recorded",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "spend_micro": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "assistant_id",
+          "name",
+          "calls",
+          "connected",
+          "booked",
+          "billed_minutes",
+          "spend_micro",
+          "avg_duration_ms",
+          "p50_latency_ms"
+        ],
+        "type": "object"
+      },
+      "AnalyticsAgentLatency": {
+        "additionalProperties": false,
+        "properties": {
+          "assistant_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "p50_ms": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "p95_ms": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "turns": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "assistant_id",
+          "name",
+          "turns",
+          "p50_ms",
+          "p95_ms"
+        ],
+        "type": "object"
+      },
+      "AnalyticsAgents": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/AnalyticsAgent"
+            },
+            "type": "array"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "from",
+          "to",
+          "timezone",
+          "data"
+        ],
+        "type": "object"
+      },
+      "AnalyticsLatency": {
+        "additionalProperties": false,
+        "properties": {
+          "agents": {
+            "items": {
+              "$ref": "#/components/schemas/AnalyticsAgentLatency"
+            },
+            "type": "array"
+          },
+          "days": {
+            "items": {
+              "$ref": "#/components/schemas/AnalyticsLatencyDay"
+            },
+            "type": "array"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "p50_ms": {
+            "description": "Caller finished to agent heard; null when no turn latency was recorded",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "p95_ms": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "turns": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "from",
+          "to",
+          "timezone",
+          "turns",
+          "p50_ms",
+          "p95_ms",
+          "days",
+          "agents"
+        ],
+        "type": "object"
+      },
+      "AnalyticsLatencyDay": {
+        "additionalProperties": false,
+        "properties": {
+          "date": {
+            "format": "date",
+            "type": "string"
+          },
+          "p50_ms": {
+            "description": "Null on days without recorded turn latency",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "p95_ms": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "turns": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "date",
+          "turns",
+          "p50_ms",
+          "p95_ms"
+        ],
+        "type": "object"
+      },
+      "AnalyticsOutcomeCount": {
+        "additionalProperties": false,
+        "properties": {
+          "calls": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "outcome": {
+            "description": "Call outcome; unknown while a call has none",
+            "type": "string"
+          }
+        },
+        "required": [
+          "outcome",
+          "calls"
+        ],
+        "type": "object"
+      },
+      "AnalyticsOutcomes": {
+        "additionalProperties": false,
+        "properties": {
+          "avg_duration_ms": {
+            "description": "Answered to ended, over calls that have both",
+            "format": "int64",
+            "type": "integer"
+          },
+          "calls": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "connected": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "opted_out": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "outcomes": {
+            "items": {
+              "$ref": "#/components/schemas/AnalyticsOutcomeCount"
+            },
+            "type": "array"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "from",
+          "to",
+          "timezone",
+          "calls",
+          "connected",
+          "opted_out",
+          "avg_duration_ms",
+          "outcomes"
+        ],
+        "type": "object"
+      },
+      "AnalyticsUsage": {
+        "additionalProperties": false,
+        "properties": {
+          "days": {
+            "items": {
+              "$ref": "#/components/schemas/AnalyticsUsageDay"
+            },
+            "type": "array"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/AnalyticsUsageSplit"
+          }
+        },
+        "required": [
+          "from",
+          "to",
+          "timezone",
+          "totals",
+          "days"
+        ],
+        "type": "object"
+      },
+      "AnalyticsUsageBucket": {
+        "additionalProperties": false,
+        "properties": {
+          "billed_minutes": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "calls": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "spend_micro": {
+            "description": "Charges written to the ledger, micro-USD",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "calls",
+          "billed_minutes",
+          "spend_micro"
+        ],
+        "type": "object"
+      },
+      "AnalyticsUsageDay": {
+        "additionalProperties": false,
+        "properties": {
+          "billed_minutes": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "calls": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "date": {
+            "format": "date",
+            "type": "string"
+          },
+          "inbound": {
+            "$ref": "#/components/schemas/AnalyticsUsageBucket"
+          },
+          "outbound": {
+            "$ref": "#/components/schemas/AnalyticsUsageBucket"
+          },
+          "spend_micro": {
+            "description": "Charges written to the ledger, micro-USD",
+            "format": "int64",
+            "type": "integer"
+          },
+          "web": {
+            "$ref": "#/components/schemas/AnalyticsUsageBucket"
+          }
+        },
+        "required": [
+          "date",
+          "inbound",
+          "outbound",
+          "web",
+          "calls",
+          "billed_minutes",
+          "spend_micro"
+        ],
+        "type": "object"
+      },
+      "AnalyticsUsageSplit": {
+        "additionalProperties": false,
+        "properties": {
+          "billed_minutes": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "calls": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "inbound": {
+            "$ref": "#/components/schemas/AnalyticsUsageBucket"
+          },
+          "outbound": {
+            "$ref": "#/components/schemas/AnalyticsUsageBucket"
+          },
+          "spend_micro": {
+            "description": "Charges written to the ledger, micro-USD",
+            "format": "int64",
+            "type": "integer"
+          },
+          "web": {
+            "$ref": "#/components/schemas/AnalyticsUsageBucket"
+          }
+        },
+        "required": [
+          "inbound",
+          "outbound",
+          "web",
+          "calls",
+          "billed_minutes",
+          "spend_micro"
+        ],
+        "type": "object"
+      },
       "AnswerKnowledgeGapRequest": {
         "additionalProperties": false,
         "properties": {
@@ -13448,6 +13866,448 @@
     }
   },
   "paths": {
+    "/v1/analytics/agents": {
+      "get": {
+        "operationId": "getAnalyticsAgents",
+        "parameters": [
+          {
+            "description": "First local day; defaults to 29 days before to",
+            "explode": false,
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "description": "First local day; defaults to 29 days before to",
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Last local day, inclusive; defaults to today in the workspace time zone. At most 366 days after from",
+            "explode": false,
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "description": "Last local day, inclusive; defaults to today in the workspace time zone. At most 366 days after from",
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only this agent",
+            "explode": false,
+            "in": "query",
+            "name": "assistant_id",
+            "schema": {
+              "description": "Only this agent",
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only this call direction",
+            "explode": false,
+            "in": "query",
+            "name": "direction",
+            "schema": {
+              "description": "Only this call direction",
+              "enum": [
+                "inbound",
+                "outbound",
+                "web"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsAgents"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "calls:read"
+            ]
+          }
+        ],
+        "summary": "Calls, minutes, spend, average duration, bookings and reply latency per agent",
+        "tags": [
+          "analytics"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "calls:read",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/analytics/latency": {
+      "get": {
+        "operationId": "getAnalyticsLatency",
+        "parameters": [
+          {
+            "description": "First local day; defaults to 29 days before to",
+            "explode": false,
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "description": "First local day; defaults to 29 days before to",
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Last local day, inclusive; defaults to today in the workspace time zone. At most 366 days after from",
+            "explode": false,
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "description": "Last local day, inclusive; defaults to today in the workspace time zone. At most 366 days after from",
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only this agent",
+            "explode": false,
+            "in": "query",
+            "name": "assistant_id",
+            "schema": {
+              "description": "Only this agent",
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only this call direction",
+            "explode": false,
+            "in": "query",
+            "name": "direction",
+            "schema": {
+              "description": "Only this call direction",
+              "enum": [
+                "inbound",
+                "outbound",
+                "web"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "day adds one row per local day, zero-filled",
+            "explode": false,
+            "in": "query",
+            "name": "group_by",
+            "schema": {
+              "default": "none",
+              "description": "day adds one row per local day, zero-filled",
+              "enum": [
+                "none",
+                "day"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsLatency"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "calls:read"
+            ]
+          }
+        ],
+        "summary": "Reply latency p50 and p95, overall, per day and per agent",
+        "tags": [
+          "analytics"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "calls:read",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/analytics/outcomes": {
+      "get": {
+        "operationId": "getAnalyticsOutcomes",
+        "parameters": [
+          {
+            "description": "First local day; defaults to 29 days before to",
+            "explode": false,
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "description": "First local day; defaults to 29 days before to",
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Last local day, inclusive; defaults to today in the workspace time zone. At most 366 days after from",
+            "explode": false,
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "description": "Last local day, inclusive; defaults to today in the workspace time zone. At most 366 days after from",
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only this agent",
+            "explode": false,
+            "in": "query",
+            "name": "assistant_id",
+            "schema": {
+              "description": "Only this agent",
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only this call direction",
+            "explode": false,
+            "in": "query",
+            "name": "direction",
+            "schema": {
+              "description": "Only this call direction",
+              "enum": [
+                "inbound",
+                "outbound",
+                "web"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsOutcomes"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "calls:read"
+            ]
+          }
+        ],
+        "summary": "Calls by outcome with connected, opt-out and average duration totals",
+        "tags": [
+          "analytics"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "calls:read",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/analytics/usage": {
+      "get": {
+        "operationId": "getAnalyticsUsage",
+        "parameters": [
+          {
+            "description": "First local day; defaults to 29 days before to",
+            "explode": false,
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "description": "First local day; defaults to 29 days before to",
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Last local day, inclusive; defaults to today in the workspace time zone. At most 366 days after from",
+            "explode": false,
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "description": "Last local day, inclusive; defaults to today in the workspace time zone. At most 366 days after from",
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only this agent",
+            "explode": false,
+            "in": "query",
+            "name": "assistant_id",
+            "schema": {
+              "description": "Only this agent",
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only this call direction",
+            "explode": false,
+            "in": "query",
+            "name": "direction",
+            "schema": {
+              "description": "Only this call direction",
+              "enum": [
+                "inbound",
+                "outbound",
+                "web"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "day adds one row per local day, zero-filled",
+            "explode": false,
+            "in": "query",
+            "name": "group_by",
+            "schema": {
+              "default": "none",
+              "description": "day adds one row per local day, zero-filled",
+              "enum": [
+                "none",
+                "day"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsUsage"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "calls:read"
+            ]
+          }
+        ],
+        "summary": "Calls, billed minutes and spend from the ledger-written usage lines, optionally per day",
+        "tags": [
+          "analytics"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "calls:read",
+        "x-larynth-sdk": true
+      }
+    },
     "/v1/area-codes": {
       "get": {
         "operationId": "listAreaCodes",
@@ -27755,6 +28615,11 @@
     {
       "description": "Bookings agents made in connected calendars.",
       "name": "bookings",
+      "x-larynth-sdk": true
+    },
+    {
+      "description": "Read-only usage, outcome, agent and latency aggregates over a date range.",
+      "name": "analytics",
       "x-larynth-sdk": true
     }
   ],
