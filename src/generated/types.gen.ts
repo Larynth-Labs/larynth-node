@@ -37,6 +37,268 @@ export type AfterHoursTarget = {
     mode: 'same_agent' | 'assistant' | 'forward' | 'take_message';
 };
 
+export type AlertClause = {
+    /**
+     * Platform, call, analysis or data.<name> field for call_analyzed rules; caller_said, intent.* or agent.* for live_turn rules
+     */
+    field: string;
+    op: 'eq' | 'ne' | 'in' | 'not_in' | 'contains' | 'gt' | 'lt' | 'exists' | 'not_exists' | 'contains_any';
+    /**
+     * Operand; omitted for exists and not_exists; a list for in, not_in and contains_any (1 to 20 phrases of at most 40 characters)
+     */
+    value?: unknown;
+};
+
+export type AlertCondition = {
+    /**
+     * Every clause must match. Exactly one of all or any is set; the service rejects anything else with alert_rule.invalid_condition
+     */
+    all?: Array<AlertClause>;
+    /**
+     * At least one clause must match. Exactly one of all or any is set
+     */
+    any?: Array<AlertClause>;
+};
+
+export type AlertDelivery = {
+    at: string;
+    channel: 'in_app' | 'email' | 'push' | 'slack' | 'telegram' | 'webhook' | 'sms';
+    error?: string;
+    status: 'sent' | 'failed' | 'skipped';
+};
+
+export type AlertFiring = {
+    call_id: string;
+    deliveries: Array<AlertDelivery>;
+    fired_at: string;
+    id: string;
+    /**
+     * Can quote the caller
+     */
+    matched: AlertMatch;
+    rule_id: string;
+    rule_name: string;
+    state: 'sent' | 'throttled' | 'failed' | 'dry_run';
+    trigger: 'call_analyzed' | 'live_turn';
+};
+
+export type AlertMatch = {
+    field: string;
+    value: unknown;
+};
+
+export type AlertRule = {
+    /**
+     * Null means all agents
+     */
+    assistant_ids: Array<string> | null;
+    /**
+     * Slack and Telegram channels
+     */
+    channel_ids: Array<string>;
+    channels: Array<'in_app' | 'email' | 'push' | 'slack' | 'telegram' | 'webhook' | 'sms'>;
+    condition: AlertCondition;
+    created_at: string;
+    directions: Array<'inbound' | 'outbound' | 'web_test'>;
+    enabled: boolean;
+    /**
+     * Read-only; firings in the last 7 days
+     */
+    fired_7d: number;
+    id: string;
+    /**
+     * Read-only. Saved channels that do not send right now, such as sms while SMS alerts are not available
+     */
+    inactive_channels: Array<'in_app' | 'email' | 'push' | 'slack' | 'telegram' | 'webhook' | 'sms'>;
+    /**
+     * False sends only the rule name and a link
+     */
+    include_details: boolean;
+    /**
+     * Read-only
+     */
+    last_fired_at: string | null;
+    max_per_hour: number;
+    name: string;
+    /**
+     * Preset it was created from; informational
+     */
+    preset: 'callback_wanted' | 'booking_missed' | 'unhappy_caller' | 'every_call' | 'summary_failed' | 'asked_for_person' | 'urgent_words';
+    /**
+     * Everyone at or above the role
+     */
+    recipient_roles: Array<'owner' | 'admin' | 'member'>;
+    recipient_user_ids: Array<string>;
+    trigger: 'call_analyzed' | 'live_turn';
+    updated_at: string;
+};
+
+export type AlertRuleCreate = {
+    /**
+     * Unset or null means all agents
+     */
+    assistant_ids?: Array<string>;
+    channel_ids?: Array<string>;
+    channels: Array<'in_app' | 'email' | 'push' | 'slack' | 'telegram' | 'webhook' | 'sms'>;
+    condition: AlertCondition;
+    /**
+     * Unset is inbound
+     */
+    directions?: Array<'inbound' | 'outbound' | 'web_test'>;
+    /**
+     * Unset is true
+     */
+    enabled?: boolean;
+    /**
+     * Unset is true
+     */
+    include_details?: boolean;
+    /**
+     * Unset is 20
+     */
+    max_per_hour?: number;
+    name: string;
+    preset?: 'callback_wanted' | 'booking_missed' | 'unhappy_caller' | 'every_call' | 'summary_failed' | 'asked_for_person' | 'urgent_words';
+    recipient_roles?: Array<'owner' | 'admin' | 'member'>;
+    recipient_user_ids?: Array<string>;
+    trigger: 'call_analyzed' | 'live_turn';
+};
+
+export type AlertRuleUpdate = {
+    /**
+     * An empty list sets all agents
+     */
+    assistant_ids?: Array<string>;
+    channel_ids?: Array<string>;
+    channels?: Array<'in_app' | 'email' | 'push' | 'slack' | 'telegram' | 'webhook' | 'sms'>;
+    condition?: AlertCondition;
+    directions?: Array<'inbound' | 'outbound' | 'web_test'>;
+    enabled?: boolean;
+    include_details?: boolean;
+    max_per_hour?: number;
+    name?: string;
+    recipient_roles?: Array<'owner' | 'admin' | 'member'>;
+    recipient_user_ids?: Array<string>;
+};
+
+export type AnalyticsAgent = {
+    assistant_id: string;
+    avg_duration_ms: number;
+    billed_minutes: number;
+    booked: number;
+    calls: number;
+    connected: number;
+    name: string;
+    /**
+     * Null when no turn latency was recorded
+     */
+    p50_latency_ms: number | null;
+    spend_micro: number;
+};
+
+export type AnalyticsAgentLatency = {
+    assistant_id: string;
+    name: string;
+    p50_ms: number | null;
+    p95_ms: number | null;
+    turns: number;
+};
+
+export type AnalyticsAgents = {
+    data: Array<AnalyticsAgent>;
+    from: string;
+    timezone: string;
+    to: string;
+};
+
+export type AnalyticsLatency = {
+    agents: Array<AnalyticsAgentLatency>;
+    days: Array<AnalyticsLatencyDay>;
+    from: string;
+    /**
+     * Caller finished to agent heard; null when no turn latency was recorded
+     */
+    p50_ms: number | null;
+    p95_ms: number | null;
+    timezone: string;
+    to: string;
+    turns: number;
+};
+
+export type AnalyticsLatencyDay = {
+    date: string;
+    /**
+     * Null on days without recorded turn latency
+     */
+    p50_ms: number | null;
+    p95_ms: number | null;
+    turns: number;
+};
+
+export type AnalyticsOutcomeCount = {
+    calls: number;
+    /**
+     * Call outcome; unknown while a call has none
+     */
+    outcome: string;
+};
+
+export type AnalyticsOutcomes = {
+    /**
+     * Answered to ended, over calls that have both
+     */
+    avg_duration_ms: number;
+    calls: number;
+    connected: number;
+    from: string;
+    opted_out: number;
+    outcomes: Array<AnalyticsOutcomeCount>;
+    timezone: string;
+    to: string;
+};
+
+export type AnalyticsUsage = {
+    days: Array<AnalyticsUsageDay>;
+    from: string;
+    timezone: string;
+    to: string;
+    totals: AnalyticsUsageSplit;
+};
+
+export type AnalyticsUsageBucket = {
+    billed_minutes: number;
+    calls: number;
+    /**
+     * Charges written to the ledger, micro-USD
+     */
+    spend_micro: number;
+};
+
+export type AnalyticsUsageDay = {
+    billed_minutes: number;
+    calls: number;
+    date: string;
+    inbound: AnalyticsUsageBucket;
+    outbound: AnalyticsUsageBucket;
+    /**
+     * Charges written to the ledger, micro-USD
+     */
+    spend_micro: number;
+    web: AnalyticsUsageBucket;
+};
+
+export type AnalyticsUsageSplit = {
+    billed_minutes: number;
+    calls: number;
+    inbound: AnalyticsUsageBucket;
+    outbound: AnalyticsUsageBucket;
+    /**
+     * Charges written to the ledger, micro-USD
+     */
+    spend_micro: number;
+    web: AnalyticsUsageBucket;
+};
+
 export type AnswerKnowledgeGapRequest = {
     answer: string;
     knowledge_base_id: string;
@@ -61,7 +323,7 @@ export type AreaCode = {
 export type Assistant = {
     archived_at?: string;
     /**
-     * Working hours derived from number routing; null until schedules ship
+     * Working hours derived from number routing; null when the agent is not live or paused
      */
     coverage?: AssistantCoverage;
     created_at: string;
@@ -925,10 +1187,23 @@ export type CallAnalysis = {
     quality?: CallQuality;
     reason?: string;
     sentiment?: 'positive' | 'neutral' | 'negative';
+    /**
+     * Why the analysis was skipped, when state is skipped
+     */
+    skip_reason?: string;
+    /**
+     * Returned with 200 while pending instead of 404; summary and data are then empty
+     */
+    state: 'pending' | 'done' | 'skipped' | 'failed';
     successful?: boolean;
     summary: string;
     tokens: number;
     unanswered_question?: string;
+};
+
+export type CallAnalysisRerun = {
+    call_id: string;
+    state: 'pending';
 };
 
 export type CallEvent = {
@@ -2014,7 +2289,7 @@ export type CreateWebhookReplayRequest = {
 
 export type CreateWebhookRequest = {
     description?: string;
-    event_types: Array<'call.started' | 'call.answered' | 'call.ended' | 'call.analyzed' | 'call.recording.ready' | 'call.transferred' | 'campaign.started' | 'campaign.paused' | 'campaign.completed' | 'campaign.contact.completed' | 'compliance.opt_out' | 'billing.balance.low' | 'billing.top_up.succeeded' | 'billing.auto_top_up.failed' | 'number.provisioned' | 'number.released' | 'notification.call.summary' | 'notification.campaign.completed' | 'notification.campaign.paused' | 'notification.billing.balance_low' | 'notification.billing.top_up_succeeded' | 'notification.billing.auto_top_up_failed' | 'notification.spending_request.created' | 'notification.number.provisioned' | 'notification.number.released' | 'notification.compliance.optout_alert' | 'notification.inbox.callback_waiting' | 'notification.alert.missed_calls_spike' | 'notification.alert.transfers_failing' | 'notification.alert.tool_failing' | 'notification.agent.paused' | 'inbox.item.created' | 'inbox.item.cleared' | 'agent.published' | 'agent.paused' | 'agent.resumed' | 'call.flagged' | 'recording.deleted' | 'caller.blocked' | 'number.routing_changed' | 'notification.campaign.safeguard_paused' | 'notification.campaign.review_decided' | 'notification.verification.updated' | 'billing.spend_limit.alert' | 'billing.bundle.renewed' | 'billing.bundle.renewal_failed' | 'billing.payment.refunded' | 'number.rental_failed' | 'notification.billing.spend_limit_alert' | 'notification.billing.bundle_renewed' | 'notification.billing.bundle_renewal_failed' | 'notification.billing.payment_refunded' | 'notification.number.rental_failed' | 'booking.created' | 'booking.confirmed' | 'booking.cancelled' | 'booking.declined' | 'booking.failed' | 'integration.disconnected' | 'tool.disabled' | 'knowledge.gap.created'>;
+    event_types: Array<'call.started' | 'call.answered' | 'call.ended' | 'call.analyzed' | 'call.recording.ready' | 'call.transferred' | 'campaign.started' | 'campaign.paused' | 'campaign.completed' | 'campaign.contact.completed' | 'compliance.opt_out' | 'billing.balance.low' | 'billing.top_up.succeeded' | 'billing.auto_top_up.failed' | 'number.provisioned' | 'number.released' | 'notification.call.summary' | 'notification.campaign.completed' | 'notification.campaign.paused' | 'notification.billing.balance_low' | 'notification.billing.top_up_succeeded' | 'notification.billing.auto_top_up_failed' | 'notification.spending_request.created' | 'notification.number.provisioned' | 'notification.number.released' | 'notification.compliance.optout_alert' | 'notification.inbox.callback_waiting' | 'notification.alert.missed_calls_spike' | 'notification.alert.transfers_failing' | 'notification.alert.tool_failing' | 'notification.agent.paused' | 'inbox.item.created' | 'inbox.item.cleared' | 'agent.published' | 'agent.paused' | 'agent.resumed' | 'call.flagged' | 'recording.deleted' | 'caller.blocked' | 'number.routing_changed' | 'notification.campaign.safeguard_paused' | 'notification.campaign.review_decided' | 'notification.verification.updated' | 'billing.spend_limit.alert' | 'billing.bundle.renewed' | 'billing.bundle.renewal_failed' | 'billing.payment.refunded' | 'number.rental_failed' | 'notification.billing.spend_limit_alert' | 'notification.billing.bundle_renewed' | 'notification.billing.bundle_renewal_failed' | 'notification.billing.payment_refunded' | 'notification.number.rental_failed' | 'booking.created' | 'booking.confirmed' | 'booking.cancelled' | 'booking.declined' | 'booking.failed' | 'integration.disconnected' | 'tool.disabled' | 'knowledge.gap.created' | 'call.alert.fired'>;
     url: string;
 };
 
@@ -2178,7 +2453,10 @@ export type ExtractionField = {
      * The model must return a non-null value
      */
     required?: boolean;
-    type: 'string' | 'number' | 'boolean' | 'enum' | 'date';
+    /**
+     * phone is normalised to E.164 and email is lower-cased; either is null when the call has no valid value
+     */
+    type: 'string' | 'number' | 'boolean' | 'enum' | 'date' | 'phone' | 'email';
 };
 
 export type FlowAssignment = {
@@ -3101,6 +3379,22 @@ export type OrderNumbersResult = {
     numbers: Array<Number>;
 };
 
+export type PageAlertFiring = {
+    data: Array<AlertFiring>;
+    /**
+     * Cursor for the next page; null on the last page
+     */
+    next_cursor: string | null;
+};
+
+export type PageAlertRule = {
+    data: Array<AlertRule>;
+    /**
+     * Cursor for the next page; null on the last page
+     */
+    next_cursor: string | null;
+};
+
 export type PageAssistant = {
     data: Array<Assistant>;
     /**
@@ -3858,7 +4152,7 @@ export type TagCount = {
 };
 
 export type TestWebhookRequest = {
-    event_type?: 'call.started' | 'call.answered' | 'call.ended' | 'call.analyzed' | 'call.recording.ready' | 'call.transferred' | 'campaign.started' | 'campaign.paused' | 'campaign.completed' | 'campaign.contact.completed' | 'compliance.opt_out' | 'billing.balance.low' | 'billing.top_up.succeeded' | 'billing.auto_top_up.failed' | 'number.provisioned' | 'number.released' | 'notification.call.summary' | 'notification.campaign.completed' | 'notification.campaign.paused' | 'notification.billing.balance_low' | 'notification.billing.top_up_succeeded' | 'notification.billing.auto_top_up_failed' | 'notification.spending_request.created' | 'notification.number.provisioned' | 'notification.number.released' | 'notification.compliance.optout_alert' | 'notification.inbox.callback_waiting' | 'notification.alert.missed_calls_spike' | 'notification.alert.transfers_failing' | 'notification.alert.tool_failing' | 'notification.agent.paused' | 'inbox.item.created' | 'inbox.item.cleared' | 'agent.published' | 'agent.paused' | 'agent.resumed' | 'call.flagged' | 'recording.deleted' | 'caller.blocked' | 'number.routing_changed' | 'notification.campaign.safeguard_paused' | 'notification.campaign.review_decided' | 'notification.verification.updated' | 'billing.spend_limit.alert' | 'billing.bundle.renewed' | 'billing.bundle.renewal_failed' | 'billing.payment.refunded' | 'number.rental_failed' | 'notification.billing.spend_limit_alert' | 'notification.billing.bundle_renewed' | 'notification.billing.bundle_renewal_failed' | 'notification.billing.payment_refunded' | 'notification.number.rental_failed' | 'booking.created' | 'booking.confirmed' | 'booking.cancelled' | 'booking.declined' | 'booking.failed' | 'integration.disconnected' | 'tool.disabled' | 'knowledge.gap.created';
+    event_type?: 'call.started' | 'call.answered' | 'call.ended' | 'call.analyzed' | 'call.recording.ready' | 'call.transferred' | 'campaign.started' | 'campaign.paused' | 'campaign.completed' | 'campaign.contact.completed' | 'compliance.opt_out' | 'billing.balance.low' | 'billing.top_up.succeeded' | 'billing.auto_top_up.failed' | 'number.provisioned' | 'number.released' | 'notification.call.summary' | 'notification.campaign.completed' | 'notification.campaign.paused' | 'notification.billing.balance_low' | 'notification.billing.top_up_succeeded' | 'notification.billing.auto_top_up_failed' | 'notification.spending_request.created' | 'notification.number.provisioned' | 'notification.number.released' | 'notification.compliance.optout_alert' | 'notification.inbox.callback_waiting' | 'notification.alert.missed_calls_spike' | 'notification.alert.transfers_failing' | 'notification.alert.tool_failing' | 'notification.agent.paused' | 'inbox.item.created' | 'inbox.item.cleared' | 'agent.published' | 'agent.paused' | 'agent.resumed' | 'call.flagged' | 'recording.deleted' | 'caller.blocked' | 'number.routing_changed' | 'notification.campaign.safeguard_paused' | 'notification.campaign.review_decided' | 'notification.verification.updated' | 'billing.spend_limit.alert' | 'billing.bundle.renewed' | 'billing.bundle.renewal_failed' | 'billing.payment.refunded' | 'number.rental_failed' | 'notification.billing.spend_limit_alert' | 'notification.billing.bundle_renewed' | 'notification.billing.bundle_renewal_failed' | 'notification.billing.payment_refunded' | 'notification.number.rental_failed' | 'booking.created' | 'booking.confirmed' | 'booking.cancelled' | 'booking.declined' | 'booking.failed' | 'integration.disconnected' | 'tool.disabled' | 'knowledge.gap.created' | 'call.alert.fired';
 };
 
 export type TimelineCall = {
@@ -4128,7 +4422,7 @@ export type UpdateKnowledgeFaqSourceRequest = {
 
 export type UpdateWebhookRequest = {
     description?: string;
-    event_types?: Array<'call.started' | 'call.answered' | 'call.ended' | 'call.analyzed' | 'call.recording.ready' | 'call.transferred' | 'campaign.started' | 'campaign.paused' | 'campaign.completed' | 'campaign.contact.completed' | 'compliance.opt_out' | 'billing.balance.low' | 'billing.top_up.succeeded' | 'billing.auto_top_up.failed' | 'number.provisioned' | 'number.released' | 'notification.call.summary' | 'notification.campaign.completed' | 'notification.campaign.paused' | 'notification.billing.balance_low' | 'notification.billing.top_up_succeeded' | 'notification.billing.auto_top_up_failed' | 'notification.spending_request.created' | 'notification.number.provisioned' | 'notification.number.released' | 'notification.compliance.optout_alert' | 'notification.inbox.callback_waiting' | 'notification.alert.missed_calls_spike' | 'notification.alert.transfers_failing' | 'notification.alert.tool_failing' | 'notification.agent.paused' | 'inbox.item.created' | 'inbox.item.cleared' | 'agent.published' | 'agent.paused' | 'agent.resumed' | 'call.flagged' | 'recording.deleted' | 'caller.blocked' | 'number.routing_changed' | 'notification.campaign.safeguard_paused' | 'notification.campaign.review_decided' | 'notification.verification.updated' | 'billing.spend_limit.alert' | 'billing.bundle.renewed' | 'billing.bundle.renewal_failed' | 'billing.payment.refunded' | 'number.rental_failed' | 'notification.billing.spend_limit_alert' | 'notification.billing.bundle_renewed' | 'notification.billing.bundle_renewal_failed' | 'notification.billing.payment_refunded' | 'notification.number.rental_failed' | 'booking.created' | 'booking.confirmed' | 'booking.cancelled' | 'booking.declined' | 'booking.failed' | 'integration.disconnected' | 'tool.disabled' | 'knowledge.gap.created'>;
+    event_types?: Array<'call.started' | 'call.answered' | 'call.ended' | 'call.analyzed' | 'call.recording.ready' | 'call.transferred' | 'campaign.started' | 'campaign.paused' | 'campaign.completed' | 'campaign.contact.completed' | 'compliance.opt_out' | 'billing.balance.low' | 'billing.top_up.succeeded' | 'billing.auto_top_up.failed' | 'number.provisioned' | 'number.released' | 'notification.call.summary' | 'notification.campaign.completed' | 'notification.campaign.paused' | 'notification.billing.balance_low' | 'notification.billing.top_up_succeeded' | 'notification.billing.auto_top_up_failed' | 'notification.spending_request.created' | 'notification.number.provisioned' | 'notification.number.released' | 'notification.compliance.optout_alert' | 'notification.inbox.callback_waiting' | 'notification.alert.missed_calls_spike' | 'notification.alert.transfers_failing' | 'notification.alert.tool_failing' | 'notification.agent.paused' | 'inbox.item.created' | 'inbox.item.cleared' | 'agent.published' | 'agent.paused' | 'agent.resumed' | 'call.flagged' | 'recording.deleted' | 'caller.blocked' | 'number.routing_changed' | 'notification.campaign.safeguard_paused' | 'notification.campaign.review_decided' | 'notification.verification.updated' | 'billing.spend_limit.alert' | 'billing.bundle.renewed' | 'billing.bundle.renewal_failed' | 'billing.payment.refunded' | 'number.rental_failed' | 'notification.billing.spend_limit_alert' | 'notification.billing.bundle_renewed' | 'notification.billing.bundle_renewal_failed' | 'notification.billing.payment_refunded' | 'notification.number.rental_failed' | 'booking.created' | 'booking.confirmed' | 'booking.cancelled' | 'booking.declined' | 'booking.failed' | 'integration.disconnected' | 'tool.disabled' | 'knowledge.gap.created' | 'call.alert.fired'>;
     status?: 'active' | 'disabled';
     url?: string;
 };
@@ -4965,6 +5259,592 @@ export type ValidateAssistantFlowRequestWritable = {
      */
     tools?: Array<AssistantToolWritable>;
 };
+
+export type ListAlertFiringsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page size
+         */
+        limit?: number;
+        /**
+         * Opaque cursor from next_cursor of the previous page
+         */
+        after?: string;
+        rule_id?: string;
+        call_id?: string;
+    };
+    url: '/v1/alert-firings';
+};
+
+export type ListAlertFiringsErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListAlertFiringsError = ListAlertFiringsErrors[keyof ListAlertFiringsErrors];
+
+export type ListAlertFiringsResponses = {
+    /**
+     * OK
+     */
+    200: PageAlertFiring;
+};
+
+export type ListAlertFiringsResponse = ListAlertFiringsResponses[keyof ListAlertFiringsResponses];
+
+export type ListAlertRulesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Page size
+         */
+        limit?: number;
+        /**
+         * Opaque cursor from next_cursor of the previous page
+         */
+        after?: string;
+        /**
+         * Only rules with this trigger
+         */
+        trigger?: 'call_analyzed' | 'live_turn';
+    };
+    url: '/v1/alert-rules';
+};
+
+export type ListAlertRulesErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListAlertRulesError = ListAlertRulesErrors[keyof ListAlertRulesErrors];
+
+export type ListAlertRulesResponses = {
+    /**
+     * OK
+     */
+    200: PageAlertRule;
+};
+
+export type ListAlertRulesResponse = ListAlertRulesResponses[keyof ListAlertRulesResponses];
+
+export type CreateAlertRuleData = {
+    body: AlertRuleCreate;
+    headers: {
+        /**
+         * Replays within 24 h return the stored response; the same key with a different body returns 409
+         */
+        'Idempotency-Key': string;
+    };
+    path?: never;
+    query?: never;
+    url: '/v1/alert-rules';
+};
+
+export type CreateAlertRuleErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type CreateAlertRuleError = CreateAlertRuleErrors[keyof CreateAlertRuleErrors];
+
+export type CreateAlertRuleResponses = {
+    /**
+     * Created
+     */
+    201: AlertRule;
+};
+
+export type CreateAlertRuleResponse = CreateAlertRuleResponses[keyof CreateAlertRuleResponses];
+
+export type DeleteAlertRuleData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/alert-rules/{id}';
+};
+
+export type DeleteAlertRuleErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type DeleteAlertRuleError = DeleteAlertRuleErrors[keyof DeleteAlertRuleErrors];
+
+export type DeleteAlertRuleResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type DeleteAlertRuleResponse = DeleteAlertRuleResponses[keyof DeleteAlertRuleResponses];
+
+export type GetAlertRuleData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/alert-rules/{id}';
+};
+
+export type GetAlertRuleErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetAlertRuleError = GetAlertRuleErrors[keyof GetAlertRuleErrors];
+
+export type GetAlertRuleResponses = {
+    /**
+     * OK
+     */
+    200: AlertRule;
+};
+
+export type GetAlertRuleResponse = GetAlertRuleResponses[keyof GetAlertRuleResponses];
+
+export type UpdateAlertRuleData = {
+    body: AlertRuleUpdate;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/alert-rules/{id}';
+};
+
+export type UpdateAlertRuleErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type UpdateAlertRuleError = UpdateAlertRuleErrors[keyof UpdateAlertRuleErrors];
+
+export type UpdateAlertRuleResponses = {
+    /**
+     * OK
+     */
+    200: AlertRule;
+};
+
+export type UpdateAlertRuleResponse = UpdateAlertRuleResponses[keyof UpdateAlertRuleResponses];
+
+export type GetAnalyticsAgentsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * First local day; defaults to 29 days before to
+         */
+        from?: string;
+        /**
+         * Last local day, inclusive; defaults to today in the workspace time zone. At most 366 days after from
+         */
+        to?: string;
+        /**
+         * Only this agent
+         */
+        assistant_id?: string;
+        /**
+         * Only this call direction
+         */
+        direction?: 'inbound' | 'outbound' | 'web';
+    };
+    url: '/v1/analytics/agents';
+};
+
+export type GetAnalyticsAgentsErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetAnalyticsAgentsError = GetAnalyticsAgentsErrors[keyof GetAnalyticsAgentsErrors];
+
+export type GetAnalyticsAgentsResponses = {
+    /**
+     * OK
+     */
+    200: AnalyticsAgents;
+};
+
+export type GetAnalyticsAgentsResponse = GetAnalyticsAgentsResponses[keyof GetAnalyticsAgentsResponses];
+
+export type GetAnalyticsLatencyData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * First local day; defaults to 29 days before to
+         */
+        from?: string;
+        /**
+         * Last local day, inclusive; defaults to today in the workspace time zone. At most 366 days after from
+         */
+        to?: string;
+        /**
+         * Only this agent
+         */
+        assistant_id?: string;
+        /**
+         * Only this call direction
+         */
+        direction?: 'inbound' | 'outbound' | 'web';
+        /**
+         * day adds one row per local day, zero-filled
+         */
+        group_by?: 'none' | 'day';
+    };
+    url: '/v1/analytics/latency';
+};
+
+export type GetAnalyticsLatencyErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetAnalyticsLatencyError = GetAnalyticsLatencyErrors[keyof GetAnalyticsLatencyErrors];
+
+export type GetAnalyticsLatencyResponses = {
+    /**
+     * OK
+     */
+    200: AnalyticsLatency;
+};
+
+export type GetAnalyticsLatencyResponse = GetAnalyticsLatencyResponses[keyof GetAnalyticsLatencyResponses];
+
+export type GetAnalyticsOutcomesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * First local day; defaults to 29 days before to
+         */
+        from?: string;
+        /**
+         * Last local day, inclusive; defaults to today in the workspace time zone. At most 366 days after from
+         */
+        to?: string;
+        /**
+         * Only this agent
+         */
+        assistant_id?: string;
+        /**
+         * Only this call direction
+         */
+        direction?: 'inbound' | 'outbound' | 'web';
+    };
+    url: '/v1/analytics/outcomes';
+};
+
+export type GetAnalyticsOutcomesErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetAnalyticsOutcomesError = GetAnalyticsOutcomesErrors[keyof GetAnalyticsOutcomesErrors];
+
+export type GetAnalyticsOutcomesResponses = {
+    /**
+     * OK
+     */
+    200: AnalyticsOutcomes;
+};
+
+export type GetAnalyticsOutcomesResponse = GetAnalyticsOutcomesResponses[keyof GetAnalyticsOutcomesResponses];
+
+export type GetAnalyticsUsageData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * First local day; defaults to 29 days before to
+         */
+        from?: string;
+        /**
+         * Last local day, inclusive; defaults to today in the workspace time zone. At most 366 days after from
+         */
+        to?: string;
+        /**
+         * Only this agent
+         */
+        assistant_id?: string;
+        /**
+         * Only this call direction
+         */
+        direction?: 'inbound' | 'outbound' | 'web';
+        /**
+         * day adds one row per local day, zero-filled
+         */
+        group_by?: 'none' | 'day';
+    };
+    url: '/v1/analytics/usage';
+};
+
+export type GetAnalyticsUsageErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetAnalyticsUsageError = GetAnalyticsUsageErrors[keyof GetAnalyticsUsageErrors];
+
+export type GetAnalyticsUsageResponses = {
+    /**
+     * OK
+     */
+    200: AnalyticsUsage;
+};
+
+export type GetAnalyticsUsageResponse = GetAnalyticsUsageResponses[keyof GetAnalyticsUsageResponses];
 
 export type ListAreaCodesData = {
     body?: never;
@@ -8307,6 +9187,70 @@ export type GetCallAnalysisResponses = {
 };
 
 export type GetCallAnalysisResponse = GetCallAnalysisResponses[keyof GetCallAnalysisResponses];
+
+export type RerunCallAnalysisData = {
+    body?: never;
+    headers: {
+        /**
+         * Replays within 24 h return the stored response; the same key with a different body returns 409
+         */
+        'Idempotency-Key': string;
+    };
+    path: {
+        /**
+         * <cell>_<ULID>
+         */
+        call_id: string;
+    };
+    query?: never;
+    url: '/v1/calls/{call_id}/analysis/rerun';
+};
+
+export type RerunCallAnalysisErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type RerunCallAnalysisError = RerunCallAnalysisErrors[keyof RerunCallAnalysisErrors];
+
+export type RerunCallAnalysisResponses = {
+    /**
+     * Accepted
+     */
+    202: CallAnalysisRerun;
+};
+
+export type RerunCallAnalysisResponse = RerunCallAnalysisResponses[keyof RerunCallAnalysisResponses];
 
 export type GetCallConversationData = {
     body?: never;
