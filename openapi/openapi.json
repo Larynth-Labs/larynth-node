@@ -195,6 +195,29 @@
         },
         "type": "object"
       },
+      "AcceptKnowledgeGapDraftRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "answer": {
+            "description": "The owner's edit of the draft; unset uses the draft as it is",
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "knowledge_base_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "question": {
+            "description": "Question to store; unset uses the draft's question",
+            "maxLength": 300,
+            "type": "string"
+          }
+        },
+        "required": [
+          "knowledge_base_id"
+        ],
+        "type": "object"
+      },
       "AddCampaignContactsRequest": {
         "additionalProperties": false,
         "properties": {
@@ -228,6 +251,21 @@
         "required": [
           "added",
           "skipped"
+        ],
+        "type": "object"
+      },
+      "AddIssueNoteRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "note": {
+            "description": "Do not paste caller details",
+            "maxLength": 1000,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "note"
         ],
         "type": "object"
       },
@@ -272,6 +310,989 @@
         },
         "required": [
           "mode"
+        ],
+        "type": "object"
+      },
+      "AlertClause": {
+        "additionalProperties": false,
+        "properties": {
+          "field": {
+            "description": "Platform, call, analysis or data.<name> field for call_analyzed rules; caller_said, intent.* or agent.* for live_turn rules",
+            "maxLength": 80,
+            "minLength": 1,
+            "type": "string"
+          },
+          "op": {
+            "enum": [
+              "eq",
+              "ne",
+              "in",
+              "not_in",
+              "contains",
+              "gt",
+              "lt",
+              "exists",
+              "not_exists",
+              "contains_any"
+            ],
+            "type": "string"
+          },
+          "value": {
+            "description": "Operand; omitted for exists and not_exists; a list for in, not_in and contains_any (1 to 20 phrases of at most 40 characters)"
+          }
+        },
+        "required": [
+          "field",
+          "op"
+        ],
+        "type": "object"
+      },
+      "AlertCondition": {
+        "additionalProperties": false,
+        "properties": {
+          "all": {
+            "description": "Every clause must match. Exactly one of all or any is set; the service rejects anything else with alert_rule.invalid_condition",
+            "items": {
+              "$ref": "#/components/schemas/AlertClause"
+            },
+            "maxItems": 8,
+            "minItems": 1,
+            "type": "array"
+          },
+          "any": {
+            "description": "At least one clause must match. Exactly one of all or any is set",
+            "items": {
+              "$ref": "#/components/schemas/AlertClause"
+            },
+            "maxItems": 8,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "AlertDelivery": {
+        "additionalProperties": false,
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "channel": {
+            "enum": [
+              "in_app",
+              "email",
+              "push",
+              "slack",
+              "telegram",
+              "webhook",
+              "sms"
+            ],
+            "type": "string"
+          },
+          "error": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "sent",
+              "failed",
+              "skipped"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "channel",
+          "status",
+          "at"
+        ],
+        "type": "object"
+      },
+      "AlertFiring": {
+        "additionalProperties": false,
+        "properties": {
+          "call_id": {
+            "pattern": "^[a-z0-9]{2,8}_[0-9A-HJKMNP-TV-Z]{26}$",
+            "type": "string"
+          },
+          "deliveries": {
+            "items": {
+              "$ref": "#/components/schemas/AlertDelivery"
+            },
+            "type": "array"
+          },
+          "fired_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "matched": {
+            "$ref": "#/components/schemas/AlertMatch",
+            "description": "Can quote the caller"
+          },
+          "rule_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rule_name": {
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "sent",
+              "throttled",
+              "failed",
+              "dry_run"
+            ],
+            "type": "string"
+          },
+          "trigger": {
+            "enum": [
+              "call_analyzed",
+              "live_turn"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "rule_id",
+          "rule_name",
+          "call_id",
+          "trigger",
+          "state",
+          "matched",
+          "deliveries",
+          "fired_at"
+        ],
+        "type": "object"
+      },
+      "AlertMatch": {
+        "additionalProperties": false,
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "value": {}
+        },
+        "required": [
+          "field",
+          "value"
+        ],
+        "type": "object"
+      },
+      "AlertRule": {
+        "additionalProperties": false,
+        "properties": {
+          "assistant_ids": {
+            "description": "Null means all agents",
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "channel_ids": {
+            "description": "Slack and Telegram channels",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "channels": {
+            "items": {
+              "enum": [
+                "in_app",
+                "email",
+                "push",
+                "slack",
+                "telegram",
+                "webhook",
+                "sms"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "condition": {
+            "$ref": "#/components/schemas/AlertCondition"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "directions": {
+            "items": {
+              "enum": [
+                "inbound",
+                "outbound",
+                "web_test"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "fired_7d": {
+            "description": "Read-only; firings in the last 7 days",
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "inactive_channels": {
+            "description": "Read-only. Saved channels that do not send right now, such as sms while SMS alerts are not available",
+            "items": {
+              "enum": [
+                "in_app",
+                "email",
+                "push",
+                "slack",
+                "telegram",
+                "webhook",
+                "sms"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "include_details": {
+            "description": "False sends only the rule name and a link",
+            "type": "boolean"
+          },
+          "last_fired_at": {
+            "description": "Read-only",
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "max_per_hour": {
+            "format": "int64",
+            "maximum": 200,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "name": {
+            "maxLength": 80,
+            "minLength": 1,
+            "type": "string"
+          },
+          "preset": {
+            "description": "Preset it was created from; informational",
+            "enum": [
+              "callback_wanted",
+              "booking_missed",
+              "unhappy_caller",
+              "every_call",
+              "summary_failed",
+              "asked_for_person",
+              "urgent_words"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "recipient_roles": {
+            "description": "Everyone at or above the role",
+            "items": {
+              "enum": [
+                "owner",
+                "admin",
+                "member"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "recipient_user_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "trigger": {
+            "enum": [
+              "call_analyzed",
+              "live_turn"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "enabled",
+          "trigger",
+          "preset",
+          "assistant_ids",
+          "directions",
+          "condition",
+          "channels",
+          "recipient_user_ids",
+          "recipient_roles",
+          "channel_ids",
+          "include_details",
+          "max_per_hour",
+          "inactive_channels",
+          "last_fired_at",
+          "fired_7d",
+          "created_at",
+          "updated_at"
+        ],
+        "type": "object"
+      },
+      "AlertRuleCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "assistant_ids": {
+            "description": "Unset or null means all agents",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 100,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "channel_ids": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 20,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "channels": {
+            "items": {
+              "enum": [
+                "in_app",
+                "email",
+                "push",
+                "slack",
+                "telegram",
+                "webhook",
+                "sms"
+              ],
+              "type": "string"
+            },
+            "maxItems": 7,
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "condition": {
+            "$ref": "#/components/schemas/AlertCondition"
+          },
+          "directions": {
+            "description": "Unset is inbound",
+            "items": {
+              "enum": [
+                "inbound",
+                "outbound",
+                "web_test"
+              ],
+              "type": "string"
+            },
+            "maxItems": 3,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "enabled": {
+            "description": "Unset is true",
+            "type": "boolean"
+          },
+          "include_details": {
+            "description": "Unset is true",
+            "type": "boolean"
+          },
+          "max_per_hour": {
+            "description": "Unset is 20",
+            "format": "int64",
+            "maximum": 200,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "name": {
+            "maxLength": 80,
+            "minLength": 1,
+            "type": "string"
+          },
+          "preset": {
+            "enum": [
+              "callback_wanted",
+              "booking_missed",
+              "unhappy_caller",
+              "every_call",
+              "summary_failed",
+              "asked_for_person",
+              "urgent_words"
+            ],
+            "type": "string"
+          },
+          "recipient_roles": {
+            "items": {
+              "enum": [
+                "owner",
+                "admin",
+                "member"
+              ],
+              "type": "string"
+            },
+            "maxItems": 3,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "recipient_user_ids": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 100,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "trigger": {
+            "enum": [
+              "call_analyzed",
+              "live_turn"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "trigger",
+          "condition",
+          "channels"
+        ],
+        "type": "object"
+      },
+      "AlertRuleUpdate": {
+        "additionalProperties": false,
+        "properties": {
+          "assistant_ids": {
+            "description": "An empty list sets all agents",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 100,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "channel_ids": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 20,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "channels": {
+            "items": {
+              "enum": [
+                "in_app",
+                "email",
+                "push",
+                "slack",
+                "telegram",
+                "webhook",
+                "sms"
+              ],
+              "type": "string"
+            },
+            "maxItems": 7,
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "condition": {
+            "$ref": "#/components/schemas/AlertCondition"
+          },
+          "directions": {
+            "items": {
+              "enum": [
+                "inbound",
+                "outbound",
+                "web_test"
+              ],
+              "type": "string"
+            },
+            "maxItems": 3,
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "include_details": {
+            "type": "boolean"
+          },
+          "max_per_hour": {
+            "format": "int64",
+            "maximum": 200,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "name": {
+            "maxLength": 80,
+            "minLength": 1,
+            "type": "string"
+          },
+          "recipient_roles": {
+            "items": {
+              "enum": [
+                "owner",
+                "admin",
+                "member"
+              ],
+              "type": "string"
+            },
+            "maxItems": 3,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "recipient_user_ids": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 100,
+            "type": "array",
+            "uniqueItems": true
+          }
+        },
+        "type": "object"
+      },
+      "AnalyticsAgent": {
+        "additionalProperties": false,
+        "properties": {
+          "assistant_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "avg_duration_ms": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "billed_minutes": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "booked": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "calls": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "connected": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "p50_latency_ms": {
+            "description": "Null when no turn latency was recorded",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "spend_micro": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "assistant_id",
+          "name",
+          "calls",
+          "connected",
+          "booked",
+          "billed_minutes",
+          "spend_micro",
+          "avg_duration_ms",
+          "p50_latency_ms"
+        ],
+        "type": "object"
+      },
+      "AnalyticsAgentLatency": {
+        "additionalProperties": false,
+        "properties": {
+          "assistant_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "p50_ms": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "p95_ms": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "turns": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "assistant_id",
+          "name",
+          "turns",
+          "p50_ms",
+          "p95_ms"
+        ],
+        "type": "object"
+      },
+      "AnalyticsAgents": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/AnalyticsAgent"
+            },
+            "type": "array"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "from",
+          "to",
+          "timezone",
+          "data"
+        ],
+        "type": "object"
+      },
+      "AnalyticsLatency": {
+        "additionalProperties": false,
+        "properties": {
+          "agents": {
+            "items": {
+              "$ref": "#/components/schemas/AnalyticsAgentLatency"
+            },
+            "type": "array"
+          },
+          "days": {
+            "items": {
+              "$ref": "#/components/schemas/AnalyticsLatencyDay"
+            },
+            "type": "array"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "p50_ms": {
+            "description": "Caller finished to agent heard; null when no turn latency was recorded",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "p95_ms": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "turns": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "from",
+          "to",
+          "timezone",
+          "turns",
+          "p50_ms",
+          "p95_ms",
+          "days",
+          "agents"
+        ],
+        "type": "object"
+      },
+      "AnalyticsLatencyDay": {
+        "additionalProperties": false,
+        "properties": {
+          "date": {
+            "format": "date",
+            "type": "string"
+          },
+          "p50_ms": {
+            "description": "Null on days without recorded turn latency",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "p95_ms": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "turns": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "date",
+          "turns",
+          "p50_ms",
+          "p95_ms"
+        ],
+        "type": "object"
+      },
+      "AnalyticsOutcomeCount": {
+        "additionalProperties": false,
+        "properties": {
+          "calls": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "outcome": {
+            "description": "Call outcome; unknown while a call has none",
+            "type": "string"
+          }
+        },
+        "required": [
+          "outcome",
+          "calls"
+        ],
+        "type": "object"
+      },
+      "AnalyticsOutcomes": {
+        "additionalProperties": false,
+        "properties": {
+          "avg_duration_ms": {
+            "description": "Answered to ended, over calls that have both",
+            "format": "int64",
+            "type": "integer"
+          },
+          "calls": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "connected": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "opted_out": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "outcomes": {
+            "items": {
+              "$ref": "#/components/schemas/AnalyticsOutcomeCount"
+            },
+            "type": "array"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "from",
+          "to",
+          "timezone",
+          "calls",
+          "connected",
+          "opted_out",
+          "avg_duration_ms",
+          "outcomes"
+        ],
+        "type": "object"
+      },
+      "AnalyticsUsage": {
+        "additionalProperties": false,
+        "properties": {
+          "days": {
+            "items": {
+              "$ref": "#/components/schemas/AnalyticsUsageDay"
+            },
+            "type": "array"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/AnalyticsUsageSplit"
+          }
+        },
+        "required": [
+          "from",
+          "to",
+          "timezone",
+          "totals",
+          "days"
+        ],
+        "type": "object"
+      },
+      "AnalyticsUsageBucket": {
+        "additionalProperties": false,
+        "properties": {
+          "billed_minutes": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "calls": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "spend_micro": {
+            "description": "Charges written to the ledger, micro-USD",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "calls",
+          "billed_minutes",
+          "spend_micro"
+        ],
+        "type": "object"
+      },
+      "AnalyticsUsageDay": {
+        "additionalProperties": false,
+        "properties": {
+          "billed_minutes": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "calls": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "date": {
+            "format": "date",
+            "type": "string"
+          },
+          "inbound": {
+            "$ref": "#/components/schemas/AnalyticsUsageBucket"
+          },
+          "outbound": {
+            "$ref": "#/components/schemas/AnalyticsUsageBucket"
+          },
+          "spend_micro": {
+            "description": "Charges written to the ledger, micro-USD",
+            "format": "int64",
+            "type": "integer"
+          },
+          "web": {
+            "$ref": "#/components/schemas/AnalyticsUsageBucket"
+          }
+        },
+        "required": [
+          "date",
+          "inbound",
+          "outbound",
+          "web",
+          "calls",
+          "billed_minutes",
+          "spend_micro"
+        ],
+        "type": "object"
+      },
+      "AnalyticsUsageSplit": {
+        "additionalProperties": false,
+        "properties": {
+          "billed_minutes": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "calls": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "inbound": {
+            "$ref": "#/components/schemas/AnalyticsUsageBucket"
+          },
+          "outbound": {
+            "$ref": "#/components/schemas/AnalyticsUsageBucket"
+          },
+          "spend_micro": {
+            "description": "Charges written to the ledger, micro-USD",
+            "format": "int64",
+            "type": "integer"
+          },
+          "web": {
+            "$ref": "#/components/schemas/AnalyticsUsageBucket"
+          }
+        },
+        "required": [
+          "inbound",
+          "outbound",
+          "web",
+          "calls",
+          "billed_minutes",
+          "spend_micro"
         ],
         "type": "object"
       },
@@ -346,7 +1367,7 @@
           },
           "coverage": {
             "$ref": "#/components/schemas/AssistantCoverage",
-            "description": "Working hours derived from number routing; null until schedules ship"
+            "description": "Working hours derived from number routing; null when the agent is not live or paused"
           },
           "created_at": {
             "format": "date-time",
@@ -667,6 +1688,13 @@
             "additionalProperties": {},
             "type": "object"
           },
+          "stt_fallback_model_ids": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 3,
+            "type": "array"
+          },
           "stt_model_id": {
             "description": "Required for cascade",
             "format": "uuid",
@@ -695,6 +1723,13 @@
               "end"
             ],
             "type": "string"
+          },
+          "tts_fallback_model_ids": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 3,
+            "type": "array"
           },
           "tts_model_id": {
             "description": "Required for cascade",
@@ -890,6 +1925,10 @@
       "AssistantTool": {
         "additionalProperties": false,
         "properties": {
+          "business_hours_only": {
+            "description": "Transfer tools only: do not dial outside the business hours of the number the call came in on; the agent takes a message instead",
+            "type": "boolean"
+          },
           "calendar_tool": {
             "$ref": "#/components/schemas/CalendarToolConfig",
             "description": "calendar: expands into the booking tools find_availability, hold_slot, confirm_booking, find_my_bookings, cancel_booking and reschedule_booking"
@@ -1118,6 +2157,13 @@
             "additionalProperties": {},
             "type": "object"
           },
+          "stt_fallback_model_ids": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 3,
+            "type": "array"
+          },
           "stt_model_id": {
             "description": "Required for cascade",
             "format": "uuid",
@@ -1146,6 +2192,13 @@
               "end"
             ],
             "type": "string"
+          },
+          "tts_fallback_model_ids": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 3,
+            "type": "array"
           },
           "tts_model_id": {
             "description": "Required for cascade",
@@ -1313,6 +2366,13 @@
             "additionalProperties": {},
             "type": "object"
           },
+          "stt_fallback_model_ids": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 3,
+            "type": "array"
+          },
           "stt_model_id": {
             "description": "Required for cascade",
             "format": "uuid",
@@ -1341,6 +2401,13 @@
               "end"
             ],
             "type": "string"
+          },
+          "tts_fallback_model_ids": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 3,
+            "type": "array"
           },
           "tts_model_id": {
             "description": "Required for cascade",
@@ -1470,6 +2537,11 @@
             "format": "int64",
             "type": "integer"
           },
+          "no_written_consent": {
+            "description": "Contacts whose consent is not written, in states where campaign calls need written consent; skipped at dial time",
+            "format": "int64",
+            "type": "integer"
+          },
           "sample_left_out": {
             "items": {
               "$ref": "#/components/schemas/LeftOutContact"
@@ -1486,6 +2558,7 @@
           "total",
           "dnc",
           "no_consent",
+          "no_written_consent",
           "callable",
           "by_timezone",
           "by_state",
@@ -2387,6 +3460,17 @@
             "format": "uuid",
             "type": "string"
           },
+          "coverage": {
+            "description": "Why the agent got this call: inside hours, after hours, a holiday, or forwarded because the owner line was busy or unanswered",
+            "enum": [
+              "open",
+              "after_hours",
+              "holiday",
+              "forwarded_busy",
+              "forwarded_no_answer"
+            ],
+            "type": "string"
+          },
           "created_at": {
             "format": "date-time",
             "type": "string"
@@ -2491,6 +3575,16 @@
             ],
             "type": "string"
           },
+          "phone_leg_ms": {
+            "description": "Billed time of the live-takeover phone legs dialled to your phones, on top of billable_ms",
+            "format": "int64",
+            "type": "integer"
+          },
+          "phone_leg_price_micro": {
+            "description": "Settled price of the phone legs in micro-USD at the transfer_minute rate; part of price_micro",
+            "format": "int64",
+            "type": "integer"
+          },
           "price_micro": {
             "description": "Settled price in micro-USD",
             "format": "int64",
@@ -2575,6 +3669,10 @@
           "updated_at": {
             "format": "date-time",
             "type": "string"
+          },
+          "would_have_missed": {
+            "description": "True when the call came after hours, on a holiday or after the owner line was busy or unanswered",
+            "type": "boolean"
           }
         },
         "required": [
@@ -2584,6 +3682,7 @@
           "status",
           "recording_allowed",
           "opted_out",
+          "would_have_missed",
           "created_at",
           "updated_at",
           "spam_flagged",
@@ -2663,6 +3762,20 @@
             ],
             "type": "string"
           },
+          "skip_reason": {
+            "description": "Why the analysis was skipped, when state is skipped",
+            "type": "string"
+          },
+          "state": {
+            "description": "Returned with 200 while pending instead of 404; summary and data are then empty",
+            "enum": [
+              "pending",
+              "done",
+              "skipped",
+              "failed"
+            ],
+            "type": "string"
+          },
           "successful": {
             "type": "boolean"
           },
@@ -2680,12 +3793,33 @@
         },
         "required": [
           "call_id",
+          "state",
           "summary",
           "data",
           "tokens",
           "cost_micro",
           "created_at",
           "callback_requested"
+        ],
+        "type": "object"
+      },
+      "CallAnalysisRerun": {
+        "additionalProperties": false,
+        "properties": {
+          "call_id": {
+            "pattern": "^[a-z0-9]{2,8}_[0-9A-HJKMNP-TV-Z]{26}$",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "pending"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "call_id",
+          "state"
         ],
         "type": "object"
       },
@@ -2834,6 +3968,10 @@
           "end_on_goodbye": {
             "type": "boolean"
           },
+          "human_route": {
+            "$ref": "#/components/schemas/HumanRoute",
+            "description": "Fast route to a person on inbound phone calls. Unset is on for agents with a transfer destination, and agents set up from now on add a short line after the greeting that tells callers about it"
+          },
           "idle_reminder": {
             "description": "Ask once whether the caller is still there before the silence hang-up. Unset is on",
             "type": "boolean"
@@ -2854,6 +3992,10 @@
               "long"
             ],
             "type": "string"
+          },
+          "message_read_back": {
+            "description": "When the agent takes a message, it reads the name, callback number and message back before closing and fixes anything the caller corrects. Unset is off",
+            "type": "boolean"
           },
           "recording": {
             "description": "Record calls of this agent. Unset is on; off still keeps transcripts and the caller hears that the call may be transcribed",
@@ -3115,6 +4257,7 @@
             "enum": [
               "agent_minutes",
               "bridged_minutes",
+              "phone_leg_minutes",
               "premium_voice",
               "premium_model"
             ],
@@ -3189,6 +4332,89 @@
           "id",
           "state",
           "retention_until"
+        ],
+        "type": "object"
+      },
+      "CallText": {
+        "additionalProperties": false,
+        "properties": {
+          "body": {
+            "description": "null after the retention period or a caller erasure",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "direction": {
+            "enum": [
+              "out",
+              "in"
+            ],
+            "type": "string"
+          },
+          "error": {
+            "description": "Carrier failure class, for example rejected or not_enabled",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "template",
+              "stop_confirm",
+              "stop_clarify",
+              "help",
+              "reply",
+              "stop",
+              "start",
+              "unclear"
+            ],
+            "type": "string"
+          },
+          "sent_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "skip_reason": {
+            "enum": [
+              "feature_off",
+              "carrier_not_ready",
+              "opted_out",
+              "no_consent",
+              "duplicate",
+              "rate_limited",
+              "no_caller_number",
+              "stop_unclear_hold"
+            ],
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "queued",
+              "sent",
+              "failed",
+              "skipped",
+              "received"
+            ],
+            "type": "string"
+          },
+          "template_key": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "direction",
+          "kind",
+          "status",
+          "body",
+          "created_at"
         ],
         "type": "object"
       },
@@ -3640,7 +4866,8 @@
               "window_closed",
               "no_caller_id",
               "compliance",
-              "operator"
+              "operator",
+              "readiness"
             ],
             "type": "string"
           },
@@ -4747,7 +5974,15 @@
               "callback_check_goodbye",
               "callback_check_digits",
               "booking_instructions",
-              "booking_fallback_line"
+              "booking_fallback_line",
+              "recording_monitoring_notice",
+              "transcript_monitoring_notice",
+              "recording_memory_notice",
+              "transcript_memory_notice",
+              "memory_attestation",
+              "sms_stop_confirm",
+              "sms_help",
+              "sms_stop_clarify"
             ],
             "type": "string"
           },
@@ -5584,6 +6819,11 @@
             "format": "uuid",
             "type": "string"
           },
+          "callback_item_id": {
+            "description": "The inbox callback item this call answers; a caller's own callback request on that item covers one informational call to the caller's number",
+            "format": "uuid",
+            "type": "string"
+          },
           "contact_id": {
             "format": "uuid",
             "type": "string"
@@ -5943,6 +7183,26 @@
         ],
         "type": "object"
       },
+      "CreatePracticeRunInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "target": {
+            "default": "draft",
+            "enum": [
+              "draft",
+              "version"
+            ],
+            "type": "string"
+          },
+          "version": {
+            "description": "With target version; unset is the published version",
+            "format": "int64",
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "CreateRevocationRequest": {
         "additionalProperties": false,
         "properties": {
@@ -6116,7 +7376,13 @@
                 "booking.failed",
                 "integration.disconnected",
                 "tool.disabled",
-                "knowledge.gap.created"
+                "knowledge.gap.created",
+                "call.alert.fired",
+                "call.supervision.started",
+                "call.supervision.ended",
+                "issue.created",
+                "issue.updated",
+                "issue.resolved"
               ],
               "type": "string"
             },
@@ -6564,12 +7830,15 @@
             "type": "boolean"
           },
           "type": {
+            "description": "phone is normalised to E.164 and email is lower-cased; either is null when the call has no valid value",
             "enum": [
               "string",
               "number",
               "boolean",
               "enum",
-              "date"
+              "date",
+              "phone",
+              "email"
             ],
             "type": "string"
           }
@@ -7174,6 +8443,17 @@
         ],
         "type": "object"
       },
+      "GeneratePracticeTestsInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "template_key": {
+            "description": "Unset uses the template the agent was set up from, or the general set",
+            "maxLength": 64,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "GuardrailBuiltIn": {
         "additionalProperties": false,
         "properties": {
@@ -7387,6 +8667,20 @@
           "start_minute",
           "end_minute"
         ],
+        "type": "object"
+      },
+      "HumanRoute": {
+        "additionalProperties": false,
+        "properties": {
+          "keypad_zero": {
+            "description": "Pressing 0 on its own transfers the caller to the first transfer destination, with no model decision. Ignored while the agent collects a keypad entry. Unset is on",
+            "type": "boolean"
+          },
+          "spoken": {
+            "description": "Saying person, human, representative, operator or agent transfers the caller to the first transfer destination, with no model decision. Unset is on",
+            "type": "boolean"
+          }
+        },
         "type": "object"
       },
       "ICEServer": {
@@ -7696,6 +8990,349 @@
         },
         "type": "object"
       },
+      "Issue": {
+        "additionalProperties": false,
+        "properties": {
+          "actions": {
+            "description": "The server decides which apply; the first is the primary one",
+            "items": {
+              "$ref": "#/components/schemas/IssueAction"
+            },
+            "type": "array"
+          },
+          "assignee": {
+            "$ref": "#/components/schemas/IssueAssignee",
+            "description": "Absent when nobody is assigned"
+          },
+          "assistant_id": {
+            "format": "uuid",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "assistant_name": {
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "detail": {
+            "additionalProperties": {},
+            "type": "object"
+          },
+          "first_seen_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "ignored_until": {
+            "description": "Null with status ignored means ignored for good",
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "impact": {
+            "description": "Higher is worse; the board is sorted by it",
+            "format": "int64",
+            "type": "integer"
+          },
+          "kind": {
+            "enum": [
+              "knowledge_gap",
+              "missed_booking",
+              "said_not_done",
+              "tool_error",
+              "transfer_failed",
+              "no_person_available",
+              "caller_hung_up",
+              "unresolved_call",
+              "test_failed",
+              "reported"
+            ],
+            "type": "string"
+          },
+          "last_seen_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "latest": {
+            "$ref": "#/components/schemas/IssueLatest"
+          },
+          "occurrences": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "ref": {
+            "$ref": "#/components/schemas/IssueRef"
+          },
+          "reopened_count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "resolution": {
+            "enum": [
+              "fixed",
+              "auto_fixed",
+              "not_a_problem",
+              "no_recent"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "resolved_at": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "enum": [
+              "open",
+              "resolved",
+              "ignored"
+            ],
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "title",
+          "status",
+          "resolution",
+          "assistant_id",
+          "detail",
+          "occurrences",
+          "impact",
+          "reopened_count",
+          "ignored_until",
+          "first_seen_at",
+          "last_seen_at",
+          "resolved_at",
+          "actions",
+          "created_at",
+          "updated_at"
+        ],
+        "type": "object"
+      },
+      "IssueAction": {
+        "additionalProperties": false,
+        "properties": {
+          "href": {
+            "description": "Dashboard path the action opens",
+            "type": "string"
+          },
+          "key": {
+            "enum": [
+              "add_answer",
+              "reconnect_tool",
+              "open_tool",
+              "check_transfer",
+              "call_back",
+              "open_agent",
+              "set_up_transfer",
+              "open_call"
+            ],
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "label"
+        ],
+        "type": "object"
+      },
+      "IssueAssignee": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "user_id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_id",
+          "name"
+        ],
+        "type": "object"
+      },
+      "IssueEvent": {
+        "additionalProperties": false,
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "by_name": {
+            "type": "string"
+          },
+          "by_user_id": {
+            "format": "uuid",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "data": {
+            "additionalProperties": {},
+            "type": "object"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "opened",
+              "reopened",
+              "resolved",
+              "ignored",
+              "assigned",
+              "note",
+              "auto_closed"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "by_user_id",
+          "data",
+          "at"
+        ],
+        "type": "object"
+      },
+      "IssueLatest": {
+        "additionalProperties": false,
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "call_id": {
+            "type": "string"
+          },
+          "evidence": {
+            "additionalProperties": {},
+            "description": "turn, at_ms, quote, tool and error where known; the quote is dropped when the transcript retention passes",
+            "type": "object"
+          }
+        },
+        "required": [
+          "at",
+          "evidence"
+        ],
+        "type": "object"
+      },
+      "IssueOccurrence": {
+        "additionalProperties": false,
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "call_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "evidence": {
+            "additionalProperties": {},
+            "type": "object"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "call_id",
+          "at",
+          "evidence"
+        ],
+        "type": "object"
+      },
+      "IssueRef": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "knowledge_gap",
+              "tool",
+              "transfer_target",
+              "test_run",
+              "call"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ],
+        "type": "object"
+      },
+      "IssuesSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "by_kind": {
+            "additionalProperties": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "object"
+          },
+          "open": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "top": {
+            "description": "At most three open issues, worst first",
+            "items": {
+              "$ref": "#/components/schemas/Issue"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "open",
+          "by_kind",
+          "top"
+        ],
+        "type": "object"
+      },
       "KnowledgeBase": {
         "additionalProperties": false,
         "properties": {
@@ -7962,6 +9599,11 @@
             "format": "uuid",
             "type": "string"
           },
+          "asked_again_at": {
+            "description": "Last time callers asked this after it was answered or dismissed",
+            "format": "date-time",
+            "type": "string"
+          },
           "assistant_ids": {
             "items": {
               "type": "string"
@@ -7984,6 +9626,29 @@
             "type": "string"
           },
           "decided_by_name": {
+            "type": "string"
+          },
+          "draft_answer": {
+            "type": "string"
+          },
+          "draft_sources": {
+            "items": {
+              "$ref": "#/components/schemas/KnowledgeGapDraftSource"
+            },
+            "type": "array"
+          },
+          "draft_status": {
+            "description": "drafted: an answer is ready; blocked_unverified: no draft because a fact could not be found verbatim in the owner's sources; blocked_clinical: medical or legal question, never drafted",
+            "enum": [
+              "none",
+              "drafted",
+              "blocked_unverified",
+              "blocked_clinical"
+            ],
+            "type": "string"
+          },
+          "drafted_at": {
+            "format": "date-time",
             "type": "string"
           },
           "examples": {
@@ -8012,6 +9677,10 @@
             "description": "Normalised wording of the group",
             "type": "string"
           },
+          "reasked_count": {
+            "format": "int64",
+            "type": "integer"
+          },
           "state": {
             "enum": [
               "open",
@@ -8030,7 +9699,26 @@
           "call_ids",
           "assistant_ids",
           "knowledge_base_ids",
-          "state"
+          "state",
+          "draft_status",
+          "draft_sources",
+          "reasked_count"
+        ],
+        "type": "object"
+      },
+      "KnowledgeGapDraftSource": {
+        "additionalProperties": false,
+        "properties": {
+          "source_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "source_id"
         ],
         "type": "object"
       },
@@ -8422,7 +10110,8 @@
               "dnc",
               "no_consent",
               "no_timezone",
-              "not_us"
+              "not_us",
+              "no_written_consent"
             ],
             "type": "string"
           }
@@ -8583,21 +10272,6 @@
         ],
         "type": "object"
       },
-      "ListSpamAllow": {
-        "additionalProperties": false,
-        "properties": {
-          "data": {
-            "items": {
-              "$ref": "#/components/schemas/SpamAllow"
-            },
-            "type": "array"
-          }
-        },
-        "required": [
-          "data"
-        ],
-        "type": "object"
-      },
       "ListTagCount": {
         "additionalProperties": false,
         "properties": {
@@ -8674,6 +10348,10 @@
           "last_line": {
             "$ref": "#/components/schemas/LiveCallLine"
           },
+          "monitoring_covered": {
+            "description": "False when the call started before live join was on or played no recording notice, so Listen and Take over would be refused",
+            "type": "boolean"
+          },
           "number_id": {
             "format": "uuid",
             "type": "string"
@@ -8690,6 +10368,10 @@
               "in_progress"
             ],
             "type": "string"
+          },
+          "supervised_by": {
+            "$ref": "#/components/schemas/LiveCallSupervisor",
+            "description": "The person listening to or taking over this call"
           }
         },
         "required": [
@@ -8699,7 +10381,8 @@
           "started_at",
           "assistant_id",
           "assistant_version",
-          "flags"
+          "flags",
+          "monitoring_covered"
         ],
         "type": "object"
       },
@@ -8750,6 +10433,42 @@
           "speaker",
           "text",
           "at"
+        ],
+        "type": "object"
+      },
+      "LiveCallSupervisor": {
+        "additionalProperties": false,
+        "properties": {
+          "mode": {
+            "enum": [
+              "listen",
+              "takeover"
+            ],
+            "type": "string"
+          },
+          "phase": {
+            "enum": [
+              "requested",
+              "ringing",
+              "screening",
+              "briefing",
+              "awaiting_key",
+              "listening",
+              "joining",
+              "joined",
+              "handing_back"
+            ],
+            "type": "string"
+          },
+          "user_id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_id",
+          "mode",
+          "phase"
         ],
         "type": "object"
       },
@@ -9067,6 +10786,10 @@
           "e164": {
             "type": "string"
           },
+          "failure_reason": {
+            "description": "Set when status is failed",
+            "type": "string"
+          },
           "forward_sources": {
             "description": "Lines seen forwarding to this number (Diversion/History-Info)",
             "items": {
@@ -9137,14 +10860,17 @@
             "type": "string"
           },
           "source": {
-            "description": "byo_sip numbers answer inbound only and never act as caller ID",
+            "description": "byo_sip numbers answer inbound only and never act as caller ID; imported numbers were already held at the carrier and carry no rent",
             "enum": [
               "larynth",
-              "byo_sip"
+              "byo_sip",
+              "imported"
             ],
             "type": "string"
           },
           "spam_screening": {
+            "deprecated": true,
+            "description": "Deprecated; always ignored",
             "type": "boolean"
           },
           "status": {
@@ -9272,7 +10998,8 @@
             "type": "string"
           },
           "spam_screening": {
-            "description": "Screen inbound calls for spam; flagged calls are not billed",
+            "deprecated": true,
+            "description": "Ignored. Spam calls are always answered and never billed; kept so older clients still validate",
             "type": "boolean"
           }
         },
@@ -9288,7 +11015,7 @@
             "type": "array"
           },
           "can_call_out": {
-            "description": "An active Larynth-owned number; imported numbers never qualify",
+            "description": "An active Larynth number that can place calls",
             "type": "boolean"
           },
           "optout_line": {
@@ -9364,7 +11091,8 @@
             "description": "Applied once provisioning completes; takes precedence over the flat route fields"
           },
           "spam_screening": {
-            "description": "Screen inbound calls for spam; flagged calls are not billed",
+            "deprecated": true,
+            "description": "Ignored. Spam calls are always answered and never billed; kept so older clients still validate",
             "type": "boolean"
           }
         },
@@ -9412,6 +11140,8 @@
             "$ref": "#/components/schemas/RoutingPlan"
           },
           "spam_screening": {
+            "deprecated": true,
+            "description": "Ignored. Spam calls are always answered and never billed; kept so older clients still validate",
             "type": "boolean"
           }
         },
@@ -9444,6 +11174,52 @@
           "numbers",
           "due_now_micro",
           "monthly_micro"
+        ],
+        "type": "object"
+      },
+      "PageAlertFiring": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/AlertFiring"
+            },
+            "type": "array"
+          },
+          "next_cursor": {
+            "description": "Cursor for the next page; null on the last page",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "data",
+          "next_cursor"
+        ],
+        "type": "object"
+      },
+      "PageAlertRule": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/AlertRule"
+            },
+            "type": "array"
+          },
+          "next_cursor": {
+            "description": "Cursor for the next page; null on the last page",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "data",
+          "next_cursor"
         ],
         "type": "object"
       },
@@ -9591,6 +11367,29 @@
           "data": {
             "items": {
               "$ref": "#/components/schemas/CallEvent"
+            },
+            "type": "array"
+          },
+          "next_cursor": {
+            "description": "Cursor for the next page; null on the last page",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "data",
+          "next_cursor"
+        ],
+        "type": "object"
+      },
+      "PageCallText": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/CallText"
             },
             "type": "array"
           },
@@ -9838,6 +11637,75 @@
         ],
         "type": "object"
       },
+      "PageIssue": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/Issue"
+            },
+            "type": "array"
+          },
+          "next_cursor": {
+            "description": "Cursor for the next page; null on the last page",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "data",
+          "next_cursor"
+        ],
+        "type": "object"
+      },
+      "PageIssueEvent": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/IssueEvent"
+            },
+            "type": "array"
+          },
+          "next_cursor": {
+            "description": "Cursor for the next page; null on the last page",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "data",
+          "next_cursor"
+        ],
+        "type": "object"
+      },
+      "PageIssueOccurrence": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/IssueOccurrence"
+            },
+            "type": "array"
+          },
+          "next_cursor": {
+            "description": "Cursor for the next page; null on the last page",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "data",
+          "next_cursor"
+        ],
+        "type": "object"
+      },
       "PageKnowledgeBase": {
         "additionalProperties": false,
         "properties": {
@@ -9999,6 +11867,75 @@
         ],
         "type": "object"
       },
+      "PagePracticeResult": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/PracticeResult"
+            },
+            "type": "array"
+          },
+          "next_cursor": {
+            "description": "Cursor for the next page; null on the last page",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "data",
+          "next_cursor"
+        ],
+        "type": "object"
+      },
+      "PagePracticeRun": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/PracticeRun"
+            },
+            "type": "array"
+          },
+          "next_cursor": {
+            "description": "Cursor for the next page; null on the last page",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "data",
+          "next_cursor"
+        ],
+        "type": "object"
+      },
+      "PagePracticeTest": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/PracticeTest"
+            },
+            "type": "array"
+          },
+          "next_cursor": {
+            "description": "Cursor for the next page; null on the last page",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "data",
+          "next_cursor"
+        ],
+        "type": "object"
+      },
       "PageRate": {
         "additionalProperties": false,
         "properties": {
@@ -10051,6 +11988,29 @@
           "data": {
             "items": {
               "$ref": "#/components/schemas/Revocation"
+            },
+            "type": "array"
+          },
+          "next_cursor": {
+            "description": "Cursor for the next page; null on the last page",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "data",
+          "next_cursor"
+        ],
+        "type": "object"
+      },
+      "PageSpamAllow": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/SpamAllow"
             },
             "type": "array"
           },
@@ -10387,6 +12347,567 @@
         },
         "type": "object"
       },
+      "PracticeCheck": {
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "description": "Stable id within the practice call",
+            "maxLength": 40,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "label": {
+            "description": "What must happen, in the owner's words",
+            "maxLength": 120,
+            "minLength": 1,
+            "type": "string"
+          },
+          "text": {
+            "description": "The phrase, the tool name, the text that must not appear in the tool's arguments, or the statement",
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "tool": {
+            "description": "Only with tool_args_not_contain: the tool whose arguments are checked",
+            "maxLength": 64,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "type": {
+            "description": "said and not_said look for a phrase in the agent's lines, tool_called and tool_not_called look at the tools it used, tool_args_not_contain passes when the arguments of the tool named in tool never contain the text, judge asks a model whether the statement holds",
+            "enum": [
+              "said",
+              "not_said",
+              "tool_called",
+              "tool_not_called",
+              "tool_args_not_contain",
+              "judge"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "type",
+          "text",
+          "label"
+        ],
+        "type": "object"
+      },
+      "PracticeCheckResult": {
+        "additionalProperties": false,
+        "properties": {
+          "evidence": {
+            "description": "The line or tool call the check looked at",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "passed": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "passed"
+        ],
+        "type": "object"
+      },
+      "PracticeResult": {
+        "additionalProperties": false,
+        "properties": {
+          "attempt": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/PracticeCheckResult"
+            },
+            "type": "array"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "error": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "run_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "passed",
+              "failed",
+              "error"
+            ],
+            "type": "string"
+          },
+          "test_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "test_name": {
+            "type": "string"
+          },
+          "tool_calls": {
+            "items": {
+              "$ref": "#/components/schemas/PracticeToolCall"
+            },
+            "type": "array"
+          },
+          "transcript": {
+            "items": {
+              "$ref": "#/components/schemas/PracticeTurn"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "run_id",
+          "test_name",
+          "attempt",
+          "state",
+          "checks",
+          "transcript",
+          "tool_calls",
+          "created_at"
+        ],
+        "type": "object"
+      },
+      "PracticeRun": {
+        "additionalProperties": false,
+        "properties": {
+          "assistant_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "attempts": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "finished_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "started_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "queued",
+              "running",
+              "done",
+              "error"
+            ],
+            "type": "string"
+          },
+          "target": {
+            "enum": [
+              "draft",
+              "version"
+            ],
+            "type": "string"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/PracticeTotals"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "assistant_id",
+          "target",
+          "version",
+          "state",
+          "attempts",
+          "totals",
+          "created_at"
+        ],
+        "type": "object"
+      },
+      "PracticeRunDetail": {
+        "additionalProperties": false,
+        "properties": {
+          "assistant_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "attempts": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "finished_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "started_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "queued",
+              "running",
+              "done",
+              "error"
+            ],
+            "type": "string"
+          },
+          "target": {
+            "enum": [
+              "draft",
+              "version"
+            ],
+            "type": "string"
+          },
+          "tests": {
+            "items": {
+              "$ref": "#/components/schemas/PracticeTestOutcome"
+            },
+            "type": "array"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/PracticeTotals"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "tests",
+          "id",
+          "assistant_id",
+          "target",
+          "version",
+          "state",
+          "attempts",
+          "totals",
+          "created_at"
+        ],
+        "type": "object"
+      },
+      "PracticeSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "failed": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "mixed": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "passed": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "ran_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "run_id": {
+            "description": "Unset when the version was never practiced",
+            "format": "uuid",
+            "type": "string"
+          },
+          "stale": {
+            "description": "The agent changed after this run, so the line is out of date",
+            "type": "boolean"
+          },
+          "tests_defined": {
+            "description": "Practice calls the agent has; 0 means offer Make practice calls",
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total",
+          "passed",
+          "mixed",
+          "failed",
+          "stale",
+          "tests_defined"
+        ],
+        "type": "object"
+      },
+      "PracticeTest": {
+        "additionalProperties": false,
+        "properties": {
+          "assistant_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "caller_e164": {
+            "description": "The number the agent sees as the caller; unset is the standard practice caller",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "key": {
+            "description": "Stable id of a starter practice call",
+            "type": "string"
+          },
+          "must": {
+            "description": "What must happen",
+            "items": {
+              "$ref": "#/components/schemas/PracticeCheck"
+            },
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "starter",
+              "custom"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "wants": {
+            "description": "What they want",
+            "type": "string"
+          },
+          "who": {
+            "description": "Who is calling",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "assistant_id",
+          "name",
+          "who",
+          "wants",
+          "must",
+          "source",
+          "created_at",
+          "updated_at"
+        ],
+        "type": "object"
+      },
+      "PracticeTestBody": {
+        "additionalProperties": false,
+        "properties": {
+          "caller_e164": {
+            "description": "The number the agent sees as the caller, in E.164. Only test numbers are allowed: +1, an optional area code, then 555 01 and two digits",
+            "maxLength": 16,
+            "pattern": "^\\+[1-9][0-9]{6,14}$",
+            "type": "string"
+          },
+          "must": {
+            "items": {
+              "$ref": "#/components/schemas/PracticeCheck"
+            },
+            "maxItems": 6,
+            "minItems": 1,
+            "type": "array"
+          },
+          "name": {
+            "maxLength": 80,
+            "minLength": 1,
+            "type": "string"
+          },
+          "wants": {
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string"
+          },
+          "who": {
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "who",
+          "wants",
+          "must"
+        ],
+        "type": "object"
+      },
+      "PracticeTestList": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/PracticeTest"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "PracticeTestOutcome": {
+        "additionalProperties": false,
+        "properties": {
+          "failed_checks": {
+            "description": "Labels of the checks that failed in any attempt",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          },
+          "outcome": {
+            "enum": [
+              "passed",
+              "mixed",
+              "failed",
+              "error"
+            ],
+            "type": "string"
+          },
+          "test_id": {
+            "description": "Unset when the practice call was deleted after the run",
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "outcome",
+          "failed_checks"
+        ],
+        "type": "object"
+      },
+      "PracticeToolCall": {
+        "additionalProperties": false,
+        "properties": {
+          "args": {
+            "additionalProperties": {},
+            "type": "object"
+          },
+          "faked": {
+            "description": "true when the answer came from a stand-in, so nothing was booked or sent",
+            "type": "boolean"
+          },
+          "result": {
+            "type": "string"
+          },
+          "tool": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "tool",
+          "faked"
+        ],
+        "type": "object"
+      },
+      "PracticeTotals": {
+        "additionalProperties": false,
+        "properties": {
+          "errors": {
+            "description": "The practice call could not run",
+            "format": "int64",
+            "type": "integer"
+          },
+          "failed": {
+            "description": "No attempt passed",
+            "format": "int64",
+            "type": "integer"
+          },
+          "mixed": {
+            "description": "Some attempts passed",
+            "format": "int64",
+            "type": "integer"
+          },
+          "passed": {
+            "description": "Every attempt passed",
+            "format": "int64",
+            "type": "integer"
+          },
+          "tests": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "tests",
+          "passed",
+          "mixed",
+          "failed",
+          "errors"
+        ],
+        "type": "object"
+      },
+      "PracticeTurn": {
+        "additionalProperties": false,
+        "properties": {
+          "speaker": {
+            "enum": [
+              "caller",
+              "agent"
+            ],
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "speaker",
+          "text"
+        ],
+        "type": "object"
+      },
       "PreflightCheck": {
         "additionalProperties": false,
         "properties": {
@@ -10412,7 +12933,8 @@
               "voicemail_optout_line",
               "balance",
               "daily_spend_cap",
-              "recheck_due"
+              "recheck_due",
+              "reassigned_numbers"
             ],
             "type": "string"
           },
@@ -10721,7 +13243,8 @@
               "premium_model",
               "premium_voice",
               "branded_call",
-              "branded_brand_month"
+              "branded_brand_month",
+              "rnd_check"
             ],
             "type": "string"
           },
@@ -10733,7 +13256,7 @@
             "type": "string"
           },
           "price_micro": {
-            "description": "Per minute for the *_minute and premium kinds, per month for number_month*, branded_brand_month, per display for branded_call",
+            "description": "Per minute for the *_minute and premium kinds, per month for number_month*, branded_brand_month, per display for branded_call, per number checked for rnd_check",
             "format": "int64",
             "type": "integer"
           },
@@ -11114,7 +13637,7 @@
             "description": "Required when hours is set"
           },
           "fallback_e164": {
-            "description": "Transfer to a person when the agent can't pick up: paused agent, agent start failure, and carrier failover when no engine answers (not billed). Engine-bridged minutes bill at transfer_minute",
+            "description": "Transfer to a person when the agent can't pick up: agent paused, agent missing or failing to start, and carrier failover when no engine answers. Never billed; a start refused for low credit or the concurrency limit is rejected, not forwarded",
             "pattern": "^\\+1[2-9][0-9]{9}$",
             "type": "string"
           },
@@ -11489,7 +14012,8 @@
               "branded_fee",
               "refund",
               "dispute",
-              "adjustment"
+              "adjustment",
+              "rnd_checks"
             ],
             "type": "string"
           },
@@ -11662,7 +14186,13 @@
               "booking.failed",
               "integration.disconnected",
               "tool.disabled",
-              "knowledge.gap.created"
+              "knowledge.gap.created",
+              "call.alert.fired",
+              "call.supervision.started",
+              "call.supervision.ended",
+              "issue.created",
+              "issue.updated",
+              "issue.resolved"
             ],
             "type": "string"
           }
@@ -12345,6 +14875,43 @@
         },
         "type": "object"
       },
+      "UpdateIssueRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "assignee_user_id": {
+            "description": "A member's user id; an empty string unassigns",
+            "maxLength": 36,
+            "type": "string"
+          },
+          "ignored_until": {
+            "description": "With status ignored: when it comes back; omit to ignore for good",
+            "format": "date-time",
+            "type": "string"
+          },
+          "note": {
+            "description": "Written to the history; do not paste caller details",
+            "maxLength": 1000,
+            "type": "string"
+          },
+          "resolution": {
+            "enum": [
+              "fixed",
+              "not_a_problem"
+            ],
+            "type": "string"
+          },
+          "status": {
+            "description": "resolved needs resolution fixed or not_a_problem; open reopens by hand",
+            "enum": [
+              "open",
+              "resolved",
+              "ignored"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "UpdateKnowledgeBaseRequest": {
         "additionalProperties": false,
         "properties": {
@@ -12391,6 +14958,41 @@
         "required": [
           "entries"
         ],
+        "type": "object"
+      },
+      "UpdatePracticeTestInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "caller_e164": {
+            "description": "A test number in E.164; an empty string clears it",
+            "maxLength": 16,
+            "pattern": "^(\\+[1-9][0-9]{6,14})?$",
+            "type": "string"
+          },
+          "must": {
+            "items": {
+              "$ref": "#/components/schemas/PracticeCheck"
+            },
+            "maxItems": 6,
+            "minItems": 1,
+            "type": "array"
+          },
+          "name": {
+            "maxLength": 80,
+            "minLength": 1,
+            "type": "string"
+          },
+          "wants": {
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string"
+          },
+          "who": {
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "UpdateWebhookRequest": {
@@ -12463,7 +15065,13 @@
                 "booking.failed",
                 "integration.disconnected",
                 "tool.disabled",
-                "knowledge.gap.created"
+                "knowledge.gap.created",
+                "call.alert.fired",
+                "call.supervision.started",
+                "call.supervision.ended",
+                "issue.created",
+                "issue.updated",
+                "issue.resolved"
               ],
               "type": "string"
             },
@@ -12554,6 +15162,11 @@
             "format": "int64",
             "type": "integer"
           },
+          "compliance_micro": {
+            "description": "Reassigned number checks",
+            "format": "int64",
+            "type": "integer"
+          },
           "forward_micro": {
             "format": "int64",
             "type": "integer"
@@ -12579,7 +15192,8 @@
           "byo_micro",
           "number_micro",
           "branded_micro",
-          "simulation_micro"
+          "simulation_micro",
+          "compliance_micro"
         ],
         "type": "object"
       },
@@ -12625,7 +15239,8 @@
               "minute",
               "number_month",
               "call",
-              "brand_month"
+              "brand_month",
+              "number_check"
             ],
             "type": "string"
           }
@@ -13448,6 +16063,925 @@
     }
   },
   "paths": {
+    "/v1/alert-firings": {
+      "get": {
+        "operationId": "listAlertFirings",
+        "parameters": [
+          {
+            "description": "Page size",
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 50,
+              "description": "Page size",
+              "format": "int64",
+              "maximum": 200,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Opaque cursor from next_cursor of the previous page",
+            "explode": false,
+            "in": "query",
+            "name": "after",
+            "schema": {
+              "description": "Opaque cursor from next_cursor of the previous page",
+              "maxLength": 512,
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "rule_id",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "call_id",
+            "schema": {
+              "pattern": "^[a-z0-9]{2,8}_[0-9A-HJKMNP-TV-Z]{26}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageAlertFiring"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "alerts:read"
+            ]
+          }
+        ],
+        "summary": "List alert firings, newest first",
+        "tags": [
+          "alerts"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "alerts:read",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/alert-rules": {
+      "get": {
+        "operationId": "listAlertRules",
+        "parameters": [
+          {
+            "description": "Page size",
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 50,
+              "description": "Page size",
+              "format": "int64",
+              "maximum": 200,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Opaque cursor from next_cursor of the previous page",
+            "explode": false,
+            "in": "query",
+            "name": "after",
+            "schema": {
+              "description": "Opaque cursor from next_cursor of the previous page",
+              "maxLength": 512,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only rules with this trigger",
+            "explode": false,
+            "in": "query",
+            "name": "trigger",
+            "schema": {
+              "description": "Only rules with this trigger",
+              "enum": [
+                "call_analyzed",
+                "live_turn"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageAlertRule"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "alerts:read"
+            ]
+          }
+        ],
+        "summary": "List call alert rules",
+        "tags": [
+          "alerts"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "alerts:read",
+        "x-larynth-sdk": true
+      },
+      "post": {
+        "operationId": "createAlertRule",
+        "parameters": [
+          {
+            "description": "Replays within 24 h return the stored response; the same key with a different body returns 409",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "description": "Replays within 24 h return the stored response; the same key with a different body returns 409",
+              "maxLength": 255,
+              "minLength": 8,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlertRuleCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertRule"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "alerts:write"
+            ]
+          }
+        ],
+        "summary": "Create a call alert rule",
+        "tags": [
+          "alerts"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-idempotency": "required",
+        "x-larynth-min-role": "admin",
+        "x-larynth-scope": "alerts:write",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/alert-rules/{id}": {
+      "delete": {
+        "operationId": "deleteAlertRule",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "alerts:write"
+            ]
+          }
+        ],
+        "summary": "Delete a call alert rule and its firing history",
+        "tags": [
+          "alerts"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "admin",
+        "x-larynth-scope": "alerts:write",
+        "x-larynth-sdk": true
+      },
+      "get": {
+        "operationId": "getAlertRule",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertRule"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "alerts:read"
+            ]
+          }
+        ],
+        "summary": "Get a call alert rule",
+        "tags": [
+          "alerts"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "alerts:read",
+        "x-larynth-sdk": true
+      },
+      "patch": {
+        "operationId": "updateAlertRule",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlertRuleUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertRule"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "alerts:write"
+            ]
+          }
+        ],
+        "summary": "Change a call alert rule; only the fields sent are changed",
+        "tags": [
+          "alerts"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "admin",
+        "x-larynth-scope": "alerts:write",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/analytics/agents": {
+      "get": {
+        "operationId": "getAnalyticsAgents",
+        "parameters": [
+          {
+            "description": "First local day; defaults to 29 days before to",
+            "explode": false,
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "description": "First local day; defaults to 29 days before to",
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Last local day, inclusive; defaults to today in the workspace time zone. At most 366 days after from",
+            "explode": false,
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "description": "Last local day, inclusive; defaults to today in the workspace time zone. At most 366 days after from",
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only this agent",
+            "explode": false,
+            "in": "query",
+            "name": "assistant_id",
+            "schema": {
+              "description": "Only this agent",
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only this call direction",
+            "explode": false,
+            "in": "query",
+            "name": "direction",
+            "schema": {
+              "description": "Only this call direction",
+              "enum": [
+                "inbound",
+                "outbound",
+                "web"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsAgents"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "calls:read"
+            ]
+          }
+        ],
+        "summary": "Calls, minutes, spend, average duration, bookings and reply latency per agent",
+        "tags": [
+          "analytics"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "calls:read",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/analytics/latency": {
+      "get": {
+        "operationId": "getAnalyticsLatency",
+        "parameters": [
+          {
+            "description": "First local day; defaults to 29 days before to",
+            "explode": false,
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "description": "First local day; defaults to 29 days before to",
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Last local day, inclusive; defaults to today in the workspace time zone. At most 366 days after from",
+            "explode": false,
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "description": "Last local day, inclusive; defaults to today in the workspace time zone. At most 366 days after from",
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only this agent",
+            "explode": false,
+            "in": "query",
+            "name": "assistant_id",
+            "schema": {
+              "description": "Only this agent",
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only this call direction",
+            "explode": false,
+            "in": "query",
+            "name": "direction",
+            "schema": {
+              "description": "Only this call direction",
+              "enum": [
+                "inbound",
+                "outbound",
+                "web"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "day adds one row per local day, zero-filled",
+            "explode": false,
+            "in": "query",
+            "name": "group_by",
+            "schema": {
+              "default": "none",
+              "description": "day adds one row per local day, zero-filled",
+              "enum": [
+                "none",
+                "day"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsLatency"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "calls:read"
+            ]
+          }
+        ],
+        "summary": "Reply latency p50 and p95, overall, per day and per agent",
+        "tags": [
+          "analytics"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "calls:read",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/analytics/outcomes": {
+      "get": {
+        "operationId": "getAnalyticsOutcomes",
+        "parameters": [
+          {
+            "description": "First local day; defaults to 29 days before to",
+            "explode": false,
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "description": "First local day; defaults to 29 days before to",
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Last local day, inclusive; defaults to today in the workspace time zone. At most 366 days after from",
+            "explode": false,
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "description": "Last local day, inclusive; defaults to today in the workspace time zone. At most 366 days after from",
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only this agent",
+            "explode": false,
+            "in": "query",
+            "name": "assistant_id",
+            "schema": {
+              "description": "Only this agent",
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only this call direction",
+            "explode": false,
+            "in": "query",
+            "name": "direction",
+            "schema": {
+              "description": "Only this call direction",
+              "enum": [
+                "inbound",
+                "outbound",
+                "web"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsOutcomes"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "calls:read"
+            ]
+          }
+        ],
+        "summary": "Calls by outcome with connected, opt-out and average duration totals",
+        "tags": [
+          "analytics"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "calls:read",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/analytics/usage": {
+      "get": {
+        "operationId": "getAnalyticsUsage",
+        "parameters": [
+          {
+            "description": "First local day; defaults to 29 days before to",
+            "explode": false,
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "description": "First local day; defaults to 29 days before to",
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Last local day, inclusive; defaults to today in the workspace time zone. At most 366 days after from",
+            "explode": false,
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "description": "Last local day, inclusive; defaults to today in the workspace time zone. At most 366 days after from",
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only this agent",
+            "explode": false,
+            "in": "query",
+            "name": "assistant_id",
+            "schema": {
+              "description": "Only this agent",
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only this call direction",
+            "explode": false,
+            "in": "query",
+            "name": "direction",
+            "schema": {
+              "description": "Only this call direction",
+              "enum": [
+                "inbound",
+                "outbound",
+                "web"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "day adds one row per local day, zero-filled",
+            "explode": false,
+            "in": "query",
+            "name": "group_by",
+            "schema": {
+              "default": "none",
+              "description": "day adds one row per local day, zero-filled",
+              "enum": [
+                "none",
+                "day"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsUsage"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "calls:read"
+            ]
+          }
+        ],
+        "summary": "Calls, billed minutes and spend from the ledger-written usage lines, optionally per day",
+        "tags": [
+          "analytics"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "calls:read",
+        "x-larynth-sdk": true
+      }
+    },
     "/v1/area-codes": {
       "get": {
         "operationId": "listAreaCodes",
@@ -14662,6 +18196,530 @@
         "tags": [
           "assistants"
         ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "member",
+        "x-larynth-scope": "assistants:write",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/assistants/{id}/practice-runs": {
+      "get": {
+        "operationId": "listPracticeRuns",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Page size",
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 50,
+              "description": "Page size",
+              "format": "int64",
+              "maximum": 200,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Opaque cursor from next_cursor of the previous page",
+            "explode": false,
+            "in": "query",
+            "name": "after",
+            "schema": {
+              "description": "Opaque cursor from next_cursor of the previous page",
+              "maxLength": 512,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagePracticeRun"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "assistants:read"
+            ]
+          }
+        ],
+        "summary": "List an agent's practice runs, newest first",
+        "tags": [
+          "assistants"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "assistants:read",
+        "x-larynth-sdk": true
+      },
+      "post": {
+        "operationId": "createPracticeRun",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Replays within 24 h return the stored response; the same key with a different body returns 409",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "description": "Replays within 24 h return the stored response; the same key with a different body returns 409",
+              "maxLength": 255,
+              "minLength": 8,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePracticeRunInputBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeRun"
+                }
+              }
+            },
+            "description": "Accepted"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "assistants:write"
+            ]
+          }
+        ],
+        "summary": "Run the agent's practice calls in text mode; write tools are faked",
+        "tags": [
+          "assistants"
+        ],
+        "x-larynth-action": "agents.build",
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "member",
+        "x-larynth-scope": "assistants:write",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/assistants/{id}/practice-summary": {
+      "get": {
+        "operationId": "getPracticeSummary",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The version about to be published; unset is the open draft",
+            "explode": false,
+            "in": "query",
+            "name": "version",
+            "schema": {
+              "description": "The version about to be published; unset is the open draft",
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeSummary"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "assistants:read"
+            ]
+          }
+        ],
+        "summary": "The latest finished practice run for a version, for the Publish dialog line",
+        "tags": [
+          "assistants"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "assistants:read",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/assistants/{id}/practice-tests": {
+      "get": {
+        "operationId": "listPracticeTests",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Page size",
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 50,
+              "description": "Page size",
+              "format": "int64",
+              "maximum": 200,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Opaque cursor from next_cursor of the previous page",
+            "explode": false,
+            "in": "query",
+            "name": "after",
+            "schema": {
+              "description": "Opaque cursor from next_cursor of the previous page",
+              "maxLength": 512,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagePracticeTest"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "assistants:read"
+            ]
+          }
+        ],
+        "summary": "List an agent's practice calls",
+        "tags": [
+          "assistants"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "assistants:read",
+        "x-larynth-sdk": true
+      },
+      "post": {
+        "operationId": "createPracticeTest",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Replays within 24 h return the stored response; the same key with a different body returns 409",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "description": "Replays within 24 h return the stored response; the same key with a different body returns 409",
+              "maxLength": 255,
+              "minLength": 8,
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PracticeTestBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeTest"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "assistants:write"
+            ]
+          }
+        ],
+        "summary": "Add a practice call: who calls, what they want and what must happen",
+        "tags": [
+          "assistants"
+        ],
+        "x-larynth-action": "agents.build",
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "member",
+        "x-larynth-scope": "assistants:write",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/assistants/{id}/practice-tests:generate": {
+      "post": {
+        "operationId": "generatePracticeTests",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GeneratePracticeTestsInputBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeTestList"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "assistants:write"
+            ]
+          }
+        ],
+        "summary": "Add the starter practice calls for the agent's template; ones already added are kept",
+        "tags": [
+          "assistants"
+        ],
+        "x-larynth-action": "agents.build",
         "x-larynth-auth": "session_or_api_key",
         "x-larynth-min-role": "member",
         "x-larynth-scope": "assistants:write",
@@ -17941,6 +21999,16 @@
               ],
               "type": "string"
             }
+          },
+          {
+            "description": "Only calls the owner would have missed: after hours, holiday, or forwarded when busy or unanswered",
+            "explode": false,
+            "in": "query",
+            "name": "would_have_missed",
+            "schema": {
+              "description": "Only calls the owner would have missed: after hours, holiday, or forwarded when busy or unanswered",
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -18285,6 +22353,16 @@
               ],
               "type": "string"
             }
+          },
+          {
+            "description": "Only calls the owner would have missed: after hours, holiday, or forwarded when busy or unanswered",
+            "explode": false,
+            "in": "query",
+            "name": "would_have_missed",
+            "schema": {
+              "description": "Only calls the owner would have missed: after hours, holiday, or forwarded when busy or unanswered",
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -18552,6 +22630,91 @@
         "x-larynth-auth": "session_or_api_key",
         "x-larynth-min-role": "viewer",
         "x-larynth-scope": "calls:read",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/calls/{call_id}/analysis/rerun": {
+      "post": {
+        "operationId": "rerunCallAnalysis",
+        "parameters": [
+          {
+            "description": "Replays within 24 h return the stored response; the same key with a different body returns 409",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "description": "Replays within 24 h return the stored response; the same key with a different body returns 409",
+              "maxLength": 255,
+              "minLength": 8,
+              "type": "string"
+            }
+          },
+          {
+            "description": "<cell>_<ULID>",
+            "in": "path",
+            "name": "call_id",
+            "required": true,
+            "schema": {
+              "description": "<cell>_<ULID>",
+              "pattern": "^[a-z0-9]{2,8}_[0-9A-HJKMNP-TV-Z]{26}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CallAnalysisRerun"
+                }
+              }
+            },
+            "description": "Accepted"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "calls:write"
+            ]
+          }
+        ],
+        "summary": "Make the call's summary and extracted data again; once per call per 10 minutes",
+        "tags": [
+          "calls"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-idempotency": "required",
+        "x-larynth-min-role": "member",
+        "x-larynth-scope": "calls:write",
         "x-larynth-sdk": true
       }
     },
@@ -19030,6 +23193,100 @@
           }
         ],
         "summary": "Earlier calls from the same caller, newest first",
+        "tags": [
+          "calls"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "calls:read",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/calls/{call_id}/texts": {
+      "get": {
+        "operationId": "listCallTexts",
+        "parameters": [
+          {
+            "description": "<cell>_<ULID>",
+            "in": "path",
+            "name": "call_id",
+            "required": true,
+            "schema": {
+              "description": "<cell>_<ULID>",
+              "pattern": "^[a-z0-9]{2,8}_[0-9A-HJKMNP-TV-Z]{26}$",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Page size",
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 50,
+              "description": "Page size",
+              "format": "int64",
+              "maximum": 200,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Opaque cursor from next_cursor of the previous page",
+            "explode": false,
+            "in": "query",
+            "name": "after",
+            "schema": {
+              "description": "Opaque cursor from next_cursor of the previous page",
+              "maxLength": 512,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageCallText"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "calls:read"
+            ]
+          }
+        ],
+        "summary": "Texts sent to or received from this call's caller, oldest first",
         "tags": [
           "calls"
         ],
@@ -21806,7 +26063,15 @@
                 "callback_check_goodbye",
                 "callback_check_digits",
                 "booking_instructions",
-                "booking_fallback_line"
+                "booking_fallback_line",
+                "recording_monitoring_notice",
+                "transcript_monitoring_notice",
+                "recording_memory_notice",
+                "transcript_memory_notice",
+                "memory_attestation",
+                "sms_stop_confirm",
+                "sms_help",
+                "sms_stop_clarify"
               ],
               "type": "string"
             }
@@ -23079,6 +27344,619 @@
         "x-larynth-auth": "session_or_api_key",
         "x-larynth-min-role": "viewer",
         "x-larynth-scope": "tools:read",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/issues": {
+      "get": {
+        "operationId": "listIssues",
+        "parameters": [
+          {
+            "explode": false,
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "default": "open",
+              "enum": [
+                "open",
+                "resolved",
+                "ignored"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Comma-separated kinds",
+            "explode": false,
+            "in": "query",
+            "name": "kind",
+            "schema": {
+              "description": "Comma-separated kinds",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "assistant_id",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "me, none or a user id",
+            "explode": false,
+            "in": "query",
+            "name": "assignee",
+            "schema": {
+              "description": "me, none or a user id",
+              "maxLength": 36,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only issues that happened on this call",
+            "explode": false,
+            "in": "query",
+            "name": "call_id",
+            "schema": {
+              "description": "Only issues that happened on this call",
+              "pattern": "^[a-z0-9]{2,8}_[0-9A-HJKMNP-TV-Z]{26}$",
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "default": "impact",
+              "enum": [
+                "impact",
+                "recent"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Page size",
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 50,
+              "description": "Page size",
+              "format": "int64",
+              "maximum": 200,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Opaque cursor from next_cursor of the previous page",
+            "explode": false,
+            "in": "query",
+            "name": "after",
+            "schema": {
+              "description": "Opaque cursor from next_cursor of the previous page",
+              "maxLength": 512,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageIssue"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "issues:read"
+            ]
+          }
+        ],
+        "summary": "List the problems found with your agents, worst first",
+        "tags": [
+          "issues"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "issues:read",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/issues/summary": {
+      "get": {
+        "operationId": "getIssuesSummary",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IssuesSummary"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "issues:read"
+            ]
+          }
+        ],
+        "summary": "Open issue counts and the top three, for the Home tile and the navigation badge",
+        "tags": [
+          "issues"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "issues:read",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/issues/{id}": {
+      "get": {
+        "operationId": "getIssue",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Issue"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "issues:read"
+            ]
+          }
+        ],
+        "summary": "Get an issue with the actions that fix it",
+        "tags": [
+          "issues"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "issues:read",
+        "x-larynth-sdk": true
+      },
+      "patch": {
+        "operationId": "updateIssue",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateIssueRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Issue"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "issues:write"
+            ]
+          }
+        ],
+        "summary": "Resolve, ignore, reopen or assign an issue; only the fields sent are changed",
+        "tags": [
+          "issues"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "member",
+        "x-larynth-scope": "issues:write",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/issues/{id}/events": {
+      "get": {
+        "operationId": "listIssueEvents",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Page size",
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 50,
+              "description": "Page size",
+              "format": "int64",
+              "maximum": 200,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Opaque cursor from next_cursor of the previous page",
+            "explode": false,
+            "in": "query",
+            "name": "after",
+            "schema": {
+              "description": "Opaque cursor from next_cursor of the previous page",
+              "maxLength": 512,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageIssueEvent"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "issues:read"
+            ]
+          }
+        ],
+        "summary": "The history of an issue, newest first",
+        "tags": [
+          "issues"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "issues:read",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/issues/{id}/notes": {
+      "post": {
+        "operationId": "addIssueNote",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddIssueNoteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IssueEvent"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "issues:write"
+            ]
+          }
+        ],
+        "summary": "Add a note to an issue",
+        "tags": [
+          "issues"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "member",
+        "x-larynth-scope": "issues:write",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/issues/{id}/occurrences": {
+      "get": {
+        "operationId": "listIssueOccurrences",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Page size",
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 50,
+              "description": "Page size",
+              "format": "int64",
+              "maximum": 200,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Opaque cursor from next_cursor of the previous page",
+            "explode": false,
+            "in": "query",
+            "name": "after",
+            "schema": {
+              "description": "Opaque cursor from next_cursor of the previous page",
+              "maxLength": 512,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageIssueOccurrence"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "issues:read"
+            ]
+          }
+        ],
+        "summary": "The calls an issue happened on, newest first",
+        "tags": [
+          "issues"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "issues:read",
         "x-larynth-sdk": true
       }
     },
@@ -24555,6 +29433,16 @@
               ],
               "type": "string"
             }
+          },
+          {
+            "description": "Only questions callers asked again after they were answered or dismissed",
+            "explode": false,
+            "in": "query",
+            "name": "asked_again",
+            "schema": {
+              "description": "Only questions callers asked again after they were answered or dismissed",
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -24604,6 +29492,86 @@
         "x-larynth-auth": "session_or_api_key",
         "x-larynth-min-role": "viewer",
         "x-larynth-scope": "knowledge:read",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/knowledge-gaps/{id}:accept-draft": {
+      "post": {
+        "operationId": "acceptKnowledgeGapDraft",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptKnowledgeGapDraftRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowledgeGap"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "knowledge:write"
+            ]
+          }
+        ],
+        "summary": "Add the drafted answer, or the owner's edit of it, to a knowledge base's FAQ source and close the question",
+        "tags": [
+          "knowledge"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "member",
+        "x-larynth-scope": "knowledge:write",
         "x-larynth-sdk": true
       }
     },
@@ -24748,6 +29716,76 @@
           }
         ],
         "summary": "Close a question without answering it",
+        "tags": [
+          "knowledge"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "member",
+        "x-larynth-scope": "knowledge:write",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/knowledge-gaps/{id}:dismiss-draft": {
+      "post": {
+        "operationId": "dismissKnowledgeGapDraft",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowledgeGap"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "knowledge:write"
+            ]
+          }
+        ],
+        "summary": "Throw away the drafted answer and keep the question open",
         "tags": [
           "knowledge"
         ],
@@ -25880,6 +30918,330 @@
         "x-larynth-sdk": true
       }
     },
+    "/v1/practice-runs/{run_id}": {
+      "get": {
+        "operationId": "getPracticeRun",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeRunDetail"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "assistants:read"
+            ]
+          }
+        ],
+        "summary": "Get a practice run with one row per practice call",
+        "tags": [
+          "assistants"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "assistants:read",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/practice-runs/{run_id}/results": {
+      "get": {
+        "operationId": "listPracticeResults",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Page size",
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 50,
+              "description": "Page size",
+              "format": "int64",
+              "maximum": 200,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Opaque cursor from next_cursor of the previous page",
+            "explode": false,
+            "in": "query",
+            "name": "after",
+            "schema": {
+              "description": "Opaque cursor from next_cursor of the previous page",
+              "maxLength": 512,
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "test_id",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "enum": [
+                "passed",
+                "failed",
+                "error"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagePracticeResult"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "assistants:read"
+            ]
+          }
+        ],
+        "summary": "List the attempts of a practice run with transcript and checks",
+        "tags": [
+          "assistants"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "assistants:read",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/practice-tests/{test_id}": {
+      "delete": {
+        "operationId": "deletePracticeTest",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "test_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "assistants:write"
+            ]
+          }
+        ],
+        "summary": "Delete a practice call",
+        "tags": [
+          "assistants"
+        ],
+        "x-larynth-action": "agents.build",
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "member",
+        "x-larynth-scope": "assistants:write",
+        "x-larynth-sdk": true
+      },
+      "patch": {
+        "operationId": "updatePracticeTest",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "test_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePracticeTestInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeTest"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "assistants:write"
+            ]
+          }
+        ],
+        "summary": "Edit a practice call",
+        "tags": [
+          "assistants"
+        ],
+        "x-larynth-action": "agents.build",
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "member",
+        "x-larynth-scope": "assistants:write",
+        "x-larynth-sdk": true
+      }
+    },
     "/v1/recordings/{id}/audio": {
       "get": {
         "operationId": "getRecordingAudio",
@@ -26053,12 +31415,39 @@
     "/v1/spam-allow-list": {
       "get": {
         "operationId": "listSpamAllowList",
+        "parameters": [
+          {
+            "description": "Page size",
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 50,
+              "description": "Page size",
+              "format": "int64",
+              "maximum": 200,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Opaque cursor from next_cursor of the previous page",
+            "explode": false,
+            "in": "query",
+            "name": "after",
+            "schema": {
+              "description": "Opaque cursor from next_cursor of the previous page",
+              "maxLength": 512,
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ListSpamAllow"
+                  "$ref": "#/components/schemas/PageSpamAllow"
                 }
               }
             },
@@ -27756,6 +33145,26 @@
       "description": "Bookings agents made in connected calendars.",
       "name": "bookings",
       "x-larynth-sdk": true
+    },
+    {
+      "description": "Call alert rules, their firings and previews.",
+      "name": "alerts",
+      "x-larynth-sdk": true
+    },
+    {
+      "description": "Problems found with your agents from calls, and how to fix them.",
+      "name": "issues",
+      "x-larynth-sdk": true
+    },
+    {
+      "description": "What agents remember about returning callers, and how to delete it.",
+      "name": "memory",
+      "x-larynth-sdk": true
+    },
+    {
+      "description": "Read-only usage, outcome, agent and latency aggregates over a date range.",
+      "name": "analytics",
+      "x-larynth-sdk": true
     }
   ],
   "x-larynth-error-codes": [
@@ -27788,6 +33197,36 @@
       "status": 422,
       "type": "https://larynth.com/problems/agent_setup.website_unreachable",
       "title": "Website could not be read"
+    },
+    {
+      "code": "alert_rule.channel_not_connected",
+      "status": 422,
+      "type": "https://larynth.com/problems/alert_rule.channel_not_connected",
+      "title": "A Slack or Telegram channel on this alert is not connected"
+    },
+    {
+      "code": "alert_rule.invalid_condition",
+      "status": 422,
+      "type": "https://larynth.com/problems/alert_rule.invalid_condition",
+      "title": "This alert's conditions are not valid"
+    },
+    {
+      "code": "alert_rule.limit_reached",
+      "status": 409,
+      "type": "https://larynth.com/problems/alert_rule.limit_reached",
+      "title": "Call alert limit reached"
+    },
+    {
+      "code": "analysis.rerun_too_soon",
+      "status": 429,
+      "type": "https://larynth.com/problems/analysis.rerun_too_soon",
+      "title": "This summary was made again a moment ago; try again later"
+    },
+    {
+      "code": "analysis.transcript_expired",
+      "status": 409,
+      "type": "https://larynth.com/problems/analysis.transcript_expired",
+      "title": "The transcript is no longer kept, so the summary cannot be made again"
     },
     {
       "code": "api_key.expiry_in_past",
@@ -28300,6 +33739,24 @@
       "title": "A request of this kind is already open"
     },
     {
+      "code": "destination.blocked",
+      "status": 422,
+      "type": "https://larynth.com/problems/destination.blocked",
+      "title": "That number cannot take transfers"
+    },
+    {
+      "code": "destination.own_number",
+      "status": 422,
+      "type": "https://larynth.com/problems/destination.own_number",
+      "title": "That number routes back to this workspace"
+    },
+    {
+      "code": "destination.platform_number",
+      "status": 422,
+      "type": "https://larynth.com/problems/destination.platform_number",
+      "title": "That number is a Larynth number"
+    },
+    {
       "code": "dial.caller_id.not_allowed",
       "status": 422,
       "type": "https://larynth.com/problems/dial.caller_id.not_allowed",
@@ -28426,6 +33883,12 @@
       "title": "Invitation is for a different account"
     },
     {
+      "code": "issue.invalid_transition",
+      "status": 422,
+      "type": "https://larynth.com/problems/issue.invalid_transition",
+      "title": "This issue cannot move to that status"
+    },
+    {
       "code": "knowledge.file_invalid",
       "status": 422,
       "type": "https://larynth.com/problems/knowledge.file_invalid",
@@ -28448,6 +33911,114 @@
       "status": 422,
       "type": "https://larynth.com/problems/knowledge.url_not_allowed",
       "title": "Knowledge source address not allowed"
+    },
+    {
+      "code": "live.call_not_active",
+      "status": 409,
+      "type": "https://larynth.com/problems/live.call_not_active",
+      "title": "This call is not active"
+    },
+    {
+      "code": "live.destination_blocked",
+      "status": 422,
+      "type": "https://larynth.com/problems/live.destination_blocked",
+      "title": "That phone number cannot be called"
+    },
+    {
+      "code": "live.invalid_state",
+      "status": 409,
+      "type": "https://larynth.com/problems/live.invalid_state",
+      "title": "This can't be done in the current state of the call"
+    },
+    {
+      "code": "live.join_disabled",
+      "status": 403,
+      "type": "https://larynth.com/problems/live.join_disabled",
+      "title": "Live join is off for this workspace"
+    },
+    {
+      "code": "live.join_failed",
+      "status": 502,
+      "type": "https://larynth.com/problems/live.join_failed",
+      "title": "Could not join the call"
+    },
+    {
+      "code": "live.listener_limit",
+      "status": 409,
+      "type": "https://larynth.com/problems/live.listener_limit",
+      "title": "Too many people are on this call"
+    },
+    {
+      "code": "live.not_yours",
+      "status": 403,
+      "type": "https://larynth.com/problems/live.not_yours",
+      "title": "Only the person on the call or an admin can change this"
+    },
+    {
+      "code": "live.notice_missing",
+      "status": 409,
+      "type": "https://larynth.com/problems/live.notice_missing",
+      "title": "This call had no monitoring notice, so you can only read along"
+    },
+    {
+      "code": "live.phone_billing_unavailable",
+      "status": 503,
+      "type": "https://larynth.com/problems/live.phone_billing_unavailable",
+      "title": "Calling your phone in is not available yet"
+    },
+    {
+      "code": "live.phone_code_invalid",
+      "status": 422,
+      "type": "https://larynth.com/problems/live.phone_code_invalid",
+      "title": "That code is wrong or has expired"
+    },
+    {
+      "code": "live.phone_code_unavailable",
+      "status": 503,
+      "type": "https://larynth.com/problems/live.phone_code_unavailable",
+      "title": "The code could not be sent right now; try again later"
+    },
+    {
+      "code": "live.phone_invalid",
+      "status": 422,
+      "type": "https://larynth.com/problems/live.phone_invalid",
+      "title": "Only US phone numbers (+1) can be used for now"
+    },
+    {
+      "code": "live.phone_limit",
+      "status": 409,
+      "type": "https://larynth.com/problems/live.phone_limit",
+      "title": "You have the most phone numbers you can have"
+    },
+    {
+      "code": "live.phone_needs_pstn",
+      "status": 409,
+      "type": "https://larynth.com/problems/live.phone_needs_pstn",
+      "title": "Test calls from the browser cannot dial a phone"
+    },
+    {
+      "code": "live.phone_rate_limited",
+      "status": 429,
+      "type": "https://larynth.com/problems/live.phone_rate_limited",
+      "title": "Too many codes requested; try again later"
+    },
+    {
+      "code": "live.phone_unverified",
+      "status": 422,
+      "type": "https://larynth.com/problems/live.phone_unverified",
+      "title": "Verify this phone number first"
+    },
+    {
+      "code": "live.takeover_taken",
+      "status": 409,
+      "type": "https://larynth.com/problems/live.takeover_taken",
+      "title": "Someone else has this call"
+    },
+    {
+      "code": "live.transfer_in_progress",
+      "status": 409,
+      "type": "https://larynth.com/problems/live.transfer_in_progress",
+      "title": "The agent is transferring this call"
     },
     {
       "code": "mcp.auth_failed",
@@ -28490,6 +34061,30 @@
       "status": 403,
       "type": "https://larynth.com/problems/member.role_ceiling",
       "title": "Role change exceeds your own role"
+    },
+    {
+      "code": "memory.attestation_required",
+      "status": 422,
+      "type": "https://larynth.com/problems/memory.attestation_required",
+      "title": "Confirm your privacy notice covers caller memory first"
+    },
+    {
+      "code": "memory.health_restricted",
+      "status": 422,
+      "type": "https://larynth.com/problems/memory.health_restricted",
+      "title": "That can't be used by health, dental, vet, therapy or wellness services"
+    },
+    {
+      "code": "memory.invalid_key",
+      "status": 422,
+      "type": "https://larynth.com/problems/memory.invalid_key",
+      "title": "That detail is not one memory keeps"
+    },
+    {
+      "code": "memory.none",
+      "status": 404,
+      "type": "https://larynth.com/problems/memory.none",
+      "title": "Nothing is remembered about this caller"
     },
     {
       "code": "mfa.required",
@@ -28544,6 +34139,42 @@
       "status": 422,
       "type": "https://larynth.com/problems/numbers.verification_failed",
       "title": "Number ownership could not be verified"
+    },
+    {
+      "code": "practice.fair_use",
+      "status": 429,
+      "type": "https://larynth.com/problems/practice.fair_use",
+      "title": "You have used today's practice calls; try again tomorrow"
+    },
+    {
+      "code": "practice.flow_unsupported",
+      "status": 422,
+      "type": "https://larynth.com/problems/practice.flow_unsupported",
+      "title": "Practice calls are not available for flow agents yet"
+    },
+    {
+      "code": "practice.no_model",
+      "status": 422,
+      "type": "https://larynth.com/problems/practice.no_model",
+      "title": "Practice calls are not available right now"
+    },
+    {
+      "code": "practice.no_tests",
+      "status": 422,
+      "type": "https://larynth.com/problems/practice.no_tests",
+      "title": "Add practice calls first"
+    },
+    {
+      "code": "practice.run_active",
+      "status": 409,
+      "type": "https://larynth.com/problems/practice.run_active",
+      "title": "Practice calls are already running for this agent"
+    },
+    {
+      "code": "practice.test_limit",
+      "status": 409,
+      "type": "https://larynth.com/problems/practice.test_limit",
+      "title": "This agent has the most practice calls it can have"
     },
     {
       "code": "rate_limited",
@@ -28630,10 +34261,34 @@
       "title": "Review is already decided"
     },
     {
+      "code": "rnd_check.unavailable",
+      "status": 409,
+      "type": "https://larynth.com/problems/rnd_check.unavailable",
+      "title": "The reassigned number check is not offered right now"
+    },
+    {
       "code": "sip_trunk.in_use",
       "status": 409,
       "type": "https://larynth.com/problems/sip_trunk.in_use",
       "title": "SIP trunk still carries numbers"
+    },
+    {
+      "code": "sms.code_invalid",
+      "status": 422,
+      "type": "https://larynth.com/problems/sms.code_invalid",
+      "title": "That code is wrong or has expired"
+    },
+    {
+      "code": "sms.not_available",
+      "status": 422,
+      "type": "https://larynth.com/problems/sms.not_available",
+      "title": "SMS alerts are not available yet"
+    },
+    {
+      "code": "sms.rate_limited",
+      "status": 429,
+      "type": "https://larynth.com/problems/sms.rate_limited",
+      "title": "Too many codes requested; try again later"
     },
     {
       "code": "spending.approval_required",
