@@ -421,6 +421,10 @@ export type AssistantDraft = {
      * flow agents only; flow.ui is the canvas layout, stored as is (at most 200 KB)
      */
     flow?: FlowSpec;
+    /**
+     * Recorded greeting callers hear instead of greeting_text; set with uploadGreetingAudio
+     */
+    greeting_audio?: GreetingAudio;
     greeting_text: string;
     /**
      * Owner-added guardrails; the built-in rules from listGuardrailRules always apply and cannot be removed
@@ -603,6 +607,10 @@ export type AssistantVersion = {
      * flow agents only; flow.ui is the canvas layout, stored as is (at most 200 KB)
      */
     flow?: FlowSpec;
+    /**
+     * Recorded greeting callers hear instead of greeting_text; set with uploadGreetingAudio
+     */
+    greeting_audio?: GreetingAudio;
     greeting_text: string;
     /**
      * Owner-added guardrails; the built-in rules from listGuardrailRules always apply and cannot be removed
@@ -1046,6 +1054,10 @@ export type CalendarConnection = {
     created_at: string;
     defaults: BookingDefaults;
     id: string;
+    /**
+     * The provider refused the last booking because the account's plan does not allow booking through its API
+     */
+    plan_required: boolean;
     provider: IntegrationProvider;
     resources: Array<CalendarResource>;
     status: 'connected' | 'needs_reconnect' | 'revoked';
@@ -1194,6 +1206,10 @@ export type Call = {
      */
     sentiment?: 'positive' | 'neutral' | 'negative';
     sip_code?: number;
+    /**
+     * widget: a website visitor called through the embedded widget (direction web_test)
+     */
+    source?: 'widget';
     spam_flagged: boolean;
     status: 'queued' | 'dialing' | 'ringing' | 'in_progress' | 'completed' | 'no_answer' | 'busy' | 'failed' | 'canceled' | 'rejected';
     successful?: boolean;
@@ -2736,6 +2752,15 @@ export type GeneratePracticeTestsInputBody = {
     template_key?: string;
 };
 
+export type GreetingAudio = {
+    duration_ms: number;
+    /**
+     * Hex SHA-256 of the stored 16 kHz 16-bit mono PCM
+     */
+    sha256: string;
+    uploaded_at: string;
+};
+
 export type GuardrailBuiltIn = {
     category: 'safety' | 'privacy' | 'honesty' | 'compliance' | 'scope';
     description: string;
@@ -2887,7 +2912,7 @@ export type IntegrationProvider = {
     auth: 'oauth' | 'api_key';
     display_name: string;
     id: string;
-    kind: 'google_calendar' | 'cal_com';
+    kind: 'google_calendar' | 'cal_com' | 'outlook_calendar' | 'calendly';
     logo_key: string;
     status: 'enabled' | 'disabled';
 };
@@ -4480,6 +4505,10 @@ export type RoutingHours = {
     bands: Array<HoursBand>;
     holidays: HolidaySettings;
     /**
+     * business_profile: use the workspace business profile's weekly and special hours; bands are the fallback while the profile has no weekly hours
+     */
+    source?: 'business_profile';
+    /**
      * IANA zone; defaults to the workspace time zone
      */
     timezone: string;
@@ -5355,6 +5384,10 @@ export type AssistantDraftWritable = {
      * flow agents only; flow.ui is the canvas layout, stored as is (at most 200 KB)
      */
     flow?: FlowSpec;
+    /**
+     * Recorded greeting callers hear instead of greeting_text; set with uploadGreetingAudio
+     */
+    greeting_audio?: GreetingAudio;
     greeting_text: string;
     /**
      * Owner-added guardrails; the built-in rules from listGuardrailRules always apply and cannot be removed
@@ -5498,6 +5531,10 @@ export type AssistantVersionWritable = {
      * flow agents only; flow.ui is the canvas layout, stored as is (at most 200 KB)
      */
     flow?: FlowSpec;
+    /**
+     * Recorded greeting callers hear instead of greeting_text; set with uploadGreetingAudio
+     */
+    greeting_audio?: GreetingAudio;
     greeting_text: string;
     /**
      * Owner-added guardrails; the built-in rules from listGuardrailRules always apply and cannot be removed
@@ -6972,6 +7009,133 @@ export type SaveAssistantDraftResponses = {
 
 export type SaveAssistantDraftResponse = SaveAssistantDraftResponses[keyof SaveAssistantDraftResponses];
 
+export type DeleteGreetingAudioData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/assistants/{id}/draft/greeting-audio';
+};
+
+export type DeleteGreetingAudioErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type DeleteGreetingAudioError = DeleteGreetingAudioErrors[keyof DeleteGreetingAudioErrors];
+
+export type DeleteGreetingAudioResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type DeleteGreetingAudioResponse = DeleteGreetingAudioResponses[keyof DeleteGreetingAudioResponses];
+
+export type UploadGreetingAudioData = {
+    body?: {
+        /**
+         * WAV, up to 5 MB and 30 seconds. MP3, M4A, WebM or Ogg are accepted where the server can convert them
+         */
+        file: Blob | File;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/assistants/{id}/draft/greeting-audio';
+};
+
+export type UploadGreetingAudioErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Request Entity Too Large
+     */
+    413: Problem;
+    /**
+     * Unsupported Media Type
+     */
+    415: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+    /**
+     * Service Unavailable
+     */
+    503: Problem;
+};
+
+export type UploadGreetingAudioError = UploadGreetingAudioErrors[keyof UploadGreetingAudioErrors];
+
+export type UploadGreetingAudioResponses = {
+    /**
+     * OK
+     */
+    200: GreetingAudio;
+};
+
+export type UploadGreetingAudioResponse = UploadGreetingAudioResponses[keyof UploadGreetingAudioResponses];
+
 export type RefreshDraftToolsData = {
     body: RefreshDraftToolsRequest;
     headers: {
@@ -8059,6 +8223,62 @@ export type GetAssistantVersionFlowResponses = {
 };
 
 export type GetAssistantVersionFlowResponse = GetAssistantVersionFlowResponses[keyof GetAssistantVersionFlowResponses];
+
+export type GetGreetingAudioData = {
+    body?: never;
+    path: {
+        id: string;
+        v: number;
+    };
+    query?: never;
+    url: '/v1/assistants/{id}/versions/{v}/greeting-audio';
+};
+
+export type GetGreetingAudioErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+    /**
+     * Service Unavailable
+     */
+    503: Problem;
+};
+
+export type GetGreetingAudioError = GetGreetingAudioErrors[keyof GetGreetingAudioErrors];
+
+export type GetGreetingAudioResponses = {
+    /**
+     * The recorded greeting, mono 16 kHz WAV
+     */
+    200: Blob | File;
+};
+
+export type GetGreetingAudioResponse = GetGreetingAudioResponses[keyof GetGreetingAudioResponses];
 
 export type PublishAssistantVersionData = {
     body?: PublishAssistantVersionRequest;
