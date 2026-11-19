@@ -421,6 +421,10 @@ export type AssistantDraft = {
      * flow agents only; flow.ui is the canvas layout, stored as is (at most 200 KB)
      */
     flow?: FlowSpec;
+    /**
+     * Recorded greeting callers hear instead of greeting_text; set with uploadGreetingAudio
+     */
+    greeting_audio?: GreetingAudio;
     greeting_text: string;
     /**
      * Owner-added guardrails; the built-in rules from listGuardrailRules always apply and cannot be removed
@@ -603,6 +607,10 @@ export type AssistantVersion = {
      * flow agents only; flow.ui is the canvas layout, stored as is (at most 200 KB)
      */
     flow?: FlowSpec;
+    /**
+     * Recorded greeting callers hear instead of greeting_text; set with uploadGreetingAudio
+     */
+    greeting_audio?: GreetingAudio;
     greeting_text: string;
     /**
      * Owner-added guardrails; the built-in rules from listGuardrailRules always apply and cannot be removed
@@ -973,6 +981,18 @@ export type BookingService = {
     name: string;
 };
 
+export type BuilderPreset = {
+    description: string;
+    display_name: string;
+    estimate: PriceEstimate;
+    key: string;
+    llm_model_id: string;
+    sort: number;
+    stt_model_id: string;
+    tts_model_id: string;
+    voice_id?: string;
+};
+
 export type BulkResult = {
     affected: number;
     /**
@@ -1046,6 +1066,10 @@ export type CalendarConnection = {
     created_at: string;
     defaults: BookingDefaults;
     id: string;
+    /**
+     * The provider refused the last booking because the account's plan does not allow booking through its API
+     */
+    plan_required: boolean;
     provider: IntegrationProvider;
     resources: Array<CalendarResource>;
     status: 'connected' | 'needs_reconnect' | 'revoked';
@@ -1194,6 +1218,10 @@ export type Call = {
      */
     sentiment?: 'positive' | 'neutral' | 'negative';
     sip_code?: number;
+    /**
+     * widget: a website visitor called through the embedded widget (direction web_test)
+     */
+    source?: 'widget';
     spam_flagged: boolean;
     status: 'queued' | 'dialing' | 'ringing' | 'in_progress' | 'completed' | 'no_answer' | 'busy' | 'failed' | 'canceled' | 'rejected';
     successful?: boolean;
@@ -1805,6 +1833,10 @@ export type CatalogModel = {
     is_default_fallback: boolean;
     kind: 'stt' | 'llm' | 'tts' | 's2s' | 'embedding';
     languages: Array<string>;
+    /**
+     * measured: the p50 of the last 7 days of our own calls, written nightly once 50 turns exist. Turns are attributed per call to the single model of each kind the call used; calls that switched models mid-call (fallback), test workspaces and web tests are excluded. seeded: our seeded value until then. Unset when no number exists
+     */
+    latency_basis?: 'measured' | 'seeded';
     model_key: string;
     params_schema: {
         [key: string]: unknown;
@@ -1816,6 +1848,14 @@ export type CatalogModel = {
     provider_key: string;
     provider_name: string;
     /**
+     * wer: 100 minus word error rate x10 on our benchmark corpus; eval: live-call eval pass rate; humanness: listening benchmark
+     */
+    quality_basis?: 'wer' | 'eval' | 'humanness';
+    /**
+     * 0 to 100, from our own measurement named by quality_basis; unset until measured
+     */
+    quality_score?: number;
+    /**
      * The recommended model of its tier
      */
     recommended: boolean;
@@ -1825,7 +1865,13 @@ export type CatalogModel = {
      */
     tier?: 'fast' | 'balanced' | 'best';
     /**
-     * Typical time this model adds to a reply, measured on our cells
+     * Typical latency: STT is speech end to final transcript, LLM is time to first token, TTS is text to first audio
+     */
+    typical_latency_ms?: number;
+    /**
+     * Deprecated alias of typical_latency_ms, kept for one release
+     *
+     * @deprecated
      */
     typical_reply_ms?: number;
     /**
@@ -1849,6 +1895,10 @@ export type CatalogVoice = {
      * Languages the voice speaks well; the first is its main language
      */
     languages: Array<string>;
+    /**
+     * Inherited from the TTS model. measured: the p50 of the last 7 days of our own calls, written nightly once 50 turns exist. Turns are attributed per call to the single model of each kind the call used; calls that switched models mid-call (fallback), test workspaces and web tests are excluded. seeded: our seeded value until then. Unset when no number exists
+     */
+    latency_basis?: 'measured' | 'seeded';
     model_id?: string;
     name: string;
     /**
@@ -1857,8 +1907,20 @@ export type CatalogVoice = {
     premium_micro_per_min: number;
     preview_url?: string;
     provider_key: string;
+    /**
+     * Inherited from the TTS model. wer: 100 minus word error rate x10 on our benchmark corpus; eval: live-call eval pass rate; humanness: listening benchmark
+     */
+    quality_basis?: 'wer' | 'eval' | 'humanness';
+    /**
+     * Inherited from the TTS model. 0 to 100, from our own measurement named by quality_basis; unset until measured
+     */
+    quality_score?: number;
     status: 'enabled' | 'deprecated';
     tags: Array<string>;
+    /**
+     * Inherited from the TTS model given in model_id: text to first audio
+     */
+    typical_latency_ms?: number;
     voice_key: string;
 };
 
@@ -2736,6 +2798,15 @@ export type GeneratePracticeTestsInputBody = {
     template_key?: string;
 };
 
+export type GreetingAudio = {
+    duration_ms: number;
+    /**
+     * Hex SHA-256 of the stored 16 kHz 16-bit mono PCM
+     */
+    sha256: string;
+    uploaded_at: string;
+};
+
 export type GuardrailBuiltIn = {
     category: 'safety' | 'privacy' | 'honesty' | 'compliance' | 'scope';
     description: string;
@@ -2887,7 +2958,7 @@ export type IntegrationProvider = {
     auth: 'oauth' | 'api_key';
     display_name: string;
     id: string;
-    kind: 'google_calendar' | 'cal_com';
+    kind: 'google_calendar' | 'cal_com' | 'outlook_calendar' | 'calendly';
     logo_key: string;
     status: 'enabled' | 'disabled';
 };
@@ -3210,6 +3281,15 @@ export type KnowledgeSource = {
     url?: string;
 };
 
+export type LatencyPart = {
+    basis?: 'measured' | 'seeded';
+    kind: 'stt' | 'llm' | 'tts';
+    /**
+     * typical_latency_ms of the model; null when no number exists
+     */
+    ms: number | null;
+};
+
 export type LatencySettings = {
     /**
      * Ask the STT provider to end its turn when the turn is committed on a non-STT signal. Unset uses the engine node default
@@ -3275,6 +3355,10 @@ export type LeftOutContact = {
 
 export type ListAreaCode = {
     data: Array<AreaCode>;
+};
+
+export type ListBuilderPreset = {
+    data: Array<BuilderPreset>;
 };
 
 export type ListCalendarConnection = {
@@ -4250,6 +4334,34 @@ export type PreviewCampaignAudienceRequest = {
     purpose: 'informational' | 'telemarketing';
 };
 
+export type PriceEstimate = {
+    currency: 'USD';
+    /**
+     * STT + LLM + TTS typical latency plus overhead_ms; null when a part has no number
+     */
+    latency_ms: number | null;
+    latency_parts: Array<LatencyPart>;
+    /**
+     * Platform time added to the model latencies (setting builder.latency_overhead_ms)
+     */
+    overhead_ms: number;
+    parts: Array<PricePart>;
+    /**
+     * The customer price per started minute billing charges for this selection: base plus every premium
+     */
+    total_micro_per_min: number;
+};
+
+export type PricePart = {
+    /**
+     * base is the call-minute rate after any launch price; the others are premiums
+     */
+    kind: 'base' | 'stt' | 'llm' | 'tts' | 'voice';
+    micro_per_min: number;
+    model_id?: string;
+    voice_id?: string;
+};
+
 export type Problem = {
     /**
      * API base URL of the workspace's home region (workspace.other_region)
@@ -4479,6 +4591,10 @@ export type RoutingHours = {
      */
     bands: Array<HoursBand>;
     holidays: HolidaySettings;
+    /**
+     * business_profile: use the workspace business profile's weekly and special hours; bands are the fallback while the profile has no weekly hours
+     */
+    source?: 'business_profile';
     /**
      * IANA zone; defaults to the workspace time zone
      */
@@ -5355,6 +5471,10 @@ export type AssistantDraftWritable = {
      * flow agents only; flow.ui is the canvas layout, stored as is (at most 200 KB)
      */
     flow?: FlowSpec;
+    /**
+     * Recorded greeting callers hear instead of greeting_text; set with uploadGreetingAudio
+     */
+    greeting_audio?: GreetingAudio;
     greeting_text: string;
     /**
      * Owner-added guardrails; the built-in rules from listGuardrailRules always apply and cannot be removed
@@ -5498,6 +5618,10 @@ export type AssistantVersionWritable = {
      * flow agents only; flow.ui is the canvas layout, stored as is (at most 200 KB)
      */
     flow?: FlowSpec;
+    /**
+     * Recorded greeting callers hear instead of greeting_text; set with uploadGreetingAudio
+     */
+    greeting_audio?: GreetingAudio;
     greeting_text: string;
     /**
      * Owner-added guardrails; the built-in rules from listGuardrailRules always apply and cannot be removed
@@ -6972,6 +7096,133 @@ export type SaveAssistantDraftResponses = {
 
 export type SaveAssistantDraftResponse = SaveAssistantDraftResponses[keyof SaveAssistantDraftResponses];
 
+export type DeleteGreetingAudioData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/assistants/{id}/draft/greeting-audio';
+};
+
+export type DeleteGreetingAudioErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type DeleteGreetingAudioError = DeleteGreetingAudioErrors[keyof DeleteGreetingAudioErrors];
+
+export type DeleteGreetingAudioResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type DeleteGreetingAudioResponse = DeleteGreetingAudioResponses[keyof DeleteGreetingAudioResponses];
+
+export type UploadGreetingAudioData = {
+    body?: {
+        /**
+         * WAV, up to 5 MB and 30 seconds. MP3, M4A, WebM or Ogg are accepted where the server can convert them
+         */
+        file: Blob | File;
+    };
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/v1/assistants/{id}/draft/greeting-audio';
+};
+
+export type UploadGreetingAudioErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Request Entity Too Large
+     */
+    413: Problem;
+    /**
+     * Unsupported Media Type
+     */
+    415: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+    /**
+     * Service Unavailable
+     */
+    503: Problem;
+};
+
+export type UploadGreetingAudioError = UploadGreetingAudioErrors[keyof UploadGreetingAudioErrors];
+
+export type UploadGreetingAudioResponses = {
+    /**
+     * OK
+     */
+    200: GreetingAudio;
+};
+
+export type UploadGreetingAudioResponse = UploadGreetingAudioResponses[keyof UploadGreetingAudioResponses];
+
 export type RefreshDraftToolsData = {
     body: RefreshDraftToolsRequest;
     headers: {
@@ -8059,6 +8310,62 @@ export type GetAssistantVersionFlowResponses = {
 };
 
 export type GetAssistantVersionFlowResponse = GetAssistantVersionFlowResponses[keyof GetAssistantVersionFlowResponses];
+
+export type GetGreetingAudioData = {
+    body?: never;
+    path: {
+        id: string;
+        v: number;
+    };
+    query?: never;
+    url: '/v1/assistants/{id}/versions/{v}/greeting-audio';
+};
+
+export type GetGreetingAudioErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+    /**
+     * Service Unavailable
+     */
+    503: Problem;
+};
+
+export type GetGreetingAudioError = GetGreetingAudioErrors[keyof GetGreetingAudioErrors];
+
+export type GetGreetingAudioResponses = {
+    /**
+     * The recorded greeting, mono 16 kHz WAV
+     */
+    200: Blob | File;
+};
+
+export type GetGreetingAudioResponse = GetGreetingAudioResponses[keyof GetGreetingAudioResponses];
 
 export type PublishAssistantVersionData = {
     body?: PublishAssistantVersionRequest;
@@ -11695,6 +12002,14 @@ export type ListCatalogModelsData = {
         after?: string;
         kind?: 'stt' | 'llm' | 'tts' | 's2s' | 'embedding';
         language?: string;
+        /**
+         * Only models of this provider key
+         */
+        provider?: string;
+        /**
+         * latency: lowest typical_latency_ms first; quality: highest quality_score first; price: lowest premium first. Unknown values sort last; ties break on id. The cursor carries the sort key
+         */
+        sort?: 'latency' | 'quality' | 'price';
     };
     url: '/v1/catalog/models';
 };
@@ -11736,6 +12051,119 @@ export type ListCatalogModelsResponses = {
 };
 
 export type ListCatalogModelsResponse = ListCatalogModelsResponses[keyof ListCatalogModelsResponses];
+
+export type ListBuilderPresetsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Call direction the inline estimates are priced for
+         */
+        direction?: 'inbound' | 'outbound' | 'web_test';
+    };
+    url: '/v1/catalog/presets';
+};
+
+export type ListBuilderPresetsErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListBuilderPresetsError = ListBuilderPresetsErrors[keyof ListBuilderPresetsErrors];
+
+export type ListBuilderPresetsResponses = {
+    /**
+     * OK
+     */
+    200: ListBuilderPreset;
+};
+
+export type ListBuilderPresetsResponse = ListBuilderPresetsResponses[keyof ListBuilderPresetsResponses];
+
+export type GetCatalogPriceEstimateData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * An enabled stt model id
+         */
+        stt: string;
+        /**
+         * An enabled llm model id
+         */
+        llm: string;
+        /**
+         * An enabled tts model id
+         */
+        tts: string;
+        /**
+         * An enabled voice of the tts model
+         */
+        voice?: string;
+        direction?: 'inbound' | 'outbound' | 'web_test';
+    };
+    url: '/v1/catalog/price-estimate';
+};
+
+export type GetCatalogPriceEstimateErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetCatalogPriceEstimateError = GetCatalogPriceEstimateErrors[keyof GetCatalogPriceEstimateErrors];
+
+export type GetCatalogPriceEstimateResponses = {
+    /**
+     * OK
+     */
+    200: PriceEstimate;
+};
+
+export type GetCatalogPriceEstimateResponse = GetCatalogPriceEstimateResponses[keyof GetCatalogPriceEstimateResponses];
 
 export type ListTurnPresetsData = {
     body?: never;
