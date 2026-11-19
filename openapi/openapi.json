@@ -93,6 +93,16 @@
         },
         "description": "Request Entity Too Large"
       },
+      "Problem415": {
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        },
+        "description": "Unsupported Media Type"
+      },
       "Problem416": {
         "content": {
           "application/problem+json": {
@@ -1582,6 +1592,10 @@
             "$ref": "#/components/schemas/FlowSpec",
             "description": "flow agents only; flow.ui is the canvas layout, stored as is (at most 200 KB)"
           },
+          "greeting_audio": {
+            "$ref": "#/components/schemas/GreetingAudio",
+            "description": "Recorded greeting callers hear instead of greeting_text; set with uploadGreetingAudio"
+          },
           "greeting_text": {
             "maxLength": 1000,
             "minLength": 1,
@@ -2061,6 +2075,10 @@
           "flow": {
             "$ref": "#/components/schemas/FlowSpec",
             "description": "flow agents only; flow.ui is the canvas layout, stored as is (at most 200 KB)"
+          },
+          "greeting_audio": {
+            "$ref": "#/components/schemas/GreetingAudio",
+            "description": "Recorded greeting callers hear instead of greeting_text; set with uploadGreetingAudio"
           },
           "greeting_text": {
             "maxLength": 1000,
@@ -3232,6 +3250,10 @@
             "format": "uuid",
             "type": "string"
           },
+          "plan_required": {
+            "description": "The provider refused the last booking because the account's plan does not allow booking through its API",
+            "type": "boolean"
+          },
           "provider": {
             "$ref": "#/components/schemas/IntegrationProvider"
           },
@@ -3264,7 +3286,8 @@
           "resources",
           "defaults",
           "created_at",
-          "used_by"
+          "used_by",
+          "plan_required"
         ],
         "type": "object"
       },
@@ -3628,6 +3651,13 @@
           "sip_code": {
             "format": "int64",
             "type": "integer"
+          },
+          "source": {
+            "description": "widget: a website visitor called through the embedded widget (direction web_test)",
+            "enum": [
+              "widget"
+            ],
+            "type": "string"
           },
           "spam_flagged": {
             "type": "boolean"
@@ -8454,6 +8484,31 @@
         },
         "type": "object"
       },
+      "GreetingAudio": {
+        "additionalProperties": false,
+        "properties": {
+          "duration_ms": {
+            "format": "int64",
+            "maximum": 30000,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "sha256": {
+            "description": "Hex SHA-256 of the stored 16 kHz 16-bit mono PCM",
+            "type": "string"
+          },
+          "uploaded_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sha256",
+          "duration_ms",
+          "uploaded_at"
+        ],
+        "type": "object"
+      },
       "GuardrailBuiltIn": {
         "additionalProperties": false,
         "properties": {
@@ -8920,7 +8975,9 @@
           "kind": {
             "enum": [
               "google_calendar",
-              "cal_com"
+              "cal_com",
+              "outlook_calendar",
+              "calendly"
             ],
             "type": "string"
           },
@@ -13615,6 +13672,13 @@
           "holidays": {
             "$ref": "#/components/schemas/HolidaySettings"
           },
+          "source": {
+            "description": "business_profile: use the workspace business profile's weekly and special hours; bands are the fallback while the profile has no weekly hours",
+            "enum": [
+              "business_profile"
+            ],
+            "type": "string"
+          },
           "timezone": {
             "description": "IANA zone; defaults to the workspace time zone",
             "maxLength": 64,
@@ -17771,6 +17835,172 @@
         "x-larynth-sdk": true
       }
     },
+    "/v1/assistants/{id}/draft/greeting-audio": {
+      "delete": {
+        "operationId": "deleteGreetingAudio",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "assistants:write"
+            ]
+          }
+        ],
+        "summary": "Remove the draft's recorded greeting; callers hear the greeting text again",
+        "tags": [
+          "assistants"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "member",
+        "x-larynth-scope": "assistants:write",
+        "x-larynth-sdk": true
+      },
+      "put": {
+        "operationId": "uploadGreetingAudio",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "encoding": {
+                "file": {
+                  "contentType": "audio/*,video/webm,application/octet-stream"
+                }
+              },
+              "schema": {
+                "properties": {
+                  "file": {
+                    "contentEncoding": "binary",
+                    "contentMediaType": "application/octet-stream",
+                    "description": "WAV, up to 5 MB and 30 seconds. MP3, M4A, WebM or Ogg are accepted where the server can convert them",
+                    "format": "binary",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "file"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GreetingAudio"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem409"
+          },
+          "413": {
+            "$ref": "#/components/responses/Problem413"
+          },
+          "415": {
+            "$ref": "#/components/responses/Problem415"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Problem503"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "assistants:write"
+            ]
+          }
+        ],
+        "summary": "Record the draft's greeting in your own voice: callers hear the clip instead of the greeting text",
+        "tags": [
+          "assistants"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "member",
+        "x-larynth-scope": "assistants:write",
+        "x-larynth-sdk": true
+      }
+    },
     "/v1/assistants/{id}/draft/tools:refresh": {
       "post": {
         "operationId": "refreshDraftTools",
@@ -19362,6 +19592,88 @@
           }
         ],
         "summary": "Export a version's flow with its canvas layout",
+        "tags": [
+          "assistants"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "assistants:read",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/assistants/{id}/versions/{v}/greeting-audio": {
+      "get": {
+        "operationId": "getGreetingAudio",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "v",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "audio/wav": {
+                "schema": {
+                  "contentMediaType": "application/octet-stream",
+                  "format": "binary",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "The recorded greeting, mono 16 kHz WAV"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Problem503"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "assistants:read"
+            ]
+          }
+        ],
+        "summary": "Play a version's recorded greeting as callers hear it",
         "tags": [
           "assistants"
         ],
@@ -33167,6 +33479,11 @@
       "x-larynth-sdk": true
     },
     {
+      "description": "Website voice widget: workspace settings, and the public endpoints the embedded script calls.",
+      "name": "widget",
+      "x-larynth-sdk": true
+    },
+    {
       "description": "The in-app Assistant: answers from your calls, agents and bill, and proposes changes you approve. Dashboard session only.",
       "name": "assistant",
       "x-larynth-sdk": true
@@ -33636,6 +33953,30 @@
       "title": "Business listing not found"
     },
     {
+      "code": "business_profile.changed",
+      "status": 409,
+      "type": "https://larynth.com/problems/business_profile.changed",
+      "title": "The location changed since the preview; review it again"
+    },
+    {
+      "code": "business_profile.needs_reconnect",
+      "status": 409,
+      "type": "https://larynth.com/problems/business_profile.needs_reconnect",
+      "title": "Google Business Profile needs to be connected again"
+    },
+    {
+      "code": "business_profile.not_connected",
+      "status": 409,
+      "type": "https://larynth.com/problems/business_profile.not_connected",
+      "title": "Google Business Profile is not connected"
+    },
+    {
+      "code": "business_profile.unavailable",
+      "status": 409,
+      "type": "https://larynth.com/problems/business_profile.unavailable",
+      "title": "Google Business Profile import is not available yet"
+    },
+    {
       "code": "calendar.api_key_invalid",
       "status": 422,
       "type": "https://larynth.com/problems/calendar.api_key_invalid",
@@ -33652,6 +33993,12 @@
       "status": 409,
       "type": "https://larynth.com/problems/calendar.needs_reconnect",
       "title": "Reconnect this calendar first"
+    },
+    {
+      "code": "calendar.not_configured",
+      "status": 409,
+      "type": "https://larynth.com/problems/calendar.not_configured",
+      "title": "This calendar provider is not available yet"
     },
     {
       "code": "calendar.oauth_state_invalid",
@@ -33766,6 +34113,12 @@
       "status": 422,
       "type": "https://larynth.com/problems/campaign.voicemail_optout_line_required",
       "title": "Telemarketing voicemail needs the workspace toll-free opt-out number"
+    },
+    {
+      "code": "catalog.default_required",
+      "status": 409,
+      "type": "https://larynth.com/problems/catalog.default_required",
+      "title": "This is the last enabled default model of its kind"
     },
     {
       "code": "compliance.optout_line_not_toll_free",
@@ -34476,6 +34829,24 @@
       "title": "A verification session is already open"
     },
     {
+      "code": "voice_preview.daily_limit",
+      "status": 429,
+      "type": "https://larynth.com/problems/voice_preview.daily_limit",
+      "title": "You have used today's custom previews; try again tomorrow"
+    },
+    {
+      "code": "voice_preview.failed",
+      "status": 502,
+      "type": "https://larynth.com/problems/voice_preview.failed",
+      "title": "The voice could not be generated; try again"
+    },
+    {
+      "code": "voice_preview.unavailable",
+      "status": 503,
+      "type": "https://larynth.com/problems/voice_preview.unavailable",
+      "title": "Custom previews are not available right now"
+    },
+    {
       "code": "webhook.endpoint_disabled",
       "status": 409,
       "type": "https://larynth.com/problems/webhook.endpoint_disabled",
@@ -34498,6 +34869,42 @@
       "status": 422,
       "type": "https://larynth.com/problems/webhook.url_not_allowed",
       "title": "Webhook URL not allowed"
+    },
+    {
+      "code": "widget.daily_cap",
+      "status": 429,
+      "type": "https://larynth.com/problems/widget.daily_cap",
+      "title": "The widget has reached its calls for today"
+    },
+    {
+      "code": "widget.human_check_failed",
+      "status": 403,
+      "type": "https://larynth.com/problems/widget.human_check_failed",
+      "title": "The human check failed"
+    },
+    {
+      "code": "widget.origin_not_allowed",
+      "status": 403,
+      "type": "https://larynth.com/problems/widget.origin_not_allowed",
+      "title": "This site is not allowed to use the widget"
+    },
+    {
+      "code": "widget.token_invalid",
+      "status": 401,
+      "type": "https://larynth.com/problems/widget.token_invalid",
+      "title": "The call token is used or expired; start again"
+    },
+    {
+      "code": "widget.unavailable",
+      "status": 404,
+      "type": "https://larynth.com/problems/widget.unavailable",
+      "title": "This widget is not available"
+    },
+    {
+      "code": "widget.visitor_limit",
+      "status": 429,
+      "type": "https://larynth.com/problems/widget.visitor_limit",
+      "title": "Too many calls from this visitor; try again later"
     },
     {
       "code": "workspace.limit_reached",
