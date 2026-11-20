@@ -1483,8 +1483,30 @@ export type CallRecordingInfo = {
     deleted_by_name?: string;
     deleted_reason?: 'retention' | 'user' | 'data_request' | 'key_destroyed';
     id: string;
+    /**
+     * Playable lanes of the call recording
+     */
+    lanes: Array<'caller' | 'agent'>;
     retention_until: string;
+    /**
+     * Recording start relative to answered_at
+     */
+    started_offset_ms?: number;
     state: 'pending' | 'uploaded' | 'verified' | 'failed' | 'purged';
+};
+
+export type CallRecordingLane = {
+    lane: 'caller' | 'agent';
+    /**
+     * Normalised 0 to 1 per lane; every lane has the same count on the same timeline
+     */
+    points: Array<number>;
+    recording_id: string;
+};
+
+export type CallRecordingPeaks = {
+    duration_ms: number;
+    lanes: Array<CallRecordingLane>;
 };
 
 export type CallText = {
@@ -5254,7 +5276,7 @@ export type WebhookEventCatalogue = {
 export type WebhookEventType = {
     deprecated: boolean;
     description_key: string;
-    group: 'calls' | 'agents' | 'campaigns' | 'compliance' | 'billing' | 'numbers' | 'inbox' | 'notifications';
+    group: 'calls' | 'agents' | 'campaigns' | 'compliance' | 'billing' | 'numbers' | 'inbox' | 'bookings' | 'issues' | 'tools' | 'knowledge' | 'integrations' | 'notifications';
     label_key: string;
     type: string;
 };
@@ -10735,6 +10757,140 @@ export type GetCallFlowEventsResponses = {
 };
 
 export type GetCallFlowEventsResponse = GetCallFlowEventsResponses[keyof GetCallFlowEventsResponses];
+
+export type GetCallRecordingAudioData = {
+    body?: never;
+    headers?: {
+        /**
+         * bytes=<start>-[<end>]; recordings over 60 minutes answer 200 only
+         */
+        Range?: string;
+    };
+    path: {
+        /**
+         * <cell>_<ULID>
+         */
+        call_id: string;
+    };
+    query?: never;
+    url: '/v1/calls/{call_id}/recording/audio';
+};
+
+export type GetCallRecordingAudioErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Gone
+     */
+    410: Problem;
+    /**
+     * Requested Range Not Satisfiable
+     */
+    416: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetCallRecordingAudioError = GetCallRecordingAudioErrors[keyof GetCallRecordingAudioErrors];
+
+export type GetCallRecordingAudioResponses = {
+    /**
+     * Mono mix of the caller and agent tracks
+     */
+    200: Blob | File;
+    /**
+     * Requested byte range of the mix
+     */
+    206: Blob | File;
+};
+
+export type GetCallRecordingAudioResponse = GetCallRecordingAudioResponses[keyof GetCallRecordingAudioResponses];
+
+export type GetCallRecordingPeaksData = {
+    body?: never;
+    path: {
+        /**
+         * <cell>_<ULID>
+         */
+        call_id: string;
+    };
+    query?: never;
+    url: '/v1/calls/{call_id}/recording/peaks';
+};
+
+export type GetCallRecordingPeaksErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Gone
+     */
+    410: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetCallRecordingPeaksError = GetCallRecordingPeaksErrors[keyof GetCallRecordingPeaksErrors];
+
+export type GetCallRecordingPeaksResponses = {
+    /**
+     * OK
+     */
+    200: CallRecordingPeaks;
+};
+
+export type GetCallRecordingPeaksResponse = GetCallRecordingPeaksResponses[keyof GetCallRecordingPeaksResponses];
 
 export type ListCallRecordingsData = {
     body?: never;
