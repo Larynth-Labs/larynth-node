@@ -5254,7 +5254,7 @@ export type WebhookEventCatalogue = {
 export type WebhookEventType = {
     deprecated: boolean;
     description_key: string;
-    group: 'calls' | 'agents' | 'campaigns' | 'compliance' | 'billing' | 'numbers' | 'inbox' | 'notifications';
+    group: 'calls' | 'agents' | 'campaigns' | 'compliance' | 'billing' | 'numbers' | 'inbox' | 'bookings' | 'issues' | 'tools' | 'knowledge' | 'integrations' | 'notifications';
     label_key: string;
     type: string;
 };
