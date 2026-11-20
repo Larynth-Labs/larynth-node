@@ -15901,6 +15901,11 @@
               "billing",
               "numbers",
               "inbox",
+              "bookings",
+              "issues",
+              "tools",
+              "knowledge",
+              "integrations",
               "notifications"
             ],
             "type": "string"
