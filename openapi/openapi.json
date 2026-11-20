@@ -93,6 +93,16 @@
         },
         "description": "Request Entity Too Large"
       },
+      "Problem415": {
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            }
+          }
+        },
+        "description": "Unsupported Media Type"
+      },
       "Problem416": {
         "content": {
           "application/problem+json": {
@@ -1582,6 +1592,10 @@
             "$ref": "#/components/schemas/FlowSpec",
             "description": "flow agents only; flow.ui is the canvas layout, stored as is (at most 200 KB)"
           },
+          "greeting_audio": {
+            "$ref": "#/components/schemas/GreetingAudio",
+            "description": "Recorded greeting callers hear instead of greeting_text; set with uploadGreetingAudio"
+          },
           "greeting_text": {
             "maxLength": 1000,
             "minLength": 1,
@@ -2061,6 +2075,10 @@
           "flow": {
             "$ref": "#/components/schemas/FlowSpec",
             "description": "flow agents only; flow.ui is the canvas layout, stored as is (at most 200 KB)"
+          },
+          "greeting_audio": {
+            "$ref": "#/components/schemas/GreetingAudio",
+            "description": "Recorded greeting callers hear instead of greeting_text; set with uploadGreetingAudio"
           },
           "greeting_text": {
             "maxLength": 1000,
@@ -3025,6 +3043,54 @@
         ],
         "type": "object"
       },
+      "BuilderPreset": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "estimate": {
+            "$ref": "#/components/schemas/PriceEstimate"
+          },
+          "key": {
+            "type": "string"
+          },
+          "llm_model_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "sort": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "stt_model_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "tts_model_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "voice_id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "display_name",
+          "description",
+          "sort",
+          "stt_model_id",
+          "llm_model_id",
+          "tts_model_id",
+          "estimate"
+        ],
+        "type": "object"
+      },
       "BulkResult": {
         "additionalProperties": false,
         "properties": {
@@ -3232,6 +3298,10 @@
             "format": "uuid",
             "type": "string"
           },
+          "plan_required": {
+            "description": "The provider refused the last booking because the account's plan does not allow booking through its API",
+            "type": "boolean"
+          },
           "provider": {
             "$ref": "#/components/schemas/IntegrationProvider"
           },
@@ -3264,7 +3334,8 @@
           "resources",
           "defaults",
           "created_at",
-          "used_by"
+          "used_by",
+          "plan_required"
         ],
         "type": "object"
       },
@@ -3628,6 +3699,13 @@
           "sip_code": {
             "format": "int64",
             "type": "integer"
+          },
+          "source": {
+            "description": "widget: a website visitor called through the embedded widget (direction web_test)",
+            "enum": [
+              "widget"
+            ],
+            "type": "string"
           },
           "spam_flagged": {
             "type": "boolean"
@@ -5591,6 +5669,37 @@
             },
             "type": "array"
           },
+          "latency_basis": {
+            "description": "Same value as latency_source",
+            "enum": [
+              "live",
+              "lab"
+            ],
+            "type": "string"
+          },
+          "latency_measured_at": {
+            "description": "When the latency figures were last computed",
+            "format": "date-time",
+            "type": "string"
+          },
+          "latency_p95_ms": {
+            "description": "The 95th percentile over the same samples as typical_latency_ms",
+            "format": "int64",
+            "type": "integer"
+          },
+          "latency_samples": {
+            "description": "Number of samples behind typical_latency_ms and latency_p95_ms; 0 when no number exists",
+            "format": "int64",
+            "type": "integer"
+          },
+          "latency_source": {
+            "description": "live: our own calls of the last 7 days, written nightly once 50 turns exist. Turns are attributed per call to the single model of each kind the call used; calls that switched models mid-call (fallback) are excluded. lab: our direct probe from a US host, used until live data exists. Unset when no measurement exists",
+            "enum": [
+              "live",
+              "lab"
+            ],
+            "type": "string"
+          },
           "model_key": {
             "type": "string"
           },
@@ -5609,9 +5718,30 @@
           "provider_name": {
             "type": "string"
           },
+          "quality_basis": {
+            "description": "wer: 100 minus word error rate x10 on our benchmark corpus; eval: live-call eval pass rate; humanness: listening benchmark",
+            "enum": [
+              "wer",
+              "eval",
+              "humanness"
+            ],
+            "type": "string"
+          },
+          "quality_score": {
+            "description": "0 to 100, from our own measurement named by quality_basis; unset until measured",
+            "format": "int64",
+            "maximum": 100,
+            "minimum": 0,
+            "type": "integer"
+          },
           "recommended": {
             "description": "The recommended model of its tier",
             "type": "boolean"
+          },
+          "retires_on": {
+            "description": "Date the vendor retires the model, YYYY-MM-DD; unset when no date is known",
+            "format": "date",
+            "type": "string"
           },
           "status": {
             "enum": [
@@ -5629,8 +5759,14 @@
             ],
             "type": "string"
           },
+          "typical_latency_ms": {
+            "description": "Typical latency: STT is speech end to final transcript, LLM is time to first token, TTS is text to first audio",
+            "format": "int64",
+            "type": "integer"
+          },
           "typical_reply_ms": {
-            "description": "Typical time this model adds to a reply, measured on our cells",
+            "deprecated": true,
+            "description": "Deprecated alias of typical_latency_ms, kept for one release",
             "format": "int64",
             "type": "integer"
           },
@@ -5660,6 +5796,7 @@
           "status",
           "is_default",
           "is_default_fallback",
+          "latency_samples",
           "premium_micro_per_min",
           "recommended",
           "usable_in_flows"
@@ -5691,6 +5828,14 @@
             },
             "type": "array"
           },
+          "latency_basis": {
+            "description": "Inherited from the TTS model. live: our own calls of the last 7 days, written nightly once 50 turns exist. Turns are attributed per call to the single model of each kind the call used; calls that switched models mid-call (fallback) are excluded. lab: our direct probe from a US host, used until live data exists. Unset when no measurement exists",
+            "enum": [
+              "live",
+              "lab"
+            ],
+            "type": "string"
+          },
           "model_id": {
             "format": "uuid",
             "type": "string"
@@ -5710,6 +5855,22 @@
           "provider_key": {
             "type": "string"
           },
+          "quality_basis": {
+            "description": "Inherited from the TTS model. wer: 100 minus word error rate x10 on our benchmark corpus; eval: live-call eval pass rate; humanness: listening benchmark",
+            "enum": [
+              "wer",
+              "eval",
+              "humanness"
+            ],
+            "type": "string"
+          },
+          "quality_score": {
+            "description": "Inherited from the TTS model. 0 to 100, from our own measurement named by quality_basis; unset until measured",
+            "format": "int64",
+            "maximum": 100,
+            "minimum": 0,
+            "type": "integer"
+          },
           "status": {
             "enum": [
               "enabled",
@@ -5722,6 +5883,11 @@
               "type": "string"
             },
             "type": "array"
+          },
+          "typical_latency_ms": {
+            "description": "Inherited from the TTS model given in model_id: text to first audio",
+            "format": "int64",
+            "type": "integer"
           },
           "voice_key": {
             "type": "string"
@@ -8454,6 +8620,31 @@
         },
         "type": "object"
       },
+      "GreetingAudio": {
+        "additionalProperties": false,
+        "properties": {
+          "duration_ms": {
+            "format": "int64",
+            "maximum": 30000,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "sha256": {
+            "description": "Hex SHA-256 of the stored 16 kHz 16-bit mono PCM",
+            "type": "string"
+          },
+          "uploaded_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sha256",
+          "duration_ms",
+          "uploaded_at"
+        ],
+        "type": "object"
+      },
       "GuardrailBuiltIn": {
         "additionalProperties": false,
         "properties": {
@@ -8920,7 +9111,9 @@
           "kind": {
             "enum": [
               "google_calendar",
-              "cal_com"
+              "cal_com",
+              "outlook_calendar",
+              "calendly"
             ],
             "type": "string"
           },
@@ -9940,6 +10133,39 @@
         ],
         "type": "object"
       },
+      "LatencyPart": {
+        "additionalProperties": false,
+        "properties": {
+          "basis": {
+            "enum": [
+              "live",
+              "lab"
+            ],
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "stt",
+              "llm",
+              "tts"
+            ],
+            "type": "string"
+          },
+          "ms": {
+            "description": "typical_latency_ms of the model; null when no number exists",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "kind",
+          "ms"
+        ],
+        "type": "object"
+      },
       "LatencySettings": {
         "additionalProperties": false,
         "properties": {
@@ -10128,6 +10354,21 @@
           "data": {
             "items": {
               "$ref": "#/components/schemas/AreaCode"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "ListBuilderPreset": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/BuilderPreset"
             },
             "type": "array"
           }
@@ -13004,6 +13245,89 @@
         ],
         "type": "object"
       },
+      "PriceEstimate": {
+        "additionalProperties": false,
+        "properties": {
+          "currency": {
+            "enum": [
+              "USD"
+            ],
+            "type": "string"
+          },
+          "latency_ms": {
+            "description": "STT + LLM + TTS typical latency plus overhead_ms; null when a part has no number",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "latency_parts": {
+            "items": {
+              "$ref": "#/components/schemas/LatencyPart"
+            },
+            "type": "array"
+          },
+          "overhead_ms": {
+            "description": "Platform time added to the model latencies (setting builder.latency_overhead_ms)",
+            "format": "int64",
+            "type": "integer"
+          },
+          "parts": {
+            "items": {
+              "$ref": "#/components/schemas/PricePart"
+            },
+            "type": "array"
+          },
+          "total_micro_per_min": {
+            "description": "The customer price per started minute billing charges for this selection: base plus every premium",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total_micro_per_min",
+          "currency",
+          "parts",
+          "latency_ms",
+          "latency_parts",
+          "overhead_ms"
+        ],
+        "type": "object"
+      },
+      "PricePart": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "description": "base is the call-minute rate after any launch price; the others are premiums",
+            "enum": [
+              "base",
+              "stt",
+              "llm",
+              "tts",
+              "voice"
+            ],
+            "type": "string"
+          },
+          "micro_per_min": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "model_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "voice_id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "micro_per_min"
+        ],
+        "type": "object"
+      },
       "Problem": {
         "additionalProperties": true,
         "properties": {
@@ -13614,6 +13938,13 @@
           },
           "holidays": {
             "$ref": "#/components/schemas/HolidaySettings"
+          },
+          "source": {
+            "description": "business_profile: use the workspace business profile's weekly and special hours; bands are the fallback while the profile has no weekly hours",
+            "enum": [
+              "business_profile"
+            ],
+            "type": "string"
           },
           "timezone": {
             "description": "IANA zone; defaults to the workspace time zone",
@@ -17771,6 +18102,172 @@
         "x-larynth-sdk": true
       }
     },
+    "/v1/assistants/{id}/draft/greeting-audio": {
+      "delete": {
+        "operationId": "deleteGreetingAudio",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "assistants:write"
+            ]
+          }
+        ],
+        "summary": "Remove the draft's recorded greeting; callers hear the greeting text again",
+        "tags": [
+          "assistants"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "member",
+        "x-larynth-scope": "assistants:write",
+        "x-larynth-sdk": true
+      },
+      "put": {
+        "operationId": "uploadGreetingAudio",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "encoding": {
+                "file": {
+                  "contentType": "audio/*,video/webm,application/octet-stream"
+                }
+              },
+              "schema": {
+                "properties": {
+                  "file": {
+                    "contentEncoding": "binary",
+                    "contentMediaType": "application/octet-stream",
+                    "description": "WAV, up to 5 MB and 30 seconds. MP3, M4A, WebM or Ogg are accepted where the server can convert them",
+                    "format": "binary",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "file"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GreetingAudio"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem409"
+          },
+          "413": {
+            "$ref": "#/components/responses/Problem413"
+          },
+          "415": {
+            "$ref": "#/components/responses/Problem415"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Problem503"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "assistants:write"
+            ]
+          }
+        ],
+        "summary": "Record the draft's greeting in your own voice: callers hear the clip instead of the greeting text",
+        "tags": [
+          "assistants"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "member",
+        "x-larynth-scope": "assistants:write",
+        "x-larynth-sdk": true
+      }
+    },
     "/v1/assistants/{id}/draft/tools:refresh": {
       "post": {
         "operationId": "refreshDraftTools",
@@ -19362,6 +19859,88 @@
           }
         ],
         "summary": "Export a version's flow with its canvas layout",
+        "tags": [
+          "assistants"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "assistants:read",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/assistants/{id}/versions/{v}/greeting-audio": {
+      "get": {
+        "operationId": "getGreetingAudio",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "v",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "audio/wav": {
+                "schema": {
+                  "contentMediaType": "application/octet-stream",
+                  "format": "binary",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "The recorded greeting, mono 16 kHz WAV"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          },
+          "503": {
+            "$ref": "#/components/responses/Problem503"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "assistants:read"
+            ]
+          }
+        ],
+        "summary": "Play a version's recorded greeting as callers hear it",
         "tags": [
           "assistants"
         ],
@@ -24917,6 +25496,32 @@
               "maxLength": 16,
               "type": "string"
             }
+          },
+          {
+            "description": "Only models of this provider key",
+            "explode": false,
+            "in": "query",
+            "name": "provider",
+            "schema": {
+              "description": "Only models of this provider key",
+              "maxLength": 41,
+              "type": "string"
+            }
+          },
+          {
+            "description": "latency: lowest typical_latency_ms first; quality: highest quality_score first; price: lowest premium first. Unknown values sort last; ties break on id. The cursor carries the sort key",
+            "explode": false,
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "description": "latency: lowest typical_latency_ms first; quality: highest quality_score first; price: lowest premium first. Unknown values sort last; ties break on id. The cursor carries the sort key",
+              "enum": [
+                "latency",
+                "quality",
+                "price"
+              ],
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -24960,6 +25565,193 @@
           }
         ],
         "summary": "List enabled models",
+        "tags": [
+          "catalog"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "assistants:read",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/catalog/presets": {
+      "get": {
+        "operationId": "listBuilderPresets",
+        "parameters": [
+          {
+            "description": "Call direction the inline estimates are priced for",
+            "explode": false,
+            "in": "query",
+            "name": "direction",
+            "schema": {
+              "default": "inbound",
+              "description": "Call direction the inline estimates are priced for",
+              "enum": [
+                "inbound",
+                "outbound",
+                "web_test"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListBuilderPreset"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "assistants:read"
+            ]
+          }
+        ],
+        "summary": "Builder presets with their price and latency",
+        "tags": [
+          "catalog"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "assistants:read",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/catalog/price-estimate": {
+      "get": {
+        "operationId": "getCatalogPriceEstimate",
+        "parameters": [
+          {
+            "description": "An enabled stt model id",
+            "explode": false,
+            "in": "query",
+            "name": "stt",
+            "required": true,
+            "schema": {
+              "description": "An enabled stt model id",
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "An enabled llm model id",
+            "explode": false,
+            "in": "query",
+            "name": "llm",
+            "required": true,
+            "schema": {
+              "description": "An enabled llm model id",
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "An enabled tts model id",
+            "explode": false,
+            "in": "query",
+            "name": "tts",
+            "required": true,
+            "schema": {
+              "description": "An enabled tts model id",
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "An enabled voice of the tts model",
+            "explode": false,
+            "in": "query",
+            "name": "voice",
+            "schema": {
+              "description": "An enabled voice of the tts model",
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "direction",
+            "schema": {
+              "default": "inbound",
+              "enum": [
+                "inbound",
+                "outbound",
+                "web_test"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceEstimate"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "assistants:read"
+            ]
+          }
+        ],
+        "summary": "Price per minute and expected latency of a model selection",
         "tags": [
           "catalog"
         ],
@@ -33167,6 +33959,11 @@
       "x-larynth-sdk": true
     },
     {
+      "description": "Website voice widget: workspace settings, and the public endpoints the embedded script calls.",
+      "name": "widget",
+      "x-larynth-sdk": true
+    },
+    {
       "description": "The in-app Assistant: answers from your calls, agents and bill, and proposes changes you approve. Dashboard session only.",
       "name": "assistant",
       "x-larynth-sdk": true
@@ -33636,6 +34433,30 @@
       "title": "Business listing not found"
     },
     {
+      "code": "business_profile.changed",
+      "status": 409,
+      "type": "https://larynth.com/problems/business_profile.changed",
+      "title": "The location changed since the preview; review it again"
+    },
+    {
+      "code": "business_profile.needs_reconnect",
+      "status": 409,
+      "type": "https://larynth.com/problems/business_profile.needs_reconnect",
+      "title": "Google Business Profile needs to be connected again"
+    },
+    {
+      "code": "business_profile.not_connected",
+      "status": 409,
+      "type": "https://larynth.com/problems/business_profile.not_connected",
+      "title": "Google Business Profile is not connected"
+    },
+    {
+      "code": "business_profile.unavailable",
+      "status": 409,
+      "type": "https://larynth.com/problems/business_profile.unavailable",
+      "title": "Google Business Profile import is not available yet"
+    },
+    {
       "code": "calendar.api_key_invalid",
       "status": 422,
       "type": "https://larynth.com/problems/calendar.api_key_invalid",
@@ -33652,6 +34473,12 @@
       "status": 409,
       "type": "https://larynth.com/problems/calendar.needs_reconnect",
       "title": "Reconnect this calendar first"
+    },
+    {
+      "code": "calendar.not_configured",
+      "status": 409,
+      "type": "https://larynth.com/problems/calendar.not_configured",
+      "title": "This calendar provider is not available yet"
     },
     {
       "code": "calendar.oauth_state_invalid",
@@ -33766,6 +34593,12 @@
       "status": 422,
       "type": "https://larynth.com/problems/campaign.voicemail_optout_line_required",
       "title": "Telemarketing voicemail needs the workspace toll-free opt-out number"
+    },
+    {
+      "code": "catalog.default_required",
+      "status": 409,
+      "type": "https://larynth.com/problems/catalog.default_required",
+      "title": "This is the last enabled default model of its kind"
     },
     {
       "code": "compliance.optout_line_not_toll_free",
@@ -34476,6 +35309,24 @@
       "title": "A verification session is already open"
     },
     {
+      "code": "voice_preview.daily_limit",
+      "status": 429,
+      "type": "https://larynth.com/problems/voice_preview.daily_limit",
+      "title": "You have used today's custom previews; try again tomorrow"
+    },
+    {
+      "code": "voice_preview.failed",
+      "status": 502,
+      "type": "https://larynth.com/problems/voice_preview.failed",
+      "title": "The voice could not be generated; try again"
+    },
+    {
+      "code": "voice_preview.unavailable",
+      "status": 503,
+      "type": "https://larynth.com/problems/voice_preview.unavailable",
+      "title": "Custom previews are not available right now"
+    },
+    {
       "code": "webhook.endpoint_disabled",
       "status": 409,
       "type": "https://larynth.com/problems/webhook.endpoint_disabled",
@@ -34498,6 +35349,42 @@
       "status": 422,
       "type": "https://larynth.com/problems/webhook.url_not_allowed",
       "title": "Webhook URL not allowed"
+    },
+    {
+      "code": "widget.daily_cap",
+      "status": 429,
+      "type": "https://larynth.com/problems/widget.daily_cap",
+      "title": "The widget has reached its calls for today"
+    },
+    {
+      "code": "widget.human_check_failed",
+      "status": 403,
+      "type": "https://larynth.com/problems/widget.human_check_failed",
+      "title": "The human check failed"
+    },
+    {
+      "code": "widget.origin_not_allowed",
+      "status": 403,
+      "type": "https://larynth.com/problems/widget.origin_not_allowed",
+      "title": "This site is not allowed to use the widget"
+    },
+    {
+      "code": "widget.token_invalid",
+      "status": 401,
+      "type": "https://larynth.com/problems/widget.token_invalid",
+      "title": "The call token is used or expired; start again"
+    },
+    {
+      "code": "widget.unavailable",
+      "status": 404,
+      "type": "https://larynth.com/problems/widget.unavailable",
+      "title": "This widget is not available"
+    },
+    {
+      "code": "widget.visitor_limit",
+      "status": 429,
+      "type": "https://larynth.com/problems/widget.visitor_limit",
+      "title": "Too many calls from this visitor; try again later"
     },
     {
       "code": "workspace.limit_reached",
