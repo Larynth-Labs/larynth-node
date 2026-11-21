@@ -4007,13 +4007,18 @@
       "CallHandling": {
         "additionalProperties": false,
         "properties": {
-          "ambient_sound": {
-            "description": "Low background sound the caller hears; never recorded. Unset is off",
+          "ambient_level": {
+            "description": "How loud the background sound is. Unset is medium",
             "enum": [
-              "office",
-              "cafe",
-              "call_center"
+              "low",
+              "medium",
+              "high"
             ],
+            "type": "string"
+          },
+          "ambient_sound": {
+            "description": "Low background sound the caller hears; never recorded. A key from GET /v1/catalog/ambient-sounds. Unset is off",
+            "maxLength": 40,
             "type": "string"
           },
           "dtmf_end_key": {
@@ -4391,9 +4396,25 @@
             "format": "uuid",
             "type": "string"
           },
+          "lanes": {
+            "description": "Playable lanes of the call recording",
+            "items": {
+              "enum": [
+                "caller",
+                "agent"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
           "retention_until": {
             "format": "date-time",
             "type": "string"
+          },
+          "started_offset_ms": {
+            "description": "Recording start relative to answered_at",
+            "format": "int64",
+            "type": "integer"
           },
           "state": {
             "enum": [
@@ -4409,7 +4430,59 @@
         "required": [
           "id",
           "state",
-          "retention_until"
+          "retention_until",
+          "lanes"
+        ],
+        "type": "object"
+      },
+      "CallRecordingLane": {
+        "additionalProperties": false,
+        "properties": {
+          "lane": {
+            "enum": [
+              "caller",
+              "agent"
+            ],
+            "type": "string"
+          },
+          "points": {
+            "description": "Normalised 0 to 1 per lane; every lane has the same count on the same timeline",
+            "items": {
+              "format": "double",
+              "type": "number"
+            },
+            "maxItems": 1800,
+            "type": "array"
+          },
+          "recording_id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "lane",
+          "recording_id",
+          "points"
+        ],
+        "type": "object"
+      },
+      "CallRecordingPeaks": {
+        "additionalProperties": false,
+        "properties": {
+          "duration_ms": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "lanes": {
+            "items": {
+              "$ref": "#/components/schemas/CallRecordingLane"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "duration_ms",
+          "lanes"
         ],
         "type": "object"
       },
@@ -5609,6 +5682,27 @@
           "days",
           "start_minute",
           "end_minute"
+        ],
+        "type": "object"
+      },
+      "CatalogAmbientSound": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "key": {
+            "description": "Value for call_handling.ambient_sound",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "name",
+          "description"
         ],
         "type": "object"
       },
@@ -10414,6 +10508,21 @@
           "data": {
             "items": {
               "$ref": "#/components/schemas/CallingRule"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "ListCatalogAmbientSound": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/CatalogAmbientSound"
             },
             "type": "array"
           }
@@ -15901,6 +16010,11 @@
               "billing",
               "numbers",
               "inbox",
+              "bookings",
+              "issues",
+              "tools",
+              "knowledge",
+              "integrations",
               "notifications"
             ],
             "type": "string"
@@ -23631,6 +23745,180 @@
         "x-larynth-sdk": true
       }
     },
+    "/v1/calls/{call_id}/recording/audio": {
+      "get": {
+        "operationId": "getCallRecordingAudio",
+        "parameters": [
+          {
+            "description": "<cell>_<ULID>",
+            "in": "path",
+            "name": "call_id",
+            "required": true,
+            "schema": {
+              "description": "<cell>_<ULID>",
+              "pattern": "^[a-z0-9]{2,8}_[0-9A-HJKMNP-TV-Z]{26}$",
+              "type": "string"
+            }
+          },
+          {
+            "description": "bytes=<start>-[<end>]; recordings over 60 minutes answer 200 only",
+            "in": "header",
+            "name": "Range",
+            "schema": {
+              "description": "bytes=<start>-[<end>]; recordings over 60 minutes answer 200 only",
+              "maxLength": 100,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "audio/wav": {
+                "schema": {
+                  "contentMediaType": "application/octet-stream",
+                  "format": "binary",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Mono mix of the caller and agent tracks"
+          },
+          "206": {
+            "content": {
+              "audio/wav": {
+                "schema": {
+                  "contentMediaType": "application/octet-stream",
+                  "format": "binary",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Requested byte range of the mix"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem409"
+          },
+          "410": {
+            "$ref": "#/components/responses/Problem410"
+          },
+          "416": {
+            "$ref": "#/components/responses/Problem416"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "recordings:read"
+            ]
+          }
+        ],
+        "summary": "Stream both parties of a call as one mixed WAV, with byte ranges; each playback is logged",
+        "tags": [
+          "recordings"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "member",
+        "x-larynth-scope": "recordings:read",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/calls/{call_id}/recording/peaks": {
+      "get": {
+        "operationId": "getCallRecordingPeaks",
+        "parameters": [
+          {
+            "description": "<cell>_<ULID>",
+            "in": "path",
+            "name": "call_id",
+            "required": true,
+            "schema": {
+              "description": "<cell>_<ULID>",
+              "pattern": "^[a-z0-9]{2,8}_[0-9A-HJKMNP-TV-Z]{26}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CallRecordingPeaks"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "410": {
+            "$ref": "#/components/responses/Problem410"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "recordings:read"
+            ]
+          }
+        ],
+        "summary": "Waveform peaks of each party of a call on one timeline",
+        "tags": [
+          "recordings"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "member",
+        "x-larynth-scope": "recordings:read",
+        "x-larynth-sdk": true
+      }
+    },
     "/v1/calls/{call_id}/recordings": {
       "get": {
         "operationId": "listCallRecordings",
@@ -25324,6 +25612,59 @@
         "x-larynth-auth": "session_or_api_key",
         "x-larynth-min-role": "viewer",
         "x-larynth-scope": "campaigns:read",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/catalog/ambient-sounds": {
+      "get": {
+        "operationId": "listCatalogAmbientSounds",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListCatalogAmbientSound"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "assistants:read"
+            ]
+          }
+        ],
+        "summary": "List the background sounds an agent can play under a call",
+        "tags": [
+          "catalog"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "assistants:read",
         "x-larynth-sdk": true
       }
     },
