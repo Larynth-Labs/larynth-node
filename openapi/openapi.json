@@ -7574,8 +7574,10 @@
             "type": "string"
           },
           "event_types": {
+            "description": "Event types to deliver, or [\"*\"] for every event",
             "items": {
               "enum": [
+                "*",
                 "call.started",
                 "call.answered",
                 "call.ended",
@@ -15443,8 +15445,10 @@
             "type": "string"
           },
           "event_types": {
+            "description": "Event types to deliver, or [\"*\"] for every event",
             "items": {
               "enum": [
+                "*",
                 "call.started",
                 "call.answered",
                 "call.ended",
