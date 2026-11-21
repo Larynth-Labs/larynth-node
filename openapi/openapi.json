@@ -7574,8 +7574,10 @@
             "type": "string"
           },
           "event_types": {
+            "description": "Event types to deliver, or [\"*\"] for every event",
             "items": {
               "enum": [
+                "*",
                 "call.started",
                 "call.answered",
                 "call.ended",
@@ -15443,8 +15445,10 @@
             "type": "string"
           },
           "event_types": {
+            "description": "Event types to deliver, or [\"*\"] for every event",
             "items": {
               "enum": [
+                "*",
                 "call.started",
                 "call.answered",
                 "call.ended",
@@ -35392,6 +35396,18 @@
       "title": "Number ownership could not be verified"
     },
     {
+      "code": "plan.key_taken",
+      "status": 409,
+      "type": "https://larynth.com/problems/plan.key_taken",
+      "title": "A plan with this key exists"
+    },
+    {
+      "code": "plan.name_invalid",
+      "status": 422,
+      "type": "https://larynth.com/problems/plan.name_invalid",
+      "title": "Plan name must be 1 to 200 characters after trimming"
+    },
+    {
       "code": "practice.fair_use",
       "status": 429,
       "type": "https://larynth.com/problems/practice.fair_use",
@@ -35426,6 +35442,36 @@
       "status": 409,
       "type": "https://larynth.com/problems/practice.test_limit",
       "title": "This agent has the most practice calls it can have"
+    },
+    {
+      "code": "rate.effective_from_past",
+      "status": 422,
+      "type": "https://larynth.com/problems/rate.effective_from_past",
+      "title": "A rate cannot start in the past"
+    },
+    {
+      "code": "rate.effective_to_past",
+      "status": 422,
+      "type": "https://larynth.com/problems/rate.effective_to_past",
+      "title": "A rate cannot end in the past"
+    },
+    {
+      "code": "rate.ended",
+      "status": 409,
+      "type": "https://larynth.com/problems/rate.ended",
+      "title": "Rate has ended and cannot change"
+    },
+    {
+      "code": "rate.later_scheduled",
+      "status": 409,
+      "type": "https://larynth.com/problems/rate.later_scheduled",
+      "title": "A later rate is already scheduled for this target"
+    },
+    {
+      "code": "rate.overlap",
+      "status": 409,
+      "type": "https://larynth.com/problems/rate.overlap",
+      "title": "Rate overlaps another rate for the same target"
     },
     {
       "code": "rate_limited",
