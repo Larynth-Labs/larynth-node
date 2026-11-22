@@ -374,7 +374,7 @@ export type Assistant = {
     state: 'live' | 'paused' | 'draft' | 'archived';
     status: 'active' | 'archived';
     /**
-     * Always single_prompt until flows ship
+     * single_prompt, or flow for a flow agent
      */
     type: 'single_prompt' | 'flow';
     updated_at: string;
@@ -1148,6 +1148,10 @@ export type Call = {
     codec?: 'G722' | 'PCMU' | 'PCMA' | 'opus';
     contact_id?: string;
     /**
+     * Detail only: when the call content was permanently removed
+     */
+    content_removed_at?: string;
+    /**
      * Why the agent got this call: inside hours, after hours, a holiday, or forwarded because the owner line was busy or unanswered
      */
     coverage?: 'open' | 'after_hours' | 'holiday' | 'forwarded_busy' | 'forwarded_no_answer';
@@ -1196,6 +1200,10 @@ export type Call = {
      */
     price_micro?: number;
     /**
+     * Detail only: each switch to a backup provider during the call, in order
+     */
+    provider_fallbacks?: Array<ProviderFallback>;
+    /**
      * Detail only
      */
     quality?: CallQuality;
@@ -1213,6 +1221,18 @@ export type Call = {
     recording?: CallRecordingInfo;
     recording_allowed: boolean;
     recording_notice_played_at?: string;
+    /**
+     * Detail only: stored content was checked and sensitive data in it hidden
+     */
+    redacted?: boolean;
+    /**
+     * Detail only: categories checked and hidden in this call
+     */
+    redacted_categories?: Array<'card' | 'ssn' | 'dob' | 'bank' | 'gov_id'>;
+    /**
+     * Detail only: content is hidden until redaction finishes
+     */
+    redaction_pending?: boolean;
     /**
      * Caller sentiment from the post-call analysis, on every call
      */
@@ -1232,6 +1252,10 @@ export type Call = {
     tags: Array<string>;
     to_e164?: string;
     transfer?: CallTransfer;
+    /**
+     * Detail only: things the agent said it did that no tool result or booking backs up
+     */
+    unbacked_claims?: Array<CallUnbackedClaim>;
     updated_at: string;
     /**
      * True when the call came after hours, on a holiday or after the owner line was busy or unanswered
@@ -1334,6 +1358,10 @@ export type CallHandling = {
      * Low background sound the caller hears; never recorded. A key from GET /v1/catalog/ambient-sounds. Unset is off
      */
     ambient_sound?: string;
+    /**
+     * What happens when the agent says it booked, cancelled, saved, sent or transferred something no successful tool result backs. count only counts it, rewrite also swaps the reply for a safe line. Unset is count
+     */
+    claim_guard?: 'off' | 'count' | 'rewrite';
     /**
      * Key that ends a keypad entry. Unset is #
      */
@@ -1485,7 +1513,7 @@ export type CallReceiptLine = {
 export type CallRecordingInfo = {
     deleted_at?: string;
     deleted_by_name?: string;
-    deleted_reason?: 'retention' | 'user' | 'data_request' | 'key_destroyed';
+    deleted_reason?: 'retention' | 'user' | 'data_request' | 'key_destroyed' | 'content_removed';
     id: string;
     /**
      * Playable lanes of the call recording
@@ -1567,6 +1595,17 @@ export type CallTurn = {
     tts_ttfb_ms?: number;
     turn_index: number;
     user_text?: string;
+};
+
+export type CallUnbackedClaim = {
+    claimed: 'booked' | 'scheduled' | 'cancelled' | 'saved' | 'sent' | 'transferred';
+    issue_id: string;
+    /**
+     * What the agent said; dropped when the transcript retention passes
+     */
+    quote?: string;
+    reason: 'no_tool' | 'tool_failed' | 'no_record';
+    turn: number;
 };
 
 export type CallerBlockRef = {
@@ -2274,6 +2313,40 @@ export type ConversationTool = {
     status: 'ok' | 'error' | 'timeout';
 };
 
+export type CostPerAnsweredCall = {
+    /**
+     * Agents with charges or answered calls, highest charge first; at most 100
+     */
+    agents: Array<CostPerCallRow>;
+    from: string;
+    timezone: string;
+    to: string;
+    totals: CostPerCallRow;
+};
+
+export type CostPerCallRow = {
+    /**
+     * Calls with a person on the line among the calls charged in the period: inbound answered and not free (short, spam, blocked and paused calls are free), outbound answered with any verdict except voicemail, carrier voicemail, IVR, screener, fax or SIT; no verdict counts as answered
+     */
+    answered_calls: number;
+    /**
+     * Settled call charges of the period; web tests and simulations excluded
+     */
+    charge_micro: number;
+    /**
+     * charge_micro divided by answered_calls, rounded to the nearest micro-USD; null when no call was answered
+     */
+    cost_micro: number | null;
+    /**
+     * Agent id, or none for calls without an agent; total for the whole workspace
+     */
+    key: string;
+    /**
+     * Agent name
+     */
+    label?: string;
+};
+
 export type CreateAssistantRequest = {
     name: string;
 };
@@ -2494,7 +2567,10 @@ export type CreateWebhookReplayRequest = {
 
 export type CreateWebhookRequest = {
     description?: string;
-    event_types: Array<'call.started' | 'call.answered' | 'call.ended' | 'call.analyzed' | 'call.recording.ready' | 'call.transferred' | 'campaign.started' | 'campaign.paused' | 'campaign.completed' | 'campaign.contact.completed' | 'compliance.opt_out' | 'billing.balance.low' | 'billing.top_up.succeeded' | 'billing.auto_top_up.failed' | 'number.provisioned' | 'number.released' | 'notification.call.summary' | 'notification.campaign.completed' | 'notification.campaign.paused' | 'notification.billing.balance_low' | 'notification.billing.top_up_succeeded' | 'notification.billing.auto_top_up_failed' | 'notification.spending_request.created' | 'notification.number.provisioned' | 'notification.number.released' | 'notification.compliance.optout_alert' | 'notification.inbox.callback_waiting' | 'notification.alert.missed_calls_spike' | 'notification.alert.transfers_failing' | 'notification.alert.tool_failing' | 'notification.agent.paused' | 'inbox.item.created' | 'inbox.item.cleared' | 'agent.published' | 'agent.paused' | 'agent.resumed' | 'call.flagged' | 'recording.deleted' | 'caller.blocked' | 'number.routing_changed' | 'notification.campaign.safeguard_paused' | 'notification.campaign.review_decided' | 'notification.verification.updated' | 'billing.spend_limit.alert' | 'billing.bundle.renewed' | 'billing.bundle.renewal_failed' | 'billing.payment.refunded' | 'number.rental_failed' | 'notification.billing.spend_limit_alert' | 'notification.billing.bundle_renewed' | 'notification.billing.bundle_renewal_failed' | 'notification.billing.payment_refunded' | 'notification.number.rental_failed' | 'booking.created' | 'booking.confirmed' | 'booking.cancelled' | 'booking.declined' | 'booking.failed' | 'integration.disconnected' | 'tool.disabled' | 'knowledge.gap.created' | 'call.alert.fired' | 'call.supervision.started' | 'call.supervision.ended' | 'issue.created' | 'issue.updated' | 'issue.resolved'>;
+    /**
+     * Event types to deliver, or ["*"] for every event
+     */
+    event_types: Array<'*' | 'call.started' | 'call.answered' | 'call.ended' | 'call.analyzed' | 'call.recording.ready' | 'call.transferred' | 'campaign.started' | 'campaign.paused' | 'campaign.completed' | 'campaign.contact.completed' | 'compliance.opt_out' | 'billing.balance.low' | 'billing.top_up.succeeded' | 'billing.auto_top_up.failed' | 'number.provisioned' | 'number.released' | 'notification.call.summary' | 'notification.campaign.completed' | 'notification.campaign.paused' | 'notification.billing.balance_low' | 'notification.billing.top_up_succeeded' | 'notification.billing.auto_top_up_failed' | 'notification.spending_request.created' | 'notification.number.provisioned' | 'notification.number.released' | 'notification.compliance.optout_alert' | 'notification.inbox.callback_waiting' | 'notification.alert.missed_calls_spike' | 'notification.alert.transfers_failing' | 'notification.alert.tool_failing' | 'notification.agent.paused' | 'inbox.item.created' | 'inbox.item.cleared' | 'agent.published' | 'agent.paused' | 'agent.resumed' | 'call.flagged' | 'recording.deleted' | 'caller.blocked' | 'number.routing_changed' | 'notification.campaign.safeguard_paused' | 'notification.campaign.review_decided' | 'notification.verification.updated' | 'billing.spend_limit.alert' | 'billing.bundle.renewed' | 'billing.bundle.renewal_failed' | 'billing.payment.refunded' | 'number.rental_failed' | 'notification.billing.spend_limit_alert' | 'notification.billing.bundle_renewed' | 'notification.billing.bundle_renewal_failed' | 'notification.billing.payment_refunded' | 'notification.number.rental_failed' | 'booking.created' | 'booking.confirmed' | 'booking.cancelled' | 'booking.declined' | 'booking.failed' | 'integration.disconnected' | 'tool.disabled' | 'knowledge.gap.created' | 'call.alert.fired' | 'call.supervision.started' | 'call.supervision.ended' | 'issue.created' | 'issue.updated' | 'issue.resolved'>;
     url: string;
 };
 
@@ -3010,11 +3086,23 @@ export type InstructionsDiff = {
 };
 
 export type IntegrationProvider = {
+    /**
+     * whether bookings can wait for the owner's approval
+     */
+    approval_supported: boolean;
     auth: 'oauth' | 'api_key';
+    /**
+     * false while the platform has no client credentials for an OAuth provider
+     */
+    configured: boolean;
     display_name: string;
     id: string;
     kind: 'google_calendar' | 'cal_com' | 'outlook_calendar' | 'calendly';
     logo_key: string;
+    /**
+     * what a connection of this provider exposes for booking
+     */
+    resource_kind: 'calendar' | 'event_type';
     status: 'enabled' | 'disabled';
 };
 
@@ -3059,7 +3147,7 @@ export type Issue = {
      * Higher is worse; the board is sorted by it
      */
     impact: number;
-    kind: 'knowledge_gap' | 'missed_booking' | 'said_not_done' | 'tool_error' | 'transfer_failed' | 'no_person_available' | 'caller_hung_up' | 'unresolved_call' | 'test_failed' | 'reported';
+    kind: 'knowledge_gap' | 'missed_booking' | 'said_not_done' | 'tool_error' | 'transfer_failed' | 'no_person_available' | 'caller_hung_up' | 'unresolved_call' | 'test_failed' | 'reported' | 'unbacked_claim';
     last_seen_at: string;
     latest?: IssueLatest;
     occurrences: number;
@@ -3452,6 +3540,10 @@ export type ListIntegrationProvider = {
     data: Array<IntegrationProvider>;
 };
 
+export type ListLiveModel = {
+    data: Array<LiveModel>;
+};
+
 export type ListMcpServer = {
     data: Array<McpServer>;
 };
@@ -3508,6 +3600,44 @@ export type LiveCallSupervisor = {
 export type LiveCalls = {
     concurrency: Concurrency;
     data: Array<LiveCall>;
+};
+
+export type LiveModel = {
+    /**
+     * Values s2s_params.audio_format accepts; g711_ulaw means the provider takes phone audio as is
+     */
+    audio_formats: Array<string>;
+    /**
+     * The call-minute rate for live mode, after any launch price
+     */
+    base_micro_per_min: number;
+    currency: 'USD';
+    default_audio_format?: string;
+    /**
+     * Voice key used when s2s_params.voice is unset; GET /v1/catalog/voices?model_id= lists the others
+     */
+    default_voice?: string;
+    display_name: string;
+    id: string;
+    /**
+     * Empty means the model detects the language itself
+     */
+    languages: Array<string>;
+    model_key: string;
+    /**
+     * Added to the call-minute rate for this model; 0 when it bills at the normal rate
+     */
+    premium_micro_per_min: number;
+    /**
+     * Stable provider key, for the provider logo
+     */
+    provider_key: string;
+    provider_name: string;
+    retires_on?: string;
+    /**
+     * Price per started minute billing charges for this model
+     */
+    total_micro_per_min: number;
 };
 
 export type McpAuth = {
@@ -3627,6 +3757,10 @@ export type Number = {
     id: string;
     kind?: 'local' | 'toll_free';
     label?: string;
+    /**
+     * Published agent version that answers this number now; absent when the number routes elsewhere or the agent is unpublished
+     */
+    live_agent?: NumberLiveAgent;
     monthly_price_micro: number;
     next_renewal_at?: string;
     purchased_at?: string;
@@ -3672,6 +3806,13 @@ export type NumberBranded = {
 export type NumberCnam = {
     name?: string;
     status: 'none' | 'pending' | 'registered' | 'failed' | 'unsupported';
+};
+
+export type NumberLiveAgent = {
+    assistant_id: string;
+    published_at?: string;
+    version: number;
+    version_id: string;
 };
 
 export type NumberRef = {
@@ -4516,6 +4657,34 @@ export type Pronunciation = {
     word: string;
 };
 
+export type ProviderFallback = {
+    /**
+     * Offset from the start of the call
+     */
+    at_ms: number;
+    /**
+     * Display name of the provider the call left
+     */
+    from: string;
+    /**
+     * Catalog key of that provider
+     */
+    from_key: string;
+    kind: 'stt' | 'llm' | 'tts';
+    /**
+     * Error class that caused the switch, such as timeout, stall, unavailable, rate_limited or quota
+     */
+    reason: string;
+    /**
+     * Display name of the backup provider
+     */
+    to: string;
+    /**
+     * Catalog key of the backup provider
+     */
+    to_key: string;
+};
+
 export type PublishAssistantVersionRequest = {
     note?: string;
 };
@@ -4590,7 +4759,7 @@ export type Recording = {
     created_at: string;
     deleted_at?: string;
     deleted_by_name?: string;
-    deleted_reason?: 'retention' | 'user' | 'data_request' | 'key_destroyed';
+    deleted_reason?: 'retention' | 'user' | 'data_request' | 'key_destroyed' | 'content_removed';
     dropped?: number;
     format: string;
     frames?: number;
@@ -5131,7 +5300,10 @@ export type UpdatePracticeTestInputBody = {
 
 export type UpdateWebhookRequest = {
     description?: string;
-    event_types?: Array<'call.started' | 'call.answered' | 'call.ended' | 'call.analyzed' | 'call.recording.ready' | 'call.transferred' | 'campaign.started' | 'campaign.paused' | 'campaign.completed' | 'campaign.contact.completed' | 'compliance.opt_out' | 'billing.balance.low' | 'billing.top_up.succeeded' | 'billing.auto_top_up.failed' | 'number.provisioned' | 'number.released' | 'notification.call.summary' | 'notification.campaign.completed' | 'notification.campaign.paused' | 'notification.billing.balance_low' | 'notification.billing.top_up_succeeded' | 'notification.billing.auto_top_up_failed' | 'notification.spending_request.created' | 'notification.number.provisioned' | 'notification.number.released' | 'notification.compliance.optout_alert' | 'notification.inbox.callback_waiting' | 'notification.alert.missed_calls_spike' | 'notification.alert.transfers_failing' | 'notification.alert.tool_failing' | 'notification.agent.paused' | 'inbox.item.created' | 'inbox.item.cleared' | 'agent.published' | 'agent.paused' | 'agent.resumed' | 'call.flagged' | 'recording.deleted' | 'caller.blocked' | 'number.routing_changed' | 'notification.campaign.safeguard_paused' | 'notification.campaign.review_decided' | 'notification.verification.updated' | 'billing.spend_limit.alert' | 'billing.bundle.renewed' | 'billing.bundle.renewal_failed' | 'billing.payment.refunded' | 'number.rental_failed' | 'notification.billing.spend_limit_alert' | 'notification.billing.bundle_renewed' | 'notification.billing.bundle_renewal_failed' | 'notification.billing.payment_refunded' | 'notification.number.rental_failed' | 'booking.created' | 'booking.confirmed' | 'booking.cancelled' | 'booking.declined' | 'booking.failed' | 'integration.disconnected' | 'tool.disabled' | 'knowledge.gap.created' | 'call.alert.fired' | 'call.supervision.started' | 'call.supervision.ended' | 'issue.created' | 'issue.updated' | 'issue.resolved'>;
+    /**
+     * Event types to deliver, or ["*"] for every event
+     */
+    event_types?: Array<'*' | 'call.started' | 'call.answered' | 'call.ended' | 'call.analyzed' | 'call.recording.ready' | 'call.transferred' | 'campaign.started' | 'campaign.paused' | 'campaign.completed' | 'campaign.contact.completed' | 'compliance.opt_out' | 'billing.balance.low' | 'billing.top_up.succeeded' | 'billing.auto_top_up.failed' | 'number.provisioned' | 'number.released' | 'notification.call.summary' | 'notification.campaign.completed' | 'notification.campaign.paused' | 'notification.billing.balance_low' | 'notification.billing.top_up_succeeded' | 'notification.billing.auto_top_up_failed' | 'notification.spending_request.created' | 'notification.number.provisioned' | 'notification.number.released' | 'notification.compliance.optout_alert' | 'notification.inbox.callback_waiting' | 'notification.alert.missed_calls_spike' | 'notification.alert.transfers_failing' | 'notification.alert.tool_failing' | 'notification.agent.paused' | 'inbox.item.created' | 'inbox.item.cleared' | 'agent.published' | 'agent.paused' | 'agent.resumed' | 'call.flagged' | 'recording.deleted' | 'caller.blocked' | 'number.routing_changed' | 'notification.campaign.safeguard_paused' | 'notification.campaign.review_decided' | 'notification.verification.updated' | 'billing.spend_limit.alert' | 'billing.bundle.renewed' | 'billing.bundle.renewal_failed' | 'billing.payment.refunded' | 'number.rental_failed' | 'notification.billing.spend_limit_alert' | 'notification.billing.bundle_renewed' | 'notification.billing.bundle_renewal_failed' | 'notification.billing.payment_refunded' | 'notification.number.rental_failed' | 'booking.created' | 'booking.confirmed' | 'booking.cancelled' | 'booking.declined' | 'booking.failed' | 'integration.disconnected' | 'tool.disabled' | 'knowledge.gap.created' | 'call.alert.fired' | 'call.supervision.started' | 'call.supervision.ended' | 'issue.created' | 'issue.updated' | 'issue.resolved'>;
     status?: 'active' | 'disabled';
     url?: string;
 };
@@ -5876,6 +6048,10 @@ export type NumberWritable = {
     id: string;
     kind?: 'local' | 'toll_free';
     label?: string;
+    /**
+     * Published agent version that answers this number now; absent when the number routes elsewhere or the agent is unpublished
+     */
+    live_agent?: NumberLiveAgent;
     monthly_price_micro: number;
     next_renewal_at?: string;
     purchased_at?: string;
@@ -8723,6 +8899,64 @@ export type ListBundlesResponses = {
 };
 
 export type ListBundlesResponse = ListBundlesResponses[keyof ListBundlesResponses];
+
+export type GetCostPerAnsweredCallData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * First local day; at most 366 days before to
+         */
+        from?: string;
+        /**
+         * Last local day
+         */
+        to?: string;
+        /**
+         * Instead of from and to: this_month, last_7_days, last_30_days or month:YYYY-MM
+         */
+        period?: string;
+    };
+    url: '/v1/billing/cost-per-answered-call';
+};
+
+export type GetCostPerAnsweredCallErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetCostPerAnsweredCallError = GetCostPerAnsweredCallErrors[keyof GetCostPerAnsweredCallErrors];
+
+export type GetCostPerAnsweredCallResponses = {
+    /**
+     * OK
+     */
+    200: CostPerAnsweredCall;
+};
+
+export type GetCostPerAnsweredCallResponse = GetCostPerAnsweredCallResponses[keyof GetCostPerAnsweredCallResponses];
 
 export type ListLedgerData = {
     body?: never;
@@ -12225,6 +12459,60 @@ export type ListCatalogLanguagesResponses = {
 };
 
 export type ListCatalogLanguagesResponse = ListCatalogLanguagesResponses[keyof ListCatalogLanguagesResponses];
+
+export type ListLiveModelsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Call direction the prices are for
+         */
+        direction?: 'inbound' | 'outbound' | 'web_test';
+        /**
+         * Only models that speak this language
+         */
+        language?: string;
+    };
+    url: '/v1/catalog/live-models';
+};
+
+export type ListLiveModelsErrors = {
+    /**
+     * Bad Request
+     */
+    400: Problem;
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Forbidden
+     */
+    403: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Too Many Requests
+     */
+    429: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListLiveModelsError = ListLiveModelsErrors[keyof ListLiveModelsErrors];
+
+export type ListLiveModelsResponses = {
+    /**
+     * OK
+     */
+    200: ListLiveModel;
+};
+
+export type ListLiveModelsResponse = ListLiveModelsResponses[keyof ListLiveModelsResponses];
 
 export type ListCatalogModelsData = {
     body?: never;
