@@ -1461,7 +1461,7 @@
             "type": "string"
           },
           "type": {
-            "description": "Always single_prompt until flows ship",
+            "description": "single_prompt, or flow for a flow agent",
             "enum": [
               "single_prompt",
               "flow"
@@ -3531,6 +3531,11 @@
             "format": "uuid",
             "type": "string"
           },
+          "content_removed_at": {
+            "description": "Detail only: when the call content was permanently removed",
+            "format": "date-time",
+            "type": "string"
+          },
           "coverage": {
             "description": "Why the agent got this call: inside hours, after hours, a holiday, or forwarded because the owner line was busy or unanswered",
             "enum": [
@@ -3687,6 +3692,28 @@
             "format": "date-time",
             "type": "string"
           },
+          "redacted": {
+            "description": "Detail only: stored content was checked and sensitive data in it hidden",
+            "type": "boolean"
+          },
+          "redacted_categories": {
+            "description": "Detail only: categories checked and hidden in this call",
+            "items": {
+              "enum": [
+                "card",
+                "ssn",
+                "dob",
+                "bank",
+                "gov_id"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "redaction_pending": {
+            "description": "Detail only: content is hidden until redaction finishes",
+            "type": "boolean"
+          },
           "sentiment": {
             "description": "Caller sentiment from the post-call analysis, on every call",
             "enum": [
@@ -3743,6 +3770,13 @@
           },
           "transfer": {
             "$ref": "#/components/schemas/CallTransfer"
+          },
+          "unbacked_claims": {
+            "description": "Detail only: things the agent said it did that no tool result or booking backs up",
+            "items": {
+              "$ref": "#/components/schemas/CallUnbackedClaim"
+            },
+            "type": "array"
           },
           "updated_at": {
             "format": "date-time",
@@ -4019,6 +4053,15 @@
           "ambient_sound": {
             "description": "Low background sound the caller hears; never recorded. A key from GET /v1/catalog/ambient-sounds. Unset is off",
             "maxLength": 40,
+            "type": "string"
+          },
+          "claim_guard": {
+            "description": "What happens when the agent says it booked, cancelled, saved, sent or transferred something no successful tool result backs. count only counts it, rewrite also swaps the reply for a safe line. Unset is count",
+            "enum": [
+              "off",
+              "count",
+              "rewrite"
+            ],
             "type": "string"
           },
           "dtmf_end_key": {
@@ -4388,7 +4431,8 @@
               "retention",
               "user",
               "data_request",
-              "key_destroyed"
+              "key_destroyed",
+              "content_removed"
             ],
             "type": "string"
           },
@@ -4687,6 +4731,49 @@
           "barged_in",
           "from_interim",
           "created_at"
+        ],
+        "type": "object"
+      },
+      "CallUnbackedClaim": {
+        "additionalProperties": false,
+        "properties": {
+          "claimed": {
+            "enum": [
+              "booked",
+              "scheduled",
+              "cancelled",
+              "saved",
+              "sent",
+              "transferred"
+            ],
+            "type": "string"
+          },
+          "issue_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "quote": {
+            "description": "What the agent said; dropped when the transcript retention passes",
+            "type": "string"
+          },
+          "reason": {
+            "enum": [
+              "no_tool",
+              "tool_failed",
+              "no_record"
+            ],
+            "type": "string"
+          },
+          "turn": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "issue_id",
+          "claimed",
+          "reason",
+          "turn"
         ],
         "type": "object"
       },
@@ -7024,6 +7111,78 @@
         ],
         "type": "object"
       },
+      "CostPerAnsweredCall": {
+        "additionalProperties": false,
+        "properties": {
+          "agents": {
+            "description": "Agents with charges or answered calls, highest charge first; at most 100",
+            "items": {
+              "$ref": "#/components/schemas/CostPerCallRow"
+            },
+            "type": "array"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/CostPerCallRow"
+          }
+        },
+        "required": [
+          "from",
+          "to",
+          "timezone",
+          "totals",
+          "agents"
+        ],
+        "type": "object"
+      },
+      "CostPerCallRow": {
+        "additionalProperties": false,
+        "properties": {
+          "answered_calls": {
+            "description": "Calls with a person on the line among the calls charged in the period: inbound answered and not free (short, spam, blocked and paused calls are free), outbound answered with any verdict except voicemail, carrier voicemail, IVR, screener, fax or SIT; no verdict counts as answered",
+            "format": "int64",
+            "type": "integer"
+          },
+          "charge_micro": {
+            "description": "Settled call charges of the period; web tests and simulations excluded",
+            "format": "int64",
+            "type": "integer"
+          },
+          "cost_micro": {
+            "description": "charge_micro divided by answered_calls, rounded to the nearest micro-USD; null when no call was answered",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "key": {
+            "description": "Agent id, or none for calls without an agent; total for the whole workspace",
+            "type": "string"
+          },
+          "label": {
+            "description": "Agent name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "charge_micro",
+          "answered_calls",
+          "cost_micro"
+        ],
+        "type": "object"
+      },
       "CreateAssistantRequest": {
         "additionalProperties": false,
         "properties": {
@@ -7574,8 +7733,10 @@
             "type": "string"
           },
           "event_types": {
+            "description": "Event types to deliver, or [\"*\"] for every event",
             "items": {
               "enum": [
+                "*",
                 "call.started",
                 "call.answered",
                 "call.ended",
@@ -9188,12 +9349,20 @@
       "IntegrationProvider": {
         "additionalProperties": false,
         "properties": {
+          "approval_supported": {
+            "description": "whether bookings can wait for the owner's approval",
+            "type": "boolean"
+          },
           "auth": {
             "enum": [
               "oauth",
               "api_key"
             ],
             "type": "string"
+          },
+          "configured": {
+            "description": "false while the platform has no client credentials for an OAuth provider",
+            "type": "boolean"
           },
           "display_name": {
             "type": "string"
@@ -9214,6 +9383,14 @@
           "logo_key": {
             "type": "string"
           },
+          "resource_kind": {
+            "description": "what a connection of this provider exposes for booking",
+            "enum": [
+              "calendar",
+              "event_type"
+            ],
+            "type": "string"
+          },
           "status": {
             "enum": [
               "enabled",
@@ -9228,7 +9405,10 @@
           "display_name",
           "logo_key",
           "auth",
-          "status"
+          "status",
+          "configured",
+          "resource_kind",
+          "approval_supported"
         ],
         "type": "object"
       },
@@ -9341,7 +9521,8 @@
               "caller_hung_up",
               "unresolved_call",
               "test_failed",
-              "reported"
+              "reported",
+              "unbacked_claim"
             ],
             "type": "string"
           },
@@ -13851,7 +14032,8 @@
               "retention",
               "user",
               "data_request",
-              "key_destroyed"
+              "key_destroyed",
+              "content_removed"
             ],
             "type": "string"
           },
@@ -15443,8 +15625,10 @@
             "type": "string"
           },
           "event_types": {
+            "description": "Event types to deliver, or [\"*\"] for every event",
             "items": {
               "enum": [
+                "*",
                 "call.started",
                 "call.answered",
                 "call.ended",
@@ -20448,6 +20632,95 @@
           }
         ],
         "summary": "One-time prepaid bundle packs on offer; empty while bundles are switched off",
+        "tags": [
+          "billing"
+        ],
+        "x-larynth-action": "billing.balance.read",
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "billing:read",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/billing/cost-per-answered-call": {
+      "get": {
+        "operationId": "getCostPerAnsweredCall",
+        "parameters": [
+          {
+            "description": "First local day; at most 366 days before to",
+            "explode": false,
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "description": "First local day; at most 366 days before to",
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Last local day",
+            "explode": false,
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "description": "Last local day",
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Instead of from and to: this_month, last_7_days, last_30_days or month:YYYY-MM",
+            "explode": false,
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "description": "Instead of from and to: this_month, last_7_days, last_30_days or month:YYYY-MM",
+              "pattern": "^(this_month|last_7_days|last_30_days|month:[0-9]{4}-(0[1-9]|1[0-2]))$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostPerAnsweredCall"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "billing:read"
+            ]
+          }
+        ],
+        "summary": "Settled call charges divided by answered calls, overall and per agent; read from the usage lines, never charges anything",
         "tags": [
           "billing"
         ],
@@ -34690,6 +34963,12 @@
       "title": "Export limit reached"
     },
     {
+      "code": "billing.export_too_large",
+      "status": 422,
+      "type": "https://larynth.com/problems/billing.export_too_large",
+      "title": "Export range too large"
+    },
+    {
       "code": "billing.insufficient_credit",
       "status": 402,
       "type": "https://larynth.com/problems/billing.insufficient_credit",
@@ -35392,6 +35671,18 @@
       "title": "Number ownership could not be verified"
     },
     {
+      "code": "plan.key_taken",
+      "status": 409,
+      "type": "https://larynth.com/problems/plan.key_taken",
+      "title": "A plan with this key exists"
+    },
+    {
+      "code": "plan.name_invalid",
+      "status": 422,
+      "type": "https://larynth.com/problems/plan.name_invalid",
+      "title": "Plan name must be 1 to 200 characters after trimming"
+    },
+    {
       "code": "practice.fair_use",
       "status": 429,
       "type": "https://larynth.com/problems/practice.fair_use",
@@ -35426,6 +35717,36 @@
       "status": 409,
       "type": "https://larynth.com/problems/practice.test_limit",
       "title": "This agent has the most practice calls it can have"
+    },
+    {
+      "code": "rate.effective_from_past",
+      "status": 422,
+      "type": "https://larynth.com/problems/rate.effective_from_past",
+      "title": "A rate cannot start in the past"
+    },
+    {
+      "code": "rate.effective_to_past",
+      "status": 422,
+      "type": "https://larynth.com/problems/rate.effective_to_past",
+      "title": "A rate cannot end in the past"
+    },
+    {
+      "code": "rate.ended",
+      "status": 409,
+      "type": "https://larynth.com/problems/rate.ended",
+      "title": "Rate has ended and cannot change"
+    },
+    {
+      "code": "rate.later_scheduled",
+      "status": 409,
+      "type": "https://larynth.com/problems/rate.later_scheduled",
+      "title": "A later rate is already scheduled for this target"
+    },
+    {
+      "code": "rate.overlap",
+      "status": 409,
+      "type": "https://larynth.com/problems/rate.overlap",
+      "title": "Rate overlaps another rate for the same target"
     },
     {
       "code": "rate_limited",
