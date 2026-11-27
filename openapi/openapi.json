@@ -1461,7 +1461,7 @@
             "type": "string"
           },
           "type": {
-            "description": "Always single_prompt until flows ship",
+            "description": "single_prompt, or flow for a flow agent",
             "enum": [
               "single_prompt",
               "flow"
@@ -1693,6 +1693,14 @@
             "format": "int64",
             "type": "integer"
           },
+          "s2s_fallback_model_ids": {
+            "description": "Live models tried in order when the s2s model fails to start or drops mid-call",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 3,
+            "type": "array"
+          },
           "s2s_model_id": {
             "description": "Required for s2s",
             "format": "uuid",
@@ -1754,8 +1762,12 @@
             "additionalProperties": {},
             "type": "object"
           },
+          "tts_voice": {
+            "$ref": "#/components/schemas/VoiceRef",
+            "description": "A voice of the TTS model's provider by provider voice id, for a voice that is not in the catalog; looked up at the provider when the version is created. Ignored when tts_voice_id is set"
+          },
           "tts_voice_id": {
-            "description": "Required for cascade",
+            "description": "Required for cascade unless tts_voice is given",
             "format": "uuid",
             "type": "string"
           },
@@ -2166,6 +2178,14 @@
             "format": "date-time",
             "type": "string"
           },
+          "s2s_fallback_model_ids": {
+            "description": "Live models tried in order when the s2s model fails to start or drops mid-call",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 3,
+            "type": "array"
+          },
           "s2s_model_id": {
             "description": "Required for s2s",
             "format": "uuid",
@@ -2227,8 +2247,12 @@
             "additionalProperties": {},
             "type": "object"
           },
+          "tts_voice": {
+            "$ref": "#/components/schemas/VoiceRef",
+            "description": "A voice of the TTS model's provider by provider voice id, for a voice that is not in the catalog; looked up at the provider when the version is created. Ignored when tts_voice_id is set"
+          },
           "tts_voice_id": {
-            "description": "Required for cascade",
+            "description": "Required for cascade unless tts_voice is given",
             "format": "uuid",
             "type": "string"
           },
@@ -2375,6 +2399,14 @@
             "$ref": "#/components/schemas/PostCallSettings",
             "description": "Post-call summary, data extraction and success evaluation"
           },
+          "s2s_fallback_model_ids": {
+            "description": "Live models tried in order when the s2s model fails to start or drops mid-call",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 3,
+            "type": "array"
+          },
           "s2s_model_id": {
             "description": "Required for s2s",
             "format": "uuid",
@@ -2436,8 +2468,12 @@
             "additionalProperties": {},
             "type": "object"
           },
+          "tts_voice": {
+            "$ref": "#/components/schemas/VoiceRef",
+            "description": "A voice of the TTS model's provider by provider voice id, for a voice that is not in the catalog; looked up at the provider when the version is created. Ignored when tts_voice_id is set"
+          },
           "tts_voice_id": {
-            "description": "Required for cascade",
+            "description": "Required for cascade unless tts_voice is given",
             "format": "uuid",
             "type": "string"
           },
@@ -3531,6 +3567,11 @@
             "format": "uuid",
             "type": "string"
           },
+          "content_removed_at": {
+            "description": "Detail only: when the call content was permanently removed",
+            "format": "date-time",
+            "type": "string"
+          },
           "coverage": {
             "description": "Why the agent got this call: inside hours, after hours, a holiday, or forwarded because the owner line was busy or unanswered",
             "enum": [
@@ -3600,7 +3641,8 @@
               "short_call",
               "spam",
               "blocked",
-              "agent_paused"
+              "agent_paused",
+              "failed"
             ],
             "type": "string"
           },
@@ -3646,6 +3688,16 @@
             ],
             "type": "string"
           },
+          "overflow": {
+            "description": "Every line was busy when the call came in: how it ended",
+            "enum": [
+              "answered",
+              "forwarded",
+              "busy_message",
+              "abandoned"
+            ],
+            "type": "string"
+          },
           "phone_leg_ms": {
             "description": "Billed time of the live-takeover phone legs dialled to your phones, on top of billable_ms",
             "format": "int64",
@@ -3661,6 +3713,13 @@
             "format": "int64",
             "type": "integer"
           },
+          "provider_fallbacks": {
+            "description": "Detail only: each switch to a backup provider during the call, in order",
+            "items": {
+              "$ref": "#/components/schemas/ProviderFallback"
+            },
+            "type": "array"
+          },
           "quality": {
             "$ref": "#/components/schemas/CallQuality",
             "description": "Detail only"
@@ -3670,6 +3729,11 @@
             "format": "int64",
             "maximum": 100,
             "minimum": 0,
+            "type": "integer"
+          },
+          "queue_wait_ms": {
+            "description": "Time the caller waited on hold for a free line; not billed",
+            "format": "int64",
             "type": "integer"
           },
           "receipt": {
@@ -3686,6 +3750,28 @@
           "recording_notice_played_at": {
             "format": "date-time",
             "type": "string"
+          },
+          "redacted": {
+            "description": "Detail only: stored content was checked and sensitive data in it hidden",
+            "type": "boolean"
+          },
+          "redacted_categories": {
+            "description": "Detail only: categories checked and hidden in this call",
+            "items": {
+              "enum": [
+                "card",
+                "ssn",
+                "dob",
+                "bank",
+                "gov_id"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "redaction_pending": {
+            "description": "Detail only: content is hidden until redaction finishes",
+            "type": "boolean"
           },
           "sentiment": {
             "description": "Caller sentiment from the post-call analysis, on every call",
@@ -3743,6 +3829,13 @@
           },
           "transfer": {
             "$ref": "#/components/schemas/CallTransfer"
+          },
+          "unbacked_claims": {
+            "description": "Detail only: things the agent said it did that no tool result or booking backs up",
+            "items": {
+              "$ref": "#/components/schemas/CallUnbackedClaim"
+            },
+            "type": "array"
           },
           "updated_at": {
             "format": "date-time",
@@ -4021,6 +4114,15 @@
             "maxLength": 40,
             "type": "string"
           },
+          "claim_guard": {
+            "description": "What happens when the agent says it booked, cancelled, saved, sent or transferred something no successful tool result backs. count only counts it, rewrite also swaps the reply for a safe line. Unset is count",
+            "enum": [
+              "off",
+              "count",
+              "rewrite"
+            ],
+            "type": "string"
+          },
           "dtmf_end_key": {
             "description": "Key that ends a keypad entry. Unset is #",
             "enum": [
@@ -4289,7 +4391,8 @@
               "short_call",
               "spam",
               "blocked",
-              "agent_paused"
+              "agent_paused",
+              "failed"
             ],
             "type": "string"
           },
@@ -4388,7 +4491,8 @@
               "retention",
               "user",
               "data_request",
-              "key_destroyed"
+              "key_destroyed",
+              "content_removed"
             ],
             "type": "string"
           },
@@ -4687,6 +4791,49 @@
           "barged_in",
           "from_interim",
           "created_at"
+        ],
+        "type": "object"
+      },
+      "CallUnbackedClaim": {
+        "additionalProperties": false,
+        "properties": {
+          "claimed": {
+            "enum": [
+              "booked",
+              "scheduled",
+              "cancelled",
+              "saved",
+              "sent",
+              "transferred"
+            ],
+            "type": "string"
+          },
+          "issue_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "quote": {
+            "description": "What the agent said; dropped when the transcript retention passes",
+            "type": "string"
+          },
+          "reason": {
+            "enum": [
+              "no_tool",
+              "tool_failed",
+              "no_record"
+            ],
+            "type": "string"
+          },
+          "turn": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "issue_id",
+          "claimed",
+          "reason",
+          "turn"
         ],
         "type": "object"
       },
@@ -5902,6 +6049,7 @@
         "properties": {
           "attributes": {
             "additionalProperties": {},
+            "description": "Provider facts such as gender (male, female, neutral) and accent when known",
             "type": "object"
           },
           "description": {
@@ -5909,6 +6057,7 @@
             "type": "string"
           },
           "id": {
+            "description": "Unset when the voice was fetched live from the provider and is not in the catalog",
             "format": "uuid",
             "type": "string"
           },
@@ -5988,7 +6137,6 @@
           }
         },
         "required": [
-          "id",
           "provider_key",
           "voice_key",
           "name",
@@ -6082,7 +6230,7 @@
           },
           "simulations": {
             "$ref": "#/components/schemas/SimulationsSummary",
-            "description": "Reserved; null until simulations ship"
+            "description": "Latest practice run for this version; null when it was never practiced"
           },
           "to_version": {
             "format": "int64",
@@ -7024,6 +7172,78 @@
         ],
         "type": "object"
       },
+      "CostPerAnsweredCall": {
+        "additionalProperties": false,
+        "properties": {
+          "agents": {
+            "description": "Agents with charges or answered calls, highest charge first; at most 100",
+            "items": {
+              "$ref": "#/components/schemas/CostPerCallRow"
+            },
+            "type": "array"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/CostPerCallRow"
+          }
+        },
+        "required": [
+          "from",
+          "to",
+          "timezone",
+          "totals",
+          "agents"
+        ],
+        "type": "object"
+      },
+      "CostPerCallRow": {
+        "additionalProperties": false,
+        "properties": {
+          "answered_calls": {
+            "description": "Calls with a person on the line among the calls charged in the period: inbound answered and not free (short, spam, blocked and paused calls are free), outbound answered with any verdict except voicemail, carrier voicemail, IVR, screener, fax or SIT; no verdict counts as answered",
+            "format": "int64",
+            "type": "integer"
+          },
+          "charge_micro": {
+            "description": "Settled call charges of the period; web tests and simulations excluded",
+            "format": "int64",
+            "type": "integer"
+          },
+          "cost_micro": {
+            "description": "charge_micro divided by answered_calls, rounded to the nearest micro-USD; null when no call was answered",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "key": {
+            "description": "Agent id, or none for calls without an agent; total for the whole workspace",
+            "type": "string"
+          },
+          "label": {
+            "description": "Agent name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "charge_micro",
+          "answered_calls",
+          "cost_micro"
+        ],
+        "type": "object"
+      },
       "CreateAssistantRequest": {
         "additionalProperties": false,
         "properties": {
@@ -7446,11 +7666,33 @@
       "CreatePracticeRunInputBody": {
         "additionalProperties": false,
         "properties": {
+          "mode": {
+            "default": "text",
+            "description": "Only text is available; voice returns practice_run.mode_unavailable",
+            "enum": [
+              "text",
+              "voice"
+            ],
+            "type": "string"
+          },
+          "required_only": {
+            "description": "Run only the required practice calls",
+            "type": "boolean"
+          },
           "target": {
             "default": "draft",
             "enum": [
               "draft",
               "version"
+            ],
+            "type": "string"
+          },
+          "trigger": {
+            "default": "manual",
+            "description": "publish marks the run as the check before publishing the draft",
+            "enum": [
+              "manual",
+              "publish"
             ],
             "type": "string"
           },
@@ -7574,8 +7816,10 @@
             "type": "string"
           },
           "event_types": {
+            "description": "Event types to deliver, or [\"*\"] for every event",
             "items": {
               "enum": [
+                "*",
                 "call.started",
                 "call.answered",
                 "call.ended",
@@ -9188,12 +9432,20 @@
       "IntegrationProvider": {
         "additionalProperties": false,
         "properties": {
+          "approval_supported": {
+            "description": "whether bookings can wait for the owner's approval",
+            "type": "boolean"
+          },
           "auth": {
             "enum": [
               "oauth",
               "api_key"
             ],
             "type": "string"
+          },
+          "configured": {
+            "description": "false while the platform has no client credentials for an OAuth provider",
+            "type": "boolean"
           },
           "display_name": {
             "type": "string"
@@ -9214,6 +9466,14 @@
           "logo_key": {
             "type": "string"
           },
+          "resource_kind": {
+            "description": "what a connection of this provider exposes for booking",
+            "enum": [
+              "calendar",
+              "event_type"
+            ],
+            "type": "string"
+          },
           "status": {
             "enum": [
               "enabled",
@@ -9228,7 +9488,10 @@
           "display_name",
           "logo_key",
           "auth",
-          "status"
+          "status",
+          "configured",
+          "resource_kind",
+          "approval_supported"
         ],
         "type": "object"
       },
@@ -9341,7 +9604,8 @@
               "caller_hung_up",
               "unresolved_call",
               "test_failed",
-              "reported"
+              "reported",
+              "unbacked_claim"
             ],
             "type": "string"
           },
@@ -10607,6 +10871,21 @@
         ],
         "type": "object"
       },
+      "ListLiveModel": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/LiveModel"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
       "ListMcpServer": {
         "additionalProperties": false,
         "properties": {
@@ -10839,6 +11118,98 @@
         "required": [
           "data",
           "concurrency"
+        ],
+        "type": "object"
+      },
+      "LiveModel": {
+        "additionalProperties": false,
+        "properties": {
+          "audio_formats": {
+            "description": "Values s2s_params.audio_format accepts; g711_ulaw means the provider takes phone audio as is",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "base_micro_per_min": {
+            "description": "The call-minute rate for live mode, after any launch price",
+            "format": "int64",
+            "type": "integer"
+          },
+          "currency": {
+            "enum": [
+              "USD"
+            ],
+            "type": "string"
+          },
+          "default_audio_format": {
+            "type": "string"
+          },
+          "default_voice": {
+            "description": "Voice key used when s2s_params.voice is unset; GET /v1/catalog/voices?model_id= lists the others",
+            "type": "string"
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "is_default": {
+            "description": "The live model new agents start with",
+            "type": "boolean"
+          },
+          "languages": {
+            "description": "Empty means the model detects the language itself",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "model_key": {
+            "type": "string"
+          },
+          "premium_micro_per_min": {
+            "description": "Added to the call-minute rate for this model; 0 when it bills at the normal rate",
+            "format": "int64",
+            "type": "integer"
+          },
+          "provider_key": {
+            "description": "Stable provider key, for the provider logo",
+            "type": "string"
+          },
+          "provider_name": {
+            "type": "string"
+          },
+          "retires_on": {
+            "format": "date",
+            "type": "string"
+          },
+          "total_micro_per_min": {
+            "description": "Price per started minute billing charges for this model",
+            "format": "int64",
+            "type": "integer"
+          },
+          "typical_latency_ms": {
+            "description": "Typical time to first audio, from the model's catalog hints; unset when unknown",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "provider_key",
+          "provider_name",
+          "model_key",
+          "display_name",
+          "languages",
+          "audio_formats",
+          "base_micro_per_min",
+          "premium_micro_per_min",
+          "total_micro_per_min",
+          "currency",
+          "is_default"
         ],
         "type": "object"
       },
@@ -11165,6 +11536,10 @@
           "label": {
             "type": "string"
           },
+          "live_agent": {
+            "$ref": "#/components/schemas/NumberLiveAgent",
+            "description": "Published agent version that answers this number now; absent when the number routes elsewhere or the agent is unpublished"
+          },
           "monthly_price_micro": {
             "format": "int64",
             "type": "integer"
@@ -11298,6 +11673,33 @@
         },
         "required": [
           "status"
+        ],
+        "type": "object"
+      },
+      "NumberLiveAgent": {
+        "additionalProperties": false,
+        "properties": {
+          "assistant_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "published_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "version": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "version_id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "assistant_id",
+          "version_id",
+          "version"
         ],
         "type": "object"
       },
@@ -11832,29 +12234,6 @@
           "data": {
             "items": {
               "$ref": "#/components/schemas/CatalogModel"
-            },
-            "type": "array"
-          },
-          "next_cursor": {
-            "description": "Cursor for the next page; null on the last page",
-            "type": [
-              "string",
-              "null"
-            ]
-          }
-        },
-        "required": [
-          "data",
-          "next_cursor"
-        ],
-        "type": "object"
-      },
-      "PageCatalogVoice": {
-        "additionalProperties": false,
-        "properties": {
-          "data": {
-            "items": {
-              "$ref": "#/components/schemas/CatalogVoice"
             },
             "type": "array"
           },
@@ -12726,14 +13105,16 @@
             "type": "string"
           },
           "type": {
-            "description": "said and not_said look for a phrase in the agent's lines, tool_called and tool_not_called look at the tools it used, tool_args_not_contain passes when the arguments of the tool named in tool never contain the text, judge asks a model whether the statement holds",
+            "description": "said and not_said look for a phrase in the agent's lines, tool_called and tool_not_called look at the tools it used, tool_args_not_contain passes when the arguments of the tool named in tool never contain the text, judge asks a model whether the statement holds and must quote the call as evidence, transferred passes when the agent transferred the call (text is unused; send -), outcome_is passes when the call ended with the outcome named in text (booked_appointment, rescheduled, answered_question, message_taken or no_resolution)",
             "enum": [
               "said",
               "not_said",
               "tool_called",
               "tool_not_called",
               "tool_args_not_contain",
-              "judge"
+              "judge",
+              "transferred",
+              "outcome_is"
             ],
             "type": "string"
           }
@@ -12767,6 +13148,29 @@
           "key",
           "label",
           "passed"
+        ],
+        "type": "object"
+      },
+      "PracticeEstimate": {
+        "additionalProperties": false,
+        "properties": {
+          "attempts": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "billable_micro": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "free_left": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "attempts",
+          "free_left",
+          "billable_micro"
         ],
         "type": "object"
       },
@@ -12854,6 +13258,17 @@
             "format": "date-time",
             "type": "string"
           },
+          "error_code": {
+            "description": "Why an errored run stopped, when known: practice_run.insufficient_balance means the balance could not cover the next attempt",
+            "enum": [
+              "practice_run.insufficient_balance"
+            ],
+            "type": "string"
+          },
+          "estimate": {
+            "$ref": "#/components/schemas/PracticeEstimate",
+            "description": "Only on the response that creates the run: attempts, free attempts left this month and the cost of the rest"
+          },
           "finished_at": {
             "format": "date-time",
             "type": "string"
@@ -12861,6 +13276,9 @@
           "id": {
             "format": "uuid",
             "type": "string"
+          },
+          "required_only": {
+            "type": "boolean"
           },
           "started_at": {
             "format": "date-time",
@@ -12885,6 +13303,13 @@
           "totals": {
             "$ref": "#/components/schemas/PracticeTotals"
           },
+          "trigger": {
+            "enum": [
+              "manual",
+              "publish"
+            ],
+            "type": "string"
+          },
           "version": {
             "format": "int64",
             "type": "integer"
@@ -12898,6 +13323,8 @@
           "state",
           "attempts",
           "totals",
+          "trigger",
+          "required_only",
           "created_at"
         ],
         "type": "object"
@@ -12917,6 +13344,17 @@
             "format": "date-time",
             "type": "string"
           },
+          "error_code": {
+            "description": "Why an errored run stopped, when known: practice_run.insufficient_balance means the balance could not cover the next attempt",
+            "enum": [
+              "practice_run.insufficient_balance"
+            ],
+            "type": "string"
+          },
+          "estimate": {
+            "$ref": "#/components/schemas/PracticeEstimate",
+            "description": "Only on the response that creates the run: attempts, free attempts left this month and the cost of the rest"
+          },
           "finished_at": {
             "format": "date-time",
             "type": "string"
@@ -12924,6 +13362,9 @@
           "id": {
             "format": "uuid",
             "type": "string"
+          },
+          "required_only": {
+            "type": "boolean"
           },
           "started_at": {
             "format": "date-time",
@@ -12954,6 +13395,13 @@
           "totals": {
             "$ref": "#/components/schemas/PracticeTotals"
           },
+          "trigger": {
+            "enum": [
+              "manual",
+              "publish"
+            ],
+            "type": "string"
+          },
           "version": {
             "format": "int64",
             "type": "integer"
@@ -12968,6 +13416,8 @@
           "state",
           "attempts",
           "totals",
+          "trigger",
+          "required_only",
           "created_at"
         ],
         "type": "object"
@@ -13053,12 +13503,28 @@
           "name": {
             "type": "string"
           },
+          "required": {
+            "description": "A required practice call must pass before the agent can be published from the dashboard",
+            "type": "boolean"
+          },
           "source": {
             "enum": [
               "starter",
-              "custom"
+              "custom",
+              "from_call"
             ],
             "type": "string"
+          },
+          "source_call_id": {
+            "description": "The call this practice call was made from",
+            "type": "string"
+          },
+          "traits": {
+            "description": "How the caller behaves",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
           },
           "updated_at": {
             "format": "date-time",
@@ -13081,6 +13547,8 @@
           "wants",
           "must",
           "source",
+          "required",
+          "traits",
           "created_at",
           "updated_at"
         ],
@@ -13108,6 +13576,32 @@
             "minLength": 1,
             "type": "string"
           },
+          "required": {
+            "description": "Must pass before the agent can be published from the dashboard",
+            "type": "boolean"
+          },
+          "source_call_id": {
+            "description": "The call this practice call was drafted from; sets source to from_call",
+            "pattern": "^[a-z0-9]{2,8}_[0-9A-HJKMNP-TV-Z]{26}$",
+            "type": "string"
+          },
+          "traits": {
+            "description": "How the caller behaves, at most 3",
+            "items": {
+              "enum": [
+                "in_a_hurry",
+                "changes_mind",
+                "vague",
+                "upset",
+                "asks_for_person",
+                "off_topic"
+              ],
+              "type": "string"
+            },
+            "maxItems": 3,
+            "type": "array",
+            "uniqueItems": true
+          },
           "wants": {
             "maxLength": 500,
             "minLength": 1,
@@ -13120,6 +13614,85 @@
           }
         },
         "required": [
+          "name",
+          "who",
+          "wants",
+          "must"
+        ],
+        "type": "object"
+      },
+      "PracticeTestDraft": {
+        "additionalProperties": false,
+        "properties": {
+          "assistant_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "caller_e164": {
+            "description": "The number the agent sees as the caller, in E.164. Only test numbers are allowed: +1, an optional area code, then 555 01 and two digits",
+            "maxLength": 16,
+            "pattern": "^\\+[1-9][0-9]{6,14}$",
+            "type": "string"
+          },
+          "must": {
+            "items": {
+              "$ref": "#/components/schemas/PracticeCheck"
+            },
+            "maxItems": 6,
+            "minItems": 1,
+            "type": "array"
+          },
+          "name": {
+            "maxLength": 80,
+            "minLength": 1,
+            "type": "string"
+          },
+          "required": {
+            "description": "Must pass before the agent can be published from the dashboard",
+            "type": "boolean"
+          },
+          "source": {
+            "enum": [
+              "from_call"
+            ],
+            "type": "string"
+          },
+          "source_call_id": {
+            "description": "The call this practice call was drafted from; sets source to from_call",
+            "pattern": "^[a-z0-9]{2,8}_[0-9A-HJKMNP-TV-Z]{26}$",
+            "type": "string"
+          },
+          "traits": {
+            "description": "How the caller behaves, at most 3",
+            "items": {
+              "enum": [
+                "in_a_hurry",
+                "changes_mind",
+                "vague",
+                "upset",
+                "asks_for_person",
+                "off_topic"
+              ],
+              "type": "string"
+            },
+            "maxItems": 3,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "wants": {
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string"
+          },
+          "who": {
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "assistant_id",
+          "source",
           "name",
           "who",
           "wants",
@@ -13255,6 +13828,43 @@
         "required": [
           "speaker",
           "text"
+        ],
+        "type": "object"
+      },
+      "PracticeUsage": {
+        "additionalProperties": false,
+        "properties": {
+          "attempts_billed": {
+            "description": "Attempts charged this month",
+            "format": "int64",
+            "type": "integer"
+          },
+          "attempts_free": {
+            "description": "Free attempts each month",
+            "format": "int64",
+            "type": "integer"
+          },
+          "attempts_used": {
+            "description": "Practice call attempts that finished this month",
+            "format": "int64",
+            "type": "integer"
+          },
+          "month": {
+            "description": "Month in the workspace time zone, YYYY-MM",
+            "type": "string"
+          },
+          "price_per_attempt_micro": {
+            "description": "Charge per attempt after the free ones, in micro-USD",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "month",
+          "attempts_used",
+          "attempts_free",
+          "attempts_billed",
+          "price_per_attempt_micro"
         ],
         "type": "object"
       },
@@ -13517,6 +14127,10 @@
             ],
             "type": "string"
           },
+          "practice_run_id": {
+            "description": "The practice run that blocked the publish, unset when there was none (publish.practice_failed)",
+            "type": "string"
+          },
           "reason": {
             "description": "Machine-readable cause (tools.url_blocked, mcp.discovery_failed)",
             "type": "string"
@@ -13605,11 +14219,71 @@
         ],
         "type": "object"
       },
+      "ProviderFallback": {
+        "additionalProperties": false,
+        "properties": {
+          "at_ms": {
+            "description": "Offset from the start of the call",
+            "format": "int64",
+            "type": "integer"
+          },
+          "from": {
+            "description": "Display name of the provider the call left",
+            "type": "string"
+          },
+          "from_key": {
+            "description": "Catalog key of that provider",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "stt",
+              "llm",
+              "tts",
+              "s2s"
+            ],
+            "type": "string"
+          },
+          "reason": {
+            "description": "Error class that caused the switch, such as timeout, stall, unavailable, rate_limited or quota",
+            "type": "string"
+          },
+          "to": {
+            "description": "Display name of the backup provider",
+            "type": "string"
+          },
+          "to_key": {
+            "description": "Catalog key of the backup provider",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "from",
+          "from_key",
+          "to",
+          "to_key",
+          "at_ms",
+          "reason"
+        ],
+        "type": "object"
+      },
       "PublishAssistantVersionRequest": {
         "additionalProperties": false,
         "properties": {
           "note": {
             "maxLength": 200,
+            "type": "string"
+          },
+          "override_reason": {
+            "description": "Publish although a required practice call did not pass; logged in the audit trail",
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "practice_run_id": {
+            "description": "The finished publish-trigger practice run for this draft revision; required from the dashboard when the agent has required practice calls",
+            "format": "uuid",
             "type": "string"
           }
         },
@@ -13677,7 +14351,9 @@
               "premium_voice",
               "branded_call",
               "branded_brand_month",
-              "rnd_check"
+              "rnd_check",
+              "widget_minute",
+              "simulation_attempt"
             ],
             "type": "string"
           },
@@ -13689,7 +14365,7 @@
             "type": "string"
           },
           "price_micro": {
-            "description": "Per minute for the *_minute and premium kinds, per month for number_month*, branded_brand_month, per display for branded_call, per number checked for rnd_check",
+            "description": "Per minute for the *_minute and premium kinds, per month for number_month*, branded_brand_month, per display for branded_call, per number checked for rnd_check, per attempt for simulation_attempt",
             "format": "int64",
             "type": "integer"
           },
@@ -13811,6 +14487,7 @@
               "per_minute",
               "per_month",
               "per_display",
+              "per_attempt",
               "free",
               "at_cost"
             ],
@@ -13851,7 +14528,8 @@
               "retention",
               "user",
               "data_request",
-              "key_destroyed"
+              "key_destroyed",
+              "content_removed"
             ],
             "type": "string"
           },
@@ -14453,7 +15131,8 @@
               "refund",
               "dispute",
               "adjustment",
-              "rnd_checks"
+              "rnd_checks",
+              "simulations"
             ],
             "type": "string"
           },
@@ -14519,6 +15198,10 @@
       "StatementLineParams": {
         "additionalProperties": false,
         "properties": {
+          "attempts": {
+            "format": "int64",
+            "type": "integer"
+          },
           "bundle_key": {
             "type": "string"
           },
@@ -15422,6 +16105,26 @@
             "minLength": 1,
             "type": "string"
           },
+          "required": {
+            "type": "boolean"
+          },
+          "traits": {
+            "description": "Replaces the traits; an empty list clears them",
+            "items": {
+              "enum": [
+                "in_a_hurry",
+                "changes_mind",
+                "vague",
+                "upset",
+                "asks_for_person",
+                "off_topic"
+              ],
+              "type": "string"
+            },
+            "maxItems": 3,
+            "type": "array",
+            "uniqueItems": true
+          },
           "wants": {
             "maxLength": 500,
             "minLength": 1,
@@ -15443,8 +16146,10 @@
             "type": "string"
           },
           "event_types": {
+            "description": "Event types to deliver, or [\"*\"] for every event",
             "items": {
               "enum": [
+                "*",
                 "call.started",
                 "call.answered",
                 "call.ended",
@@ -15622,10 +16327,15 @@
           "simulation_micro": {
             "format": "int64",
             "type": "integer"
+          },
+          "widget_micro": {
+            "format": "int64",
+            "type": "integer"
           }
         },
         "required": [
           "agent_micro",
+          "widget_micro",
           "premium_micro",
           "bridged_micro",
           "forward_micro",
@@ -15680,7 +16390,8 @@
               "number_month",
               "call",
               "brand_month",
-              "number_check"
+              "number_check",
+              "attempt"
             ],
             "type": "string"
           }
@@ -15734,6 +16445,49 @@
             "type": "array"
           }
         },
+        "type": "object"
+      },
+      "VoicePage": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CatalogVoice"
+            },
+            "type": "array"
+          },
+          "next_cursor": {
+            "description": "Cursor for the next page; null on the last page",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "items",
+          "next_cursor"
+        ],
+        "type": "object"
+      },
+      "VoiceRef": {
+        "additionalProperties": false,
+        "properties": {
+          "provider_key": {
+            "maxLength": 41,
+            "minLength": 1,
+            "type": "string"
+          },
+          "voice_key": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "provider_key",
+          "voice_key"
+        ],
         "type": "object"
       },
       "WebCall": {
@@ -18955,6 +19709,9 @@
           "401": {
             "$ref": "#/components/responses/Problem401"
           },
+          "402": {
+            "$ref": "#/components/responses/Problem402"
+          },
           "403": {
             "$ref": "#/components/responses/Problem403"
           },
@@ -20448,6 +21205,95 @@
           }
         ],
         "summary": "One-time prepaid bundle packs on offer; empty while bundles are switched off",
+        "tags": [
+          "billing"
+        ],
+        "x-larynth-action": "billing.balance.read",
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "billing:read",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/billing/cost-per-answered-call": {
+      "get": {
+        "operationId": "getCostPerAnsweredCall",
+        "parameters": [
+          {
+            "description": "First local day; at most 366 days before to",
+            "explode": false,
+            "in": "query",
+            "name": "from",
+            "schema": {
+              "description": "First local day; at most 366 days before to",
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Last local day",
+            "explode": false,
+            "in": "query",
+            "name": "to",
+            "schema": {
+              "description": "Last local day",
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Instead of from and to: this_month, last_7_days, last_30_days or month:YYYY-MM",
+            "explode": false,
+            "in": "query",
+            "name": "period",
+            "schema": {
+              "description": "Instead of from and to: this_month, last_7_days, last_30_days or month:YYYY-MM",
+              "pattern": "^(this_month|last_7_days|last_30_days|month:[0-9]{4}-(0[1-9]|1[0-2]))$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostPerAnsweredCall"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "billing:read"
+            ]
+          }
+        ],
+        "summary": "Settled call charges divided by answered calls, overall and per agent; read from the usage lines, never charges anything",
         "tags": [
           "billing"
         ],
@@ -23745,6 +24591,79 @@
         "x-larynth-sdk": true
       }
     },
+    "/v1/calls/{call_id}/practice-test": {
+      "post": {
+        "operationId": "draftPracticeTestFromCall",
+        "parameters": [
+          {
+            "description": "<cell>_<ULID>",
+            "in": "path",
+            "name": "call_id",
+            "required": true,
+            "schema": {
+              "description": "<cell>_<ULID>",
+              "pattern": "^[a-z0-9]{2,8}_[0-9A-HJKMNP-TV-Z]{26}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeTestDraft"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "404": {
+            "$ref": "#/components/responses/Problem404"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "assistants:write"
+            ]
+          }
+        ],
+        "summary": "Draft a practice call from a real call, with names and numbers removed; nothing is saved",
+        "tags": [
+          "assistants"
+        ],
+        "x-larynth-action": "agents.build",
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "member",
+        "x-larynth-scope": "assistants:write",
+        "x-larynth-sdk": true
+      }
+    },
     "/v1/calls/{call_id}/recording/audio": {
       "get": {
         "operationId": "getCallRecordingAudio",
@@ -25785,6 +26704,88 @@
         "x-larynth-sdk": true
       }
     },
+    "/v1/catalog/live-models": {
+      "get": {
+        "operationId": "listLiveModels",
+        "parameters": [
+          {
+            "description": "Call direction the prices are for",
+            "explode": false,
+            "in": "query",
+            "name": "direction",
+            "schema": {
+              "default": "inbound",
+              "description": "Call direction the prices are for",
+              "enum": [
+                "inbound",
+                "outbound",
+                "web_test"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only models that speak this language",
+            "explode": false,
+            "in": "query",
+            "name": "language",
+            "schema": {
+              "description": "Only models that speak this language",
+              "maxLength": 16,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListLiveModel"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "assistants:read"
+            ]
+          }
+        ],
+        "summary": "Live (speech-to-speech) models this workspace can pick, with their price per minute",
+        "tags": [
+          "catalog"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "assistants:read",
+        "x-larynth-sdk": true
+      }
+    },
     "/v1/catalog/models": {
       "get": {
         "operationId": "listCatalogModels",
@@ -26160,6 +27161,63 @@
         "operationId": "listCatalogVoices",
         "parameters": [
           {
+            "description": "Only voices of this provider",
+            "explode": false,
+            "in": "query",
+            "name": "provider_key",
+            "schema": {
+              "description": "Only voices of this provider",
+              "maxLength": 41,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only voices usable with this TTS model",
+            "explode": false,
+            "in": "query",
+            "name": "model_id",
+            "schema": {
+              "description": "Only voices usable with this TTS model",
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Case-insensitive search over name, description and tags",
+            "explode": false,
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "description": "Case-insensitive search over name, description and tags",
+              "maxLength": 100,
+              "type": "string"
+            }
+          },
+          {
+            "description": "Voices that speak this language; a region suffix is ignored",
+            "explode": false,
+            "in": "query",
+            "name": "language",
+            "schema": {
+              "description": "Voices that speak this language; a region suffix is ignored",
+              "maxLength": 16,
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "gender",
+            "schema": {
+              "enum": [
+                "male",
+                "female",
+                "neutral"
+              ],
+              "type": "string"
+            }
+          },
+          {
             "description": "Page size",
             "explode": false,
             "in": "query",
@@ -26177,28 +27235,10 @@
             "description": "Opaque cursor from next_cursor of the previous page",
             "explode": false,
             "in": "query",
-            "name": "after",
+            "name": "cursor",
             "schema": {
               "description": "Opaque cursor from next_cursor of the previous page",
-              "maxLength": 512,
-              "type": "string"
-            }
-          },
-          {
-            "explode": false,
-            "in": "query",
-            "name": "model_id",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "explode": false,
-            "in": "query",
-            "name": "language",
-            "schema": {
-              "maxLength": 16,
+              "maxLength": 1024,
               "type": "string"
             }
           }
@@ -26208,7 +27248,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PageCatalogVoice"
+                  "$ref": "#/components/schemas/VoicePage"
                 }
               }
             },
@@ -26250,6 +27290,72 @@
         "x-larynth-auth": "session_or_api_key",
         "x-larynth-min-role": "viewer",
         "x-larynth-scope": "assistants:read",
+        "x-larynth-sdk": true
+      }
+    },
+    "/v1/catalog/voices/lookup": {
+      "post": {
+        "operationId": "lookupCatalogVoice",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VoiceRef"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogVoice"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem409"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "assistants:write"
+            ]
+          }
+        ],
+        "summary": "Look up a voice by provider and voice id, in the catalog or live at the provider",
+        "tags": [
+          "catalog"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "member",
+        "x-larynth-scope": "assistants:write",
         "x-larynth-sdk": true
       }
     },
@@ -32375,6 +33481,59 @@
         "x-larynth-sdk": true
       }
     },
+    "/v1/practice-usage": {
+      "get": {
+        "operationId": "getPracticeUsage",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeUsage"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem400"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem401"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem403"
+          },
+          "422": {
+            "$ref": "#/components/responses/Problem422"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem429"
+          },
+          "500": {
+            "$ref": "#/components/responses/Problem500"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "apiKey": [
+              "assistants:read"
+            ]
+          }
+        ],
+        "summary": "Practice call attempts used this month, how many were free and what the rest cost",
+        "tags": [
+          "assistants"
+        ],
+        "x-larynth-auth": "session_or_api_key",
+        "x-larynth-min-role": "viewer",
+        "x-larynth-scope": "assistants:read",
+        "x-larynth-sdk": true
+      }
+    },
     "/v1/recordings/{id}/audio": {
       "get": {
         "operationId": "getRecordingAudio",
@@ -34265,6 +35424,11 @@
       "x-larynth-sdk": true
     },
     {
+      "description": "Health of the providers a workspace uses. Dashboard session only.",
+      "name": "status",
+      "x-larynth-sdk": true
+    },
+    {
       "description": "Shared action inbox of a workspace. Dashboard session only.",
       "name": "inbox",
       "x-larynth-sdk": true
@@ -34570,6 +35734,24 @@
       "title": "Origin not allowed"
     },
     {
+      "code": "auth.passkey_exists",
+      "status": 409,
+      "type": "https://larynth.com/problems/auth.passkey_exists",
+      "title": "This passkey is already on the account"
+    },
+    {
+      "code": "auth.passkey_invalid",
+      "status": 400,
+      "type": "https://larynth.com/problems/auth.passkey_invalid",
+      "title": "Passkey was not accepted"
+    },
+    {
+      "code": "auth.passkey_limit",
+      "status": 409,
+      "type": "https://larynth.com/problems/auth.passkey_limit",
+      "title": "Passkey limit reached"
+    },
+    {
       "code": "auth.password_invalid",
       "status": 401,
       "type": "https://larynth.com/problems/auth.password_invalid",
@@ -34688,6 +35870,12 @@
       "status": 429,
       "type": "https://larynth.com/problems/billing.export_limit",
       "title": "Export limit reached"
+    },
+    {
+      "code": "billing.export_too_large",
+      "status": 422,
+      "type": "https://larynth.com/problems/billing.export_too_large",
+      "title": "Export range too large"
     },
     {
       "code": "billing.insufficient_credit",
@@ -35392,6 +36580,18 @@
       "title": "Number ownership could not be verified"
     },
     {
+      "code": "plan.key_taken",
+      "status": 409,
+      "type": "https://larynth.com/problems/plan.key_taken",
+      "title": "A plan with this key exists"
+    },
+    {
+      "code": "plan.name_invalid",
+      "status": 422,
+      "type": "https://larynth.com/problems/plan.name_invalid",
+      "title": "Plan name must be 1 to 200 characters after trimming"
+    },
+    {
       "code": "practice.fair_use",
       "status": 429,
       "type": "https://larynth.com/problems/practice.fair_use",
@@ -35426,6 +36626,60 @@
       "status": 409,
       "type": "https://larynth.com/problems/practice.test_limit",
       "title": "This agent has the most practice calls it can have"
+    },
+    {
+      "code": "practice_run.insufficient_balance",
+      "status": 402,
+      "type": "https://larynth.com/problems/practice_run.insufficient_balance",
+      "title": "Add credit to run more practice calls this month"
+    },
+    {
+      "code": "practice_run.mode_unavailable",
+      "status": 422,
+      "type": "https://larynth.com/problems/practice_run.mode_unavailable",
+      "title": "Voice practice calls are not available yet"
+    },
+    {
+      "code": "practice_test.from_call_unavailable",
+      "status": 422,
+      "type": "https://larynth.com/problems/practice_test.from_call_unavailable",
+      "title": "This call cannot become a practice call: it has no transcript or belongs to a flow agent"
+    },
+    {
+      "code": "publish.practice_failed",
+      "status": 409,
+      "type": "https://larynth.com/problems/publish.practice_failed",
+      "title": "A required practice call did not pass"
+    },
+    {
+      "code": "rate.effective_from_past",
+      "status": 422,
+      "type": "https://larynth.com/problems/rate.effective_from_past",
+      "title": "A rate cannot start in the past"
+    },
+    {
+      "code": "rate.effective_to_past",
+      "status": 422,
+      "type": "https://larynth.com/problems/rate.effective_to_past",
+      "title": "A rate cannot end in the past"
+    },
+    {
+      "code": "rate.ended",
+      "status": 409,
+      "type": "https://larynth.com/problems/rate.ended",
+      "title": "Rate has ended and cannot change"
+    },
+    {
+      "code": "rate.later_scheduled",
+      "status": 409,
+      "type": "https://larynth.com/problems/rate.later_scheduled",
+      "title": "A later rate is already scheduled for this target"
+    },
+    {
+      "code": "rate.overlap",
+      "status": 409,
+      "type": "https://larynth.com/problems/rate.overlap",
+      "title": "Rate overlaps another rate for the same target"
     },
     {
       "code": "rate_limited",
